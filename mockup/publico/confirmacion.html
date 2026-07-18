@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cita confirmada · Salon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body>
+    <div class="mock-banner">Mockup · P-11 · <a href="../index.html">Índice</a></div>
+    <header class="public-nav">
+      <div class="inner">
+        <a class="logo" href="home.html"><span class="logo-mark">S</span> Salon</a>
+        <div class="nav-actions">
+          <a class="btn btn-secondary btn-sm" href="mis-citas.html">Mis citas</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="section">
+      <div class="container" style="max-width: 520px">
+        <div class="card text-center">
+          <div class="card-body" style="padding: 2.5rem 1.75rem">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--success-soft); color: var(--success); display: grid; place-items: center; margin: 0 auto 1rem; font-size: 1.75rem">✓</div>
+            <h1 style="font-size: 1.75rem">¡Cita confirmada!</h1>
+            <p>Te enviamos el detalle por correo (en el producto real, vía Resend + cola).</p>
+            <div class="card" style="text-align: left; margin: 1.5rem 0; background: var(--bg)">
+              <div class="card-body stack" style="gap: 0.65rem">
+                <div class="row" style="justify-content: space-between"><span class="muted small">Servicio</span><strong>Corte clásico</strong></div>
+                <div class="row" style="justify-content: space-between"><span class="muted small">Profesional</span><strong>Leo M.</strong></div>
+                <div class="row" style="justify-content: space-between"><span class="muted small">Sucursal</span><strong>Roma Norte</strong></div>
+                <div class="row" style="justify-content: space-between"><span class="muted small">Cuándo</span><strong>Mié 16 jul · 11:30</strong></div>
+                <div class="row" style="justify-content: space-between"><span class="muted small">Pago</span><span class="badge badge-success">Prepagado $252</span></div>
+                <div class="row" style="justify-content: space-between"><span class="muted small">Folio</span><strong class="tiny">#SAL-10482</strong></div>
+              </div>
+            </div>
+            <div class="row" style="justify-content: center">
+              <a class="btn btn-primary" href="mis-citas.html">Ver mis citas</a>
+              <button type="button" class="btn btn-secondary" onclick="alert('Mock: añadir a calendario')">Añadir al calendario</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>

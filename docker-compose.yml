@@ -1,0 +1,144 @@
+services:
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-salon}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-salon_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-salon}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      # Postgres 18+: mount parent dir (not .../data) — see docker-library/postgres#1259
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-salon} -d ${POSTGRES_DB:-salon}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minio_dev_password}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+
+  app:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      target: dev
+    restart: unless-stopped
+    working_dir: /app
+    # Entrypoint: generate + db push + seed + assert Prisma models
+    entrypoint: ["sh", "scripts/docker-dev-entrypoint.sh"]
+    command: ["npm", "run", "dev", "--", "--hostname", "0.0.0.0", "--port", "3000"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-salon}:${POSTGRES_PASSWORD:-salon_dev_password}@postgres:5432/${POSTGRES_DB:-salon}
+      REDIS_URL: redis://redis:6379
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-dev-encryption-key-change-me-32chars}
+      SESSION_SECRET: ${SESSION_SECRET:-dev-session-secret-change-me-please}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:3000}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@salon.local}
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${NEXT_PUBLIC_VAPID_PUBLIC_KEY:-}
+      TENANT_SLUG: ${TENANT_SLUG:-demo}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minio_dev_password}
+      # 1 = npm ci forzado (tras cambios de package-lock o client roto)
+      FORCE_NPM_CI: ${FORCE_NPM_CI:-0}
+      SKIP_SEED: ${SKIP_SEED:-0}
+      SEED_RESET_MATRICES: ${SEED_RESET_MATRICES:-0}
+      NODE_ENV: development
+      WATCHPACK_POLLING: "true"
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    volumes:
+      - ./web:/app
+      - web_node_modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 30
+      start_period: 180s
+
+  worker:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      target: dev
+    restart: unless-stopped
+    working_dir: /app
+    # Mismo entrypoint: generate + assert (SKIP_SEED por defecto en worker vía env)
+    entrypoint: ["sh", "scripts/docker-dev-entrypoint.sh"]
+    command: ["npx", "tsx", "worker/index.ts"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-salon}:${POSTGRES_PASSWORD:-salon_dev_password}@postgres:5432/${POSTGRES_DB:-salon}
+      REDIS_URL: redis://redis:6379
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-dev-encryption-key-change-me-32chars}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:3000}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@salon.local}
+      FORCE_NPM_CI: ${FORCE_NPM_CI:-0}
+      # Worker no re-siembra demo en cada restart (app ya lo hizo)
+      SKIP_SEED: "1"
+      SKIP_DB_PUSH: "1"
+      NODE_ENV: development
+    volumes:
+      - ./web:/app
+      - web_node_modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      app:
+        condition: service_healthy
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      app:
+        condition: service_healthy
+    profiles:
+      - tunnel
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  web_node_modules:

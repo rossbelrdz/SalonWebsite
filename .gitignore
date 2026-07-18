@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+.next/
+out/
+dist/
+build/
+coverage/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+docs/credentials.md
+docs/credentials.local.md
+**/credentials.local.*
+
+# Docker local overrides
+docker-compose.override.yml
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# MinIO / local data (si se montan en repo por error)
+data/
+.minio/
+postgres-data/
+redis-data/
+
+# Typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Vercel / turbo
+.vercel
+.turbo

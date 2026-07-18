@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reportes · Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body class="admin-body">
+    <div class="mock-banner">Mockup · A-12 · <a href="../index.html">Índice</a></div>
+    <div class="admin-shell">
+      <div class="sidebar-backdrop" data-sidebar-close></div>
+      <aside class="sidebar">
+        <div class="sidebar-brand"><span class="logo-mark">S</span> Salon Admin</div>
+        <div class="sidebar-section">Operación</div>
+        <a href="index.html" data-nav="dashboard">Dashboard</a>
+        <a href="citas.html" data-nav="citas">Citas</a>
+        <a href="servicios.html" data-nav="servicios">Servicios</a>
+        <a href="catalogo.html" data-nav="catalogo">Catálogo / estilos</a>
+        <a href="sucursales.html" data-nav="sucursales">Sucursales</a>
+        <div class="sidebar-section">Personas</div>
+        <a href="personal.html" data-nav="personal">Personal</a>
+        <a href="clientes.html" data-nav="clientes">Clientes</a>
+        <a href="asistencia.html" data-nav="asistencia">Asistencia</a>
+        <a href="comisiones.html" data-nav="comisiones">Comisiones</a>
+        <div class="sidebar-section">Análisis</div>
+        <a href="reportes.html" class="is-active" data-nav="reportes">Reportes</a>
+        <div class="sidebar-section">Sistema</div>
+        <div class="sidebar-group" data-nav-group="config">
+          <a href="config.html#general" class="sidebar-parent" data-nav="config">Configuración</a>
+          <div class="sidebar-subnav">
+            <a href="config.html#general" data-config-tab="general">General</a>
+            <a href="config.html#correo" data-config-tab="correo">Correo (Resend)</a>
+            <a href="config.html#telegram" data-config-tab="telegram">Telegram</a>
+            <a href="config.html#turnstile" data-config-tab="turnstile">Turnstile</a>
+            <a href="config.html#usuarios" data-config-tab="usuarios">Usuarios</a>
+            <a href="config.html#citas" data-config-tab="citas">Citas / prepago</a>
+          </div>
+        </div>
+        <div class="sidebar-footer">
+          <a href="../empleado/agenda.html">Vista empleado</a>
+          <a href="../super/tenants.html">Super Admin</a>
+          <a href="../publico/home.html">Cerrar sesión</a>
+        </div>
+      </aside>
+      <div class="admin-main">
+        <header class="admin-topbar"><strong>Reportes</strong></header>
+        <div class="admin-content">
+          <div class="kpi-grid">
+            <div class="kpi"><div class="kpi-label">Citas del mes</div><div class="kpi-value">642</div></div>
+            <div class="kpi"><div class="kpi-label">Tasa prepago</div><div class="kpi-value">61%</div></div>
+            <div class="kpi"><div class="kpi-label">Cancelaciones</div><div class="kpi-value">4.2%</div></div>
+            <div class="kpi"><div class="kpi-label">Reembolsos</div><div class="kpi-value">$3.2k</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="card"><div class="card-body">
+              <h3 style="font-size: 1rem">Ingresos por día</h3>
+              <div class="chart-placeholder">
+                <div class="chart-bar" style="height:50%"></div>
+                <div class="chart-bar" style="height:70%"></div>
+                <div class="chart-bar" style="height:45%"></div>
+                <div class="chart-bar" style="height:85%"></div>
+                <div class="chart-bar" style="height:60%"></div>
+                <div class="chart-bar" style="height:95%"></div>
+                <div class="chart-bar" style="height:40%"></div>
+              </div>
+            </div></div>
+            <div class="card"><div class="card-body">
+              <h3 style="font-size: 1rem">Servicios más vendidos</h3>
+              <div class="stack" style="gap: 0.65rem">
+                <div class="row" style="justify-content: space-between"><span>Corte clásico</span><strong>28%</strong></div>
+                <div class="row" style="justify-content: space-between"><span>Corte + barba</span><strong>18%</strong></div>
+                <div class="row" style="justify-content: space-between"><span>Manicure gel</span><strong>14%</strong></div>
+                <div class="row" style="justify-content: space-between"><span>Color / balayage</span><strong>12%</strong></div>
+              </div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>

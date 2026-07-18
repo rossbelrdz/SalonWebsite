@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard · Admin Salon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body class="admin-body">
+    <div class="mock-banner">Mockup Admin · <a href="../index.html">Índice</a> · <a href="../publico/home.html">Sitio público</a></div>
+    <div class="admin-shell">
+      <div class="sidebar-backdrop" data-sidebar-close></div>
+      <aside class="sidebar">
+        <div class="sidebar-brand"><span class="logo-mark">S</span> Salon Admin</div>
+        <div class="sidebar-section">Operación</div>
+        <a href="index.html" class="is-active" data-nav="dashboard">Dashboard</a>
+        <a href="citas.html" data-nav="citas">Citas</a>
+        <a href="servicios.html" data-nav="servicios">Servicios</a>
+        <a href="catalogo.html" data-nav="catalogo">Catálogo / estilos</a>
+        <a href="sucursales.html" data-nav="sucursales">Sucursales</a>
+        <div class="sidebar-section">Personas</div>
+        <a href="personal.html" data-nav="personal">Personal</a>
+        <a href="clientes.html" data-nav="clientes">Clientes</a>
+        <a href="asistencia.html" data-nav="asistencia">Asistencia</a>
+        <a href="comisiones.html" data-nav="comisiones">Comisiones</a>
+        <div class="sidebar-section">Análisis</div>
+        <a href="reportes.html" data-nav="reportes">Reportes</a>
+        <div class="sidebar-section">Sistema</div>
+        <div class="sidebar-group" data-nav-group="config">
+          <a href="config.html#general" class="sidebar-parent" data-nav="config">Configuración</a>
+          <div class="sidebar-subnav">
+            <a href="config.html#general" data-config-tab="general">General</a>
+            <a href="config.html#correo" data-config-tab="correo">Correo (Resend)</a>
+            <a href="config.html#telegram" data-config-tab="telegram">Telegram</a>
+            <a href="config.html#turnstile" data-config-tab="turnstile">Turnstile</a>
+            <a href="config.html#usuarios" data-config-tab="usuarios">Usuarios</a>
+            <a href="config.html#citas" data-config-tab="citas">Citas / prepago</a>
+          </div>
+        </div>
+        <div class="sidebar-footer">
+          <a href="../empleado/agenda.html">Vista empleado</a>
+          <a href="../super/tenants.html">Super Admin</a>
+          <a href="../publico/home.html">Cerrar sesión</a>
+        </div>
+      </aside>
+      <div class="admin-main">
+        <header class="admin-topbar">
+          <div class="row">
+            <button type="button" class="btn btn-ghost btn-sm" data-sidebar-toggle>☰</button>
+            <div>
+              <strong>Hoy · Miércoles 16 jul</strong>
+              <div class="tiny muted">Sucursal: Todas · Demo Beauty Group</div>
+            </div>
+          </div>
+          <div class="row">
+            <span class="badge badge-accent">Admin</span>
+            <div class="avatar avatar-sm" style="background: var(--primary)">AD</div>
+          </div>
+        </header>
+        <div class="admin-content">
+          <div class="page-header">
+            <h1>Dashboard</h1>
+            <p>Resumen operativo del negocio (datos mock).</p>
+          </div>
+          <div class="kpi-grid">
+            <div class="kpi">
+              <div class="kpi-label">Citas hoy</div>
+              <div class="kpi-value">28</div>
+              <div class="kpi-delta up">↑ 12% vs ayer</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Ocupación</div>
+              <div class="kpi-value">76%</div>
+              <div class="kpi-delta up">↑ 4 pts</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Ingresos estimados</div>
+              <div class="kpi-value">$18.4k</div>
+              <div class="kpi-delta up">Prepago 62%</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">No-shows (7d)</div>
+              <div class="kpi-value">3.1%</div>
+              <div class="kpi-delta down">↓ con prepago</div>
+            </div>
+          </div>
+
+          <div class="grid-2" style="gap: 1.25rem">
+            <div class="card">
+              <div class="card-body">
+                <div class="row" style="justify-content: space-between; margin-bottom: 1rem">
+                  <h2 style="font-size: 1.05rem; margin: 0">Citas de hoy</h2>
+                  <a class="btn btn-sm btn-secondary" href="citas.html">Ver todas</a>
+                </div>
+                <div class="table-wrap">
+                  <table class="data">
+                    <thead>
+                      <tr><th>Hora</th><th>Cliente</th><th>Servicio</th><th>Pro</th><th>Estado</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>10:30</td><td>María L.</td><td>Balayage</td><td>Ana R.</td>
+                        <td><span class="badge badge-info">En curso</span></td>
+                      </tr>
+                      <tr>
+                        <td>11:30</td><td>Ross R.</td><td>Corte</td><td>Leo M.</td>
+                        <td><span class="badge badge-success">Prepagada</span></td>
+                      </tr>
+                      <tr>
+                        <td>12:00</td><td>Jorge T.</td><td>Barba</td><td>Diego P.</td>
+                        <td><span class="badge badge-neutral">Confirmada</span></td>
+                      </tr>
+                      <tr>
+                        <td>16:00</td><td>Laura P.</td><td>Gel</td><td>Sofía → ?</td>
+                        <td><span class="badge badge-warning">Reasignar</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-body">
+                <h2 style="font-size: 1.05rem; margin: 0 0 1rem">Ocupación semanal</h2>
+                <div class="chart-placeholder" aria-hidden="true">
+                  <div class="chart-bar" style="height: 40%"></div>
+                  <div class="chart-bar" style="height: 65%"></div>
+                  <div class="chart-bar" style="height: 55%"></div>
+                  <div class="chart-bar" style="height: 80%"></div>
+                  <div class="chart-bar" style="height: 70%"></div>
+                  <div class="chart-bar" style="height: 90%"></div>
+                  <div class="chart-bar" style="height: 35%"></div>
+                </div>
+                <p class="tiny muted" style="margin: 0.75rem 0 0">Lun → Dom · placeholder de gráfica</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>

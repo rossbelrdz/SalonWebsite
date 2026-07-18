@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Contacto · Salon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body>
+    <div class="mock-banner">Mockup · P-12 · <a href="../index.html">Índice</a></div>
+    <header class="public-nav">
+      <div class="inner">
+        <a class="logo" href="home.html"><span class="logo-mark">S</span> Salon</a>
+        <nav class="nav-links">
+          <a href="home.html">Inicio</a>
+          <a href="servicios.html">Servicios</a>
+          <a href="sucursales.html">Sucursales</a>
+          <a class="is-active" href="contacto.html">Contacto</a>
+        </nav>
+        <div class="nav-actions">
+          <a class="btn btn-primary btn-sm" href="agendar.html">Agendar cita</a>
+          <button class="nav-toggle" type="button" data-nav-toggle aria-label="Menú">☰</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="section">
+      <div class="container">
+        <div class="page-header">
+          <h1>Contacto</h1>
+          <p>Escríbenos o usa tus canales favoritos.</p>
+        </div>
+        <div class="grid-2" style="gap: 2rem; align-items: start">
+          <form class="card" data-mock-form data-success="Mensaje simulado. Gracias (mock).">
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label" for="c-nombre">Nombre</label>
+                <input class="form-control" id="c-nombre" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="c-email">Correo</label>
+                <input class="form-control" id="c-email" type="email" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="c-msg">Mensaje</label>
+                <textarea class="form-control" id="c-msg" required placeholder="¿En qué te ayudamos?"></textarea>
+              </div>
+              <div class="notice notice-info" style="margin-bottom: 1rem">Turnstile iría aquí en producción.</div>
+              <button type="submit" class="btn btn-primary btn-block">Enviar</button>
+            </div>
+          </form>
+          <div class="stack">
+            <a class="card card-hover" href="#" onclick="alert('Mock WhatsApp'); return false;">
+              <div class="card-body row">
+                <div class="avatar" style="background: #25d366">W</div>
+                <div>
+                  <strong>WhatsApp</strong>
+                  <div class="small muted">Respuesta rápida en horario de sucursal</div>
+                </div>
+              </div>
+            </a>
+            <a class="card card-hover" href="#" onclick="alert('Mock Facebook'); return false;">
+              <div class="card-body row">
+                <div class="avatar" style="background: #1877f2">f</div>
+                <div>
+                  <strong>Facebook</strong>
+                  <div class="small muted">@salon.demo</div>
+                </div>
+              </div>
+            </a>
+            <a class="card card-hover" href="mailto:hola@salon.demo">
+              <div class="card-body row">
+                <div class="avatar" style="background: var(--primary)">@</div>
+                <div>
+                  <strong>Correo</strong>
+                  <div class="small muted">hola@salon.demo</div>
+                </div>
+              </div>
+            </a>
+            <div class="card">
+              <div class="card-body">
+                <strong>Telegram bot</strong>
+                <p class="small" style="margin: 0.35rem 0 0">Opcional: agendar desde el bot del negocio (configurable en admin).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>

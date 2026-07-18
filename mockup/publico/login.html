@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Entrar · Salon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body>
+    <div class="mock-banner">Mockup · P-13 · <a href="../index.html">Índice</a></div>
+    <header class="public-nav">
+      <div class="inner">
+        <a class="logo" href="home.html"><span class="logo-mark">S</span> Salon</a>
+        <div class="nav-actions">
+          <a class="btn btn-ghost btn-sm" href="home.html">Volver</a>
+        </div>
+      </div>
+    </header>
+
+    <div class="auth-shell" data-tabs>
+      <div class="auth-card">
+        <div class="logo" style="justify-content: center; margin-bottom: 1rem"><span class="logo-mark">S</span> Salon</div>
+        <div class="tabs" style="justify-content: center">
+          <a href="#" class="tab is-active" data-tab="login">Entrar</a>
+          <a href="#" class="tab" data-tab="reg">Crear cuenta</a>
+        </div>
+
+        <form data-tab-panel="login" class="is-active" data-mock-form data-success="Sesión simulada (mock)." style="display: block">
+          <div class="form-group">
+            <label class="form-label" for="l-id">Correo o celular</label>
+            <input class="form-control" id="l-id" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="l-pass">Contraseña</label>
+            <input class="form-control" id="l-pass" type="password" required />
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+        </form>
+
+        <form data-tab-panel="reg" data-mock-form data-success="Cuenta creada (mock). Solo pedimos lo mínimo." style="display: none">
+          <p class="small muted">Registro sin fricción: nombre + correo <strong>o</strong> celular.</p>
+          <div class="form-group">
+            <label class="form-label" for="r-nombre">Nombre</label>
+            <input class="form-control" id="r-nombre" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="r-email">Correo electrónico</label>
+            <input class="form-control" id="r-email" type="email" placeholder="Opcional si das celular" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="r-tel">Celular</label>
+            <input class="form-control" id="r-tel" type="tel" placeholder="Opcional si das correo" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="r-pass">Contraseña</label>
+            <input class="form-control" id="r-pass" type="password" required />
+          </div>
+          <div class="notice notice-info" style="margin-bottom: 1rem">Turnstile en producción.</div>
+          <button type="submit" class="btn btn-accent btn-block">Crear cuenta</button>
+        </form>
+
+        <p class="tiny muted text-center" style="margin-top: 1.25rem; margin-bottom: 0">
+          ¿Eres del equipo? <a href="../admin/index.html"><strong>Admin</strong></a> ·
+          <a href="../empleado/agenda.html"><strong>Empleado</strong></a>
+        </p>
+      </div>
+    </div>
+
+    <style>
+      [data-tab-panel] { display: none; }
+      [data-tab-panel].is-active { display: block !important; }
+    </style>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>

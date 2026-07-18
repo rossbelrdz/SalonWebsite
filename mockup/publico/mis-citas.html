@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mis citas · Salon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body>
+    <div class="mock-banner">Mockup · P-14 · <a href="../index.html">Índice</a></div>
+    <header class="public-nav">
+      <div class="inner">
+        <a class="logo" href="home.html"><span class="logo-mark">S</span> Salon</a>
+        <nav class="nav-links">
+          <a href="home.html">Inicio</a>
+          <a href="servicios.html">Servicios</a>
+          <a class="is-active" href="mis-citas.html">Mis citas</a>
+        </nav>
+        <div class="nav-actions">
+          <a class="btn btn-primary btn-sm" href="agendar.html">Nueva cita</a>
+          <button class="nav-toggle" type="button" data-nav-toggle aria-label="Menú">☰</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="section">
+      <div class="container" style="max-width: 720px">
+        <div class="page-header">
+          <h1>Mis citas</h1>
+          <p>Hola, Ross. Aquí tienes lo próximo y el historial.</p>
+        </div>
+
+        <h2 style="font-size: 1.1rem; margin-bottom: 0.75rem">Próximas</h2>
+        <div class="stack" style="margin-bottom: 2rem">
+          <div class="card">
+            <div class="card-body">
+              <div class="row" style="justify-content: space-between; align-items: start">
+                <div>
+                  <span class="badge badge-success">Confirmada · Prepagada</span>
+                  <h3 style="font-size: 1.15rem; margin: 0.5rem 0 0.25rem">Corte clásico</h3>
+                  <p class="small" style="margin: 0">Mié 16 jul · 11:30 · Leo M. · Roma Norte</p>
+                </div>
+                <div class="price">$252</div>
+              </div>
+              <div class="row" style="margin-top: 1rem">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="alert('Mock: reagendar')">Reagendar</button>
+                <button type="button" class="btn btn-sm btn-ghost" onclick="if(confirm('¿Cancelar cita? (mock)')) alert('Cancelada. Si hay prepago → flujo de reembolso.')">Cancelar</button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <div class="row" style="justify-content: space-between; align-items: start">
+                <div>
+                  <span class="badge badge-warning">Acción requerida</span>
+                  <h3 style="font-size: 1.15rem; margin: 0.5rem 0 0.25rem">Manicure gel</h3>
+                  <p class="small" style="margin: 0">Vie 18 jul · 16:00 · Sofía G. no puede · reasignación</p>
+                </div>
+              </div>
+              <div class="row" style="margin-top: 1rem">
+                <a class="btn btn-sm btn-accent" href="reasignacion.html">Resolver ahora</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2 style="font-size: 1.1rem; margin-bottom: 0.75rem">Anteriores</h2>
+        <div class="card">
+          <div class="card-body row" style="justify-content: space-between">
+            <div>
+              <strong>Barba full</strong>
+              <div class="small muted">2 jul · Diego P. · Completada</div>
+            </div>
+            <span class="badge badge-neutral">Pagada en local</span>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>

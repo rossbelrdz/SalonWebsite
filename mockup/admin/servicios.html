@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Servicios · Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body class="admin-body">
+    <div class="mock-banner">Mockup · A-04 · <a href="../index.html">Índice</a></div>
+    <div class="admin-shell">
+      <div class="sidebar-backdrop" data-sidebar-close></div>
+      <aside class="sidebar">
+        <div class="sidebar-brand"><span class="logo-mark">S</span> Salon Admin</div>
+        <div class="sidebar-section">Operación</div>
+        <a href="index.html" data-nav="dashboard">Dashboard</a>
+        <a href="citas.html" data-nav="citas">Citas</a>
+        <a href="servicios.html" class="is-active" data-nav="servicios">Servicios</a>
+        <a href="catalogo.html" data-nav="catalogo">Catálogo / estilos</a>
+        <a href="sucursales.html" data-nav="sucursales">Sucursales</a>
+        <div class="sidebar-section">Personas</div>
+        <a href="personal.html" data-nav="personal">Personal</a>
+        <a href="clientes.html" data-nav="clientes">Clientes</a>
+        <a href="asistencia.html" data-nav="asistencia">Asistencia</a>
+        <a href="comisiones.html" data-nav="comisiones">Comisiones</a>
+        <div class="sidebar-section">Análisis</div>
+        <a href="reportes.html" data-nav="reportes">Reportes</a>
+        <div class="sidebar-section">Sistema</div>
+        <div class="sidebar-group" data-nav-group="config">
+          <a href="config.html#general" class="sidebar-parent" data-nav="config">Configuración</a>
+          <div class="sidebar-subnav">
+            <a href="config.html#general" data-config-tab="general">General</a>
+            <a href="config.html#correo" data-config-tab="correo">Correo (Resend)</a>
+            <a href="config.html#telegram" data-config-tab="telegram">Telegram</a>
+            <a href="config.html#turnstile" data-config-tab="turnstile">Turnstile</a>
+            <a href="config.html#usuarios" data-config-tab="usuarios">Usuarios</a>
+            <a href="config.html#citas" data-config-tab="citas">Citas / prepago</a>
+          </div>
+        </div>
+        <div class="sidebar-footer">
+          <a href="../empleado/agenda.html">Vista empleado</a>
+          <a href="../super/tenants.html">Super Admin</a>
+          <a href="../publico/home.html">Cerrar sesión</a>
+        </div>
+      </aside>
+      <div class="admin-main">
+        <header class="admin-topbar">
+          <div class="row">
+            <button type="button" class="btn btn-ghost btn-sm" data-sidebar-toggle>☰</button>
+            <strong>Servicios</strong>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" onclick="alert('Mock: alta servicio + imagen MinIO')">+ Servicio</button>
+        </header>
+        <div class="admin-content">
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr><th>Servicio</th><th>Categoría</th><th>Duración</th><th>Precio</th><th>Prepago −10%</th><th>Estado</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Corte clásico</td><td>Cabello</td><td>45 min</td><td>$280</td><td>$252</td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-sm btn-secondary">Editar</button></td></tr>
+                <tr><td>Barba full</td><td>Barba</td><td>30 min</td><td>$180</td><td>$162</td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-sm btn-secondary">Editar</button></td></tr>
+                <tr><td>Balayage</td><td>Color</td><td>150 min</td><td>$1,450</td><td>$1,305</td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-sm btn-secondary">Editar</button></td></tr>
+                <tr><td>Manicure gel</td><td>Uñas</td><td>60 min</td><td>$320</td><td>$288</td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-sm btn-secondary">Editar</button></td></tr>
+                <tr><td>Maquillaje social</td><td>Maquillaje</td><td>70 min</td><td>$650</td><td>$585</td><td><span class="badge badge-neutral">Borrador</span></td><td><button class="btn btn-sm btn-secondary">Editar</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>

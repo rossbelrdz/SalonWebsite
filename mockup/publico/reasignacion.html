@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cambio de profesional · Salon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body>
+    <div class="mock-banner">Mockup · P-15 · <a href="../index.html">Índice</a></div>
+    <header class="public-nav">
+      <div class="inner">
+        <a class="logo" href="home.html"><span class="logo-mark">S</span> Salon</a>
+        <div class="nav-actions">
+          <a class="btn btn-ghost btn-sm" href="mis-citas.html">Mis citas</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="section">
+      <div class="container" style="max-width: 900px">
+        <div class="page-header">
+          <span class="badge badge-warning">Acción requerida</span>
+          <h1 style="margin-top: 0.75rem">Tu profesional no puede atenderte</h1>
+          <p>
+            <strong>Sofía G.</strong> no estará el vie 18 jul. Te proponemos a
+            <strong>Mariana V.</strong> a la misma hora, o eliges otra opción.
+          </p>
+        </div>
+
+        <div class="card" style="margin-bottom: 1.5rem">
+          <div class="card-body row" style="justify-content: space-between; flex-wrap: wrap">
+            <div>
+              <div class="tiny muted">Cita original</div>
+              <strong>Manicure gel · Vie 18 jul · 16:00 · Roma Norte</strong>
+            </div>
+            <span class="badge badge-success">Prepagada $288</span>
+          </div>
+        </div>
+
+        <div class="choice-grid">
+          <button type="button" class="choice-card" onclick="alert('Mock: aceptaste a Mariana. Cita actualizada.')" style="text-align: left; width: 100%; font: inherit; color: inherit">
+            <div class="icon" style="background: var(--success-soft)">✓</div>
+            <h3 style="font-size: 1.1rem">Aceptar nuevo pro</h3>
+            <div class="row" style="margin: 0.75rem 0">
+              <div class="avatar" style="background: #8b5a6b">MV</div>
+              <div>
+                <strong>Mariana V.</strong>
+                <div class="small muted">Uñas · ★ 4.9</div>
+              </div>
+            </div>
+            <p class="small" style="margin: 0">Misma fecha y hora. Sin cambios en el prepago.</p>
+          </button>
+
+          <a class="choice-card" href="agendar.html">
+            <div class="icon" style="background: var(--secondary-soft)">↻</div>
+            <h3 style="font-size: 1.1rem">Reagendar</h3>
+            <p class="small">Elige otro día, hora o profesional. Conservamos tu prepago como saldo de la nueva cita.</p>
+          </a>
+
+          <button type="button" class="choice-card" onclick="if(confirm('¿Cancelar y solicitar reembolso? (mock)')) alert('Reembolso iniciado. Te avisamos por correo.')" style="text-align: left; width: 100%; font: inherit; color: inherit">
+            <div class="icon" style="background: var(--danger-soft)">✕</div>
+            <h3 style="font-size: 1.1rem">Cancelar + reembolso</h3>
+            <p class="small" style="margin: 0">Se cancela la cita y se reembolsa el prepago ($288) según política del negocio.</p>
+          </button>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>

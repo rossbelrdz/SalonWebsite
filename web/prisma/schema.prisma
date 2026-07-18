@@ -1,0 +1,497 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+  CLIENT
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  PREPAID
+  PENDING
+  CANCELLED
+  COMPLETED
+  REASSIGNMENT_PENDING
+}
+
+enum ServiceCategory {
+  HAIR
+  COLOR
+  BEARD
+  NAILS
+  MAKEUP
+  SPA
+  OTHER
+}
+
+/// Pasarela activa a nivel plataforma (superadmin).
+enum PaymentProvider {
+  NONE
+  MERCADOPAGO
+  PAYPAL
+  CLIP
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REFUNDED
+  PARTIAL_REFUND
+  CANCELLED
+}
+
+enum ReassignmentChoice {
+  ACCEPT_NEW
+  RESCHEDULE
+  CANCEL_REFUND
+}
+
+enum AbsenceStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  BLOCKED
+}
+
+model PlatformSettings {
+  id                    String          @id @default("default")
+  /// Proveedor de pago activo para la plataforma.
+  activePaymentProvider PaymentProvider @default(NONE)
+  enableMercadoPago     Boolean         @default(true)
+  enablePayPal          Boolean         @default(true)
+  enableClip            Boolean         @default(true)
+  /// Si true y no hay credenciales tenant, simula cobro (solo dev/demo).
+  allowDemoPayments     Boolean         @default(true)
+  updatedAt             DateTime        @updatedAt
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  settings     TenantSettings?
+  memberships  Membership[]
+  branches     Branch[]
+  services     Service[]
+  appointments Appointment[]
+  employees    EmployeeProfile[]
+  payments            Payment[]
+  absences            AbsenceRequest[]
+  notifications       NotificationLog[]
+  rolePermissions     RolePermission[]
+  notificationMatrix  NotificationMatrixRule[]
+}
+
+/// Matriz de permisos por rol (por tenant; editable en admin).
+/// roleCode: ADMIN | EMPLOYEE | CLIENT | SUPER_ADMIN
+model RolePermission {
+  id            String   @id @default(cuid())
+  tenantId      String
+  roleCode      String
+  permissionKey String
+  allowed       Boolean  @default(false)
+  updatedAt     DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, roleCode, permissionKey])
+  @@index([tenantId, roleCode])
+}
+
+/// Matriz de notificaciones: evento × audiencia × canales.
+/// audience: CLIENT | EMPLOYEE | ADMIN | SUPER_ADMIN
+model NotificationMatrixRule {
+  id        String   @id @default(cuid())
+  tenantId  String
+  eventType String
+  audience  String
+  email     Boolean  @default(false)
+  telegram  Boolean  @default(false)
+  inApp     Boolean  @default(false)
+  push      Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, eventType, audience])
+  @@index([tenantId, eventType])
+}
+
+model TenantSettings {
+  id                  String   @id @default(cuid())
+  tenantId            String   @unique
+  themePrimary        String?
+  themeAccent         String?
+  timezone            String   @default("America/Mexico_City")
+  currency            String   @default("MXN")
+  prepaidDiscountPct  Int      @default(10)
+  minLeadMinutes      Int      @default(60)
+  maxLeadDays         Int      @default(60)
+
+  /// Política reembolso: horas antes de la cita para reembolso 100%.
+  refundFullHours     Int      @default(24)
+  /// % reembolso parcial si cancela entre full y none.
+  refundPartialPct    Int      @default(50)
+  /// Horas previas a la cita: sin reembolso.
+  refundNoneHours     Int      @default(2)
+
+  // Mercado Pago
+  mpAccessTokenEnc    String?
+  mpPublicKey         String?
+  mpWebhookSecret     String?
+
+  // PayPal
+  paypalClientId      String?
+  paypalClientSecretEnc String?
+  paypalSandbox       Boolean  @default(true)
+
+  // Clip.mx (API Key + Secret → Basic auth)
+  clipApiKeyEnc       String?
+  clipApiSecretEnc    String?
+
+  resendApiKeyEnc     String?
+  resendFromEmail     String?
+  resendFromName      String?
+  telegramBotTokenEnc String?
+  telegramEnabled     Boolean  @default(false)
+  /// Chat de admin para avisos del bot (opcional).
+  telegramAdminChatId String?
+  turnstileSiteKey    String?
+  turnstileSecretEnc  String?
+  /// Recordatorios de cita (horas antes).
+  remindHoursBefore   Int      @default(24)
+  remindHoursBefore2  Int      @default(2)
+  updatedAt           DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+enum NotificationChannel {
+  EMAIL
+  TELEGRAM
+  IN_APP
+  PUSH
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  FAILED
+  SKIPPED
+}
+
+model User {
+  id             String   @id @default(cuid())
+  name           String
+  email          String?  @unique
+  phone          String?  @unique
+  passwordHash   String
+  isSuperAdmin   Boolean  @default(false)
+  active         Boolean  @default(true)
+  /// Chat ID de Telegram vinculado (tras /start en el bot).
+  telegramChatId String?
+
+  /// Preferencias de notificación (usuario puede desactivar).
+  notifyEmail    Boolean  @default(true)
+  notifyPush     Boolean  @default(true)
+  notifyTelegram Boolean  @default(true)
+  notifyInApp    Boolean  @default(true)
+
+  /// MFA TOTP (opcional, el usuario lo activa).
+  mfaEnabled     Boolean  @default(false)
+  mfaSecretEnc   String?
+  /// Challenge temporal login MFA (no persistir en prod largo tiempo).
+  mfaPendingToken String?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  memberships        Membership[]
+  employeeProfiles   EmployeeProfile[]
+  clientAppointments Appointment[]     @relation("ClientAppointments")
+  absences           AbsenceRequest[]
+  notifications      NotificationLog[]
+  pushSubscriptions  PushSubscription[]
+  passkeys           PasskeyCredential[]
+}
+
+/// Suscripción Web Push (PWA / navegador).
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// Passkeys / WebAuthn (opcional por usuario).
+model PasskeyCredential {
+  id           String   @id @default(cuid())
+  userId       String
+  credentialId String   @unique
+  publicKey    Bytes
+  counter      BigInt   @default(0)
+  transports   String?
+  deviceType   String?
+  backedUp     Boolean  @default(false)
+  nickname     String?
+  createdAt    DateTime @default(now())
+  lastUsedAt   DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Membership {
+  id       String  @id @default(cuid())
+  userId   String
+  tenantId String
+  role     Role
+  active   Boolean @default(true)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tenantId])
+  @@index([tenantId, role])
+}
+
+model Branch {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  address   String
+  city      String
+  lat       Float?
+  lng       Float?
+  phone     String?
+  openTime  String   @default("09:00")
+  closeTime String   @default("19:00")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant       Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  employees    EmployeeBranch[]
+  appointments Appointment[]
+
+  @@index([tenantId])
+}
+
+model Service {
+  id           String          @id @default(cuid())
+  tenantId     String
+  name         String
+  description  String          @default("")
+  durationMin  Int
+  priceCents   Int
+  category     ServiceCategory @default(OTHER)
+  mediaClass   String          @default("media-cut")
+  active       Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  tenant       Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  employees    EmployeeService[]
+  appointments Appointment[]
+
+  @@index([tenantId])
+}
+
+model EmployeeProfile {
+  id        String   @id @default(cuid())
+  userId    String
+  tenantId  String
+  title     String   @default("Estilista")
+  bio       String   @default("")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant       Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branches     EmployeeBranch[]
+  services     EmployeeService[]
+  schedules    WorkSchedule[]
+  appointments Appointment[]
+  proposedFor  Appointment[]     @relation("ProposedEmployee")
+  absences     AbsenceRequest[]
+
+  @@unique([userId, tenantId])
+  @@index([tenantId])
+}
+
+model EmployeeBranch {
+  employeeId String
+  branchId   String
+
+  employee EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branch   Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@id([employeeId, branchId])
+}
+
+model EmployeeService {
+  employeeId String
+  serviceId  String
+
+  employee EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  service  Service         @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([employeeId, serviceId])
+}
+
+model WorkSchedule {
+  id         String @id @default(cuid())
+  employeeId String
+  /// 0 = domingo … 6 = sábado
+  dayOfWeek  Int
+  startTime  String @default("09:00")
+  endTime    String @default("18:00")
+
+  employee EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, dayOfWeek])
+}
+
+model Appointment {
+  id                  String              @id @default(cuid())
+  tenantId            String
+  branchId            String
+  serviceId           String
+  employeeId          String
+  clientUserId        String?
+  clientName          String
+  clientEmail         String?
+  clientPhone         String?
+  startsAt            DateTime
+  endsAt              DateTime
+  status              AppointmentStatus   @default(CONFIRMED)
+  prepaid             Boolean             @default(false)
+  priceCents          Int
+  notes               String?
+  cancelReason        String?
+  cancelledAt         DateTime?
+  /// Reasignación: profesional propuesto por admin.
+  proposedEmployeeId  String?
+  reassignmentNote    String?
+  reassignmentChoice  ReassignmentChoice?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  tenant           Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch           Branch           @relation(fields: [branchId], references: [id])
+  service          Service          @relation(fields: [serviceId], references: [id])
+  employee         EmployeeProfile  @relation(fields: [employeeId], references: [id])
+  proposedEmployee EmployeeProfile? @relation("ProposedEmployee", fields: [proposedEmployeeId], references: [id])
+  client           User?            @relation("ClientAppointments", fields: [clientUserId], references: [id])
+  payments         Payment[]
+
+  @@index([tenantId, startsAt])
+  @@index([employeeId, startsAt])
+  @@index([clientUserId])
+  @@index([status])
+}
+
+model Payment {
+  id                String          @id @default(cuid())
+  tenantId          String
+  appointmentId     String
+  provider          PaymentProvider
+  status            PaymentStatus   @default(PENDING)
+  amountCents       Int
+  currency          String          @default("MXN")
+  /// ID de preferencia / order / payment_request
+  externalId        String?
+  /// ID de cobro capturado (para reembolsos)
+  externalPaymentId String?
+  checkoutUrl       String?
+  refundAmountCents Int?
+  refundedAt        DateTime?
+  paidAt            DateTime?
+  failureReason     String?
+  rawMeta           Json?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([appointmentId])
+  @@index([externalId])
+  @@index([status])
+}
+
+/// Log de notificaciones (idempotencia + in-app + auditoría).
+model NotificationLog {
+  id        String              @id @default(cuid())
+  tenantId  String
+  userId    String?
+  /// Clave única anti-duplicado: eventType:entityId:channel:role
+  eventKey  String
+  eventType String
+  channel   NotificationChannel
+  status    NotificationStatus  @default(QUEUED)
+  recipient String?
+  subject   String?
+  body      String?
+  error     String?
+  payload   Json?
+  sentAt    DateTime?
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([eventKey])
+  @@index([tenantId, createdAt])
+  @@index([userId, status])
+  @@index([eventType])
+}
+
+/// Solicitud de ausencia del personal; candado si hay citas prepagadas.
+model AbsenceRequest {
+  id               String        @id @default(cuid())
+  tenantId         String
+  employeeId       String
+  requestedById    String
+  dateFrom         DateTime
+  dateTo           DateTime
+  reason           String        @default("")
+  status           AbsenceStatus @default(PENDING)
+  blockedByPrepaid Boolean       @default(false)
+  prepaidCount     Int           @default(0)
+  adminNote        String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  employee  EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  requester User            @relation(fields: [requestedById], references: [id])
+
+  @@index([tenantId, status])
+  @@index([employeeId, dateFrom])
+}

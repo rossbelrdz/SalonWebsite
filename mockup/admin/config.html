@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Configuración · Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body class="admin-body">
+    <div class="mock-banner">Mockup · A-13→17 · <a href="../index.html">Índice</a></div>
+    <div class="admin-shell">
+      <div class="sidebar-backdrop" data-sidebar-close></div>
+      <aside class="sidebar">
+        <div class="sidebar-brand"><span class="logo-mark">S</span> Salon Admin</div>
+        <div class="sidebar-section">Operación</div>
+        <a href="index.html" data-nav="dashboard">Dashboard</a>
+        <a href="citas.html" data-nav="citas">Citas</a>
+        <a href="servicios.html" data-nav="servicios">Servicios</a>
+        <a href="catalogo.html" data-nav="catalogo">Catálogo / estilos</a>
+        <a href="sucursales.html" data-nav="sucursales">Sucursales</a>
+        <div class="sidebar-section">Personas</div>
+        <a href="personal.html" data-nav="personal">Personal</a>
+        <a href="clientes.html" data-nav="clientes">Clientes</a>
+        <a href="asistencia.html" data-nav="asistencia">Asistencia</a>
+        <a href="comisiones.html" data-nav="comisiones">Comisiones</a>
+        <div class="sidebar-section">Análisis</div>
+        <a href="reportes.html" data-nav="reportes">Reportes</a>
+        <div class="sidebar-section">Sistema</div>
+        <div class="sidebar-group is-open" data-nav-group="config">
+          <a href="config.html#general" class="sidebar-parent is-active" data-nav="config">Configuración</a>
+          <div class="sidebar-subnav">
+            <a href="config.html#general" data-config-tab="general">General</a>
+            <a href="config.html#correo" data-config-tab="correo">Correo (Resend)</a>
+            <a href="config.html#telegram" data-config-tab="telegram">Telegram</a>
+            <a href="config.html#turnstile" data-config-tab="turnstile">Turnstile</a>
+            <a href="config.html#usuarios" data-config-tab="usuarios">Usuarios</a>
+            <a href="config.html#citas" data-config-tab="citas">Citas / prepago</a>
+          </div>
+        </div>
+        <div class="sidebar-footer">
+          <a href="../empleado/agenda.html">Vista empleado</a>
+          <a href="../super/tenants.html">Super Admin</a>
+          <a href="../publico/home.html">Cerrar sesión</a>
+        </div>
+      </aside>
+      <div class="admin-main">
+        <header class="admin-topbar">
+          <div class="row">
+            <button type="button" class="btn btn-ghost btn-sm" data-sidebar-toggle>☰</button>
+            <div>
+              <strong>Configuración</strong>
+              <div class="tiny muted">Negocio · integraciones y parámetros</div>
+            </div>
+          </div>
+          <span class="badge badge-accent">Admin</span>
+        </header>
+        <div class="admin-content" data-tabs>
+          <div class="page-header" style="margin-bottom: 1rem">
+            <h1 style="margin: 0; font-size: 1.35rem">Configuración del negocio</h1>
+            <p class="muted small" style="margin: 0.35rem 0 0">
+              Navega por el <strong>sidebar</strong> (General, Correo, Telegram, Turnstile, Usuarios, Citas)
+              o por las pestañas. Enlaces con hash: <code class="tiny">config.html#correo</code>
+            </p>
+          </div>
+          <div class="tabs">
+            <a href="#general" class="tab is-active" data-tab="general">General</a>
+            <a href="#correo" class="tab" data-tab="correo">Correo (Resend)</a>
+            <a href="#telegram" class="tab" data-tab="telegram">Telegram</a>
+            <a href="#turnstile" class="tab" data-tab="turnstile">Turnstile</a>
+            <a href="#usuarios" class="tab" data-tab="usuarios">Usuarios</a>
+            <a href="#citas" class="tab" data-tab="citas">Citas / prepago</a>
+          </div>
+
+          <div data-tab-panel="general" class="is-active">
+            <div class="card" style="max-width: 560px">
+              <div class="card-body">
+                <h2 style="font-size: 1.05rem; margin: 0 0 1rem">General</h2>
+                <div class="form-group">
+                  <label class="form-label">Nombre comercial</label>
+                  <input class="form-control" value="Demo Beauty Group" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Zona horaria</label>
+                  <select class="form-control"><option>America/Mexico_City</option></select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Moneda</label>
+                  <select class="form-control"><option>MXN</option></select>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="alert('Mock guardado')">Guardar</button>
+              </div>
+            </div>
+          </div>
+
+          <div data-tab-panel="correo">
+            <div class="card" style="max-width: 560px">
+              <div class="card-body">
+                <p class="small muted">Envío de correos vía Resend + cola BullMQ.</p>
+                <div class="form-group">
+                  <label class="form-label">API Key</label>
+                  <input class="form-control form-control-secret" type="password" value="re_••••••••••••••••" />
+                  <div class="form-hint">Enmascarada. Se reescribe al guardar. Cifrada en DB en producción.</div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">From email</label>
+                  <input class="form-control" value="citas@demobeauty.mx" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">From name</label>
+                  <input class="form-control" value="Demo Beauty" />
+                </div>
+                <div class="row">
+                  <button type="button" class="btn btn-primary" onclick="alert('Mock guardado')">Guardar</button>
+                  <button type="button" class="btn btn-secondary" onclick="alert('Mock: email de prueba encolado')">Enviar prueba</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div data-tab-panel="telegram">
+            <div class="card" style="max-width: 560px">
+              <div class="card-body">
+                <p class="small muted">Bot para notificaciones y/o agendar citas.</p>
+                <div class="form-group">
+                  <label class="form-label">Bot token</label>
+                  <input class="form-control form-control-secret" type="password" value="123456:ABC-DEF••••" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Username del bot</label>
+                  <input class="form-control" value="@DemoBeautyBot" />
+                </div>
+                <label class="row" style="margin-bottom: 1rem">
+                  <input type="checkbox" checked /> Bot activo
+                </label>
+                <button type="button" class="btn btn-primary" onclick="alert('Mock guardado')">Guardar</button>
+              </div>
+            </div>
+          </div>
+
+          <div data-tab-panel="turnstile">
+            <div class="card" style="max-width: 560px">
+              <div class="card-body">
+                <p class="small muted">Cloudflare Turnstile — anti-bot en formularios públicos.</p>
+                <div class="form-group">
+                  <label class="form-label">Site key (pública)</label>
+                  <input class="form-control" value="0x4AAAAAAA••••" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Secret key</label>
+                  <input class="form-control form-control-secret" type="password" value="0x4AAAAAAA••••secret" />
+                </div>
+                <button type="button" class="btn btn-primary" onclick="alert('Mock guardado')">Guardar</button>
+              </div>
+            </div>
+          </div>
+
+          <div data-tab-panel="usuarios">
+            <div class="row" style="margin-bottom: 1rem; justify-content: space-between">
+              <p class="muted" style="margin: 0">Alta / baja de usuarios de empresa y clientes.</p>
+              <button type="button" class="btn btn-primary btn-sm" onclick="alert('Mock: alta usuario')">+ Usuario</button>
+            </div>
+            <div class="table-wrap">
+              <table class="data">
+                <thead><tr><th>Nombre</th><th>Rol</th><th>Contacto</th><th>Estado</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td>Admin Demo</td><td><span class="badge">Admin</span></td><td>admin@demo.mx</td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-sm btn-ghost">Baja</button></td></tr>
+                  <tr><td>Leo M.</td><td><span class="badge badge-info">Empleado</span></td><td>leo@demo.mx</td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-sm btn-ghost">Baja</button></td></tr>
+                  <tr><td>Ross Rodríguez</td><td><span class="badge badge-neutral">Cliente</span></td><td>ross@email.com</td><td><span class="badge badge-success">Activo</span></td><td><button class="btn btn-sm btn-ghost">Baja</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-tab-panel="citas">
+            <div class="card" style="max-width: 560px">
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Descuento prepago (%)</label>
+                  <input class="form-control" type="number" value="10" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Antelación mínima (horas)</label>
+                  <input class="form-control" type="number" value="1" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Antelación máxima (días)</label>
+                  <input class="form-control" type="number" value="60" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Política reembolso (borrador)</label>
+                  <textarea class="form-control">100% si cancela el negocio o el cliente elige cancelar tras reasignación. Plazos TBD.</textarea>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="alert('Mock guardado')">Guardar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>

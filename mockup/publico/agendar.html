@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agendar cita · Salon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body>
+    <div class="mock-banner">Mockup · Wizard P-06→10 · <a href="../index.html">Índice</a></div>
+    <header class="public-nav">
+      <div class="inner">
+        <a class="logo" href="home.html"><span class="logo-mark">S</span> Salon</a>
+        <nav class="nav-links">
+          <a href="home.html">Inicio</a>
+          <a href="servicios.html">Servicios</a>
+          <a href="sucursales.html">Sucursales</a>
+          <a href="contacto.html">Contacto</a>
+        </nav>
+        <div class="nav-actions">
+          <a class="btn btn-ghost btn-sm" href="login.html">Entrar</a>
+          <button class="nav-toggle" type="button" data-nav-toggle aria-label="Menú">☰</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container wizard-shell" data-wizard>
+      <div class="page-header">
+        <h1>Agendar cita</h1>
+        <p>Elige sucursal, servicio, profesional y horario. Tú decides quién te atiende.</p>
+      </div>
+
+      <div class="wizard-steps">
+        <div class="wizard-step is-active" data-wizard-step>1 · Sucursal</div>
+        <div class="wizard-step" data-wizard-step>2 · Servicio</div>
+        <div class="wizard-step" data-wizard-step>3 · Profesional</div>
+        <div class="wizard-step" data-wizard-step>4 · Fecha</div>
+        <div class="wizard-step" data-wizard-step>5 · Pago</div>
+      </div>
+
+      <div class="grid-2" style="align-items: start; gap: 1.5rem">
+        <div class="card">
+          <div class="card-body">
+            <!-- Step 1 -->
+            <div class="wizard-panel is-active" data-wizard-panel>
+              <h2 style="font-size: 1.2rem">¿En qué sucursal?</h2>
+              <div class="stack" data-select-group>
+                <div class="card card-selectable is-selected" data-select-item="roma" data-pick="sucursal" data-value="Roma Norte">
+                  <div class="card-body">
+                    <strong>Roma Norte</strong>
+                    <div class="small muted">Álvaro Obregón 214 · Abierta</div>
+                  </div>
+                </div>
+                <div class="card card-selectable" data-select-item="polanco" data-pick="sucursal" data-value="Polanco">
+                  <div class="card-body">
+                    <strong>Polanco</strong>
+                    <div class="small muted">Homero 1425 · Abierta</div>
+                  </div>
+                </div>
+                <div class="card card-selectable" data-select-item="coyo" data-pick="sucursal" data-value="Coyoacán">
+                  <div class="card-body">
+                    <strong>Coyoacán</strong>
+                    <div class="small muted">Centenario 48 · Hasta 19:00</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="wizard-panel" data-wizard-panel>
+              <h2 style="font-size: 1.2rem">¿Qué servicio?</h2>
+              <div class="stack" data-select-group>
+                <div class="card card-selectable is-selected" data-select-item="corte" data-pick="servicio" data-value="Corte clásico">
+                  <div class="card-body row" style="justify-content: space-between">
+                    <div><strong>Corte clásico</strong><div class="small muted">45 min</div></div>
+                    <div class="price">$280</div>
+                  </div>
+                </div>
+                <div class="card card-selectable" data-select-item="barba" data-pick="servicio" data-value="Barba full">
+                  <div class="card-body row" style="justify-content: space-between">
+                    <div><strong>Barba full</strong><div class="small muted">30 min</div></div>
+                    <div class="price">$180</div>
+                  </div>
+                </div>
+                <div class="card card-selectable" data-select-item="combo" data-pick="servicio" data-value="Corte + barba">
+                  <div class="card-body row" style="justify-content: space-between">
+                    <div><strong>Corte + barba</strong><div class="small muted">50 min</div></div>
+                    <div class="price">$420</div>
+                  </div>
+                </div>
+                <div class="card card-selectable" data-select-item="gel" data-pick="servicio" data-value="Manicure gel">
+                  <div class="card-body row" style="justify-content: space-between">
+                    <div><strong>Manicure gel</strong><div class="small muted">60 min</div></div>
+                    <div class="price">$320</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="wizard-panel" data-wizard-panel>
+              <h2 style="font-size: 1.2rem">¿Quién te atiende?</h2>
+              <p class="small">Solo profesionales disponibles para este servicio en la sucursal.</p>
+              <div class="stack" data-select-group>
+                <div class="card card-selectable is-selected" data-select-item="leo" data-pick="profesional" data-value="Leo M.">
+                  <div class="card-body row">
+                    <div class="avatar avatar-lg" style="background: #2f4a6e">LM</div>
+                    <div style="flex: 1">
+                      <strong>Leo M.</strong>
+                      <div class="stars">★★★★★ <span class="muted">4.9</span></div>
+                      <div class="small muted">Barbero · 8 años</div>
+                    </div>
+                    <span class="badge badge-success">Hoy libre</span>
+                  </div>
+                </div>
+                <div class="card card-selectable" data-select-item="ana" data-pick="profesional" data-value="Ana R.">
+                  <div class="card-body row">
+                    <div class="avatar avatar-lg" style="background: #1f4d3a">AR</div>
+                    <div style="flex: 1">
+                      <strong>Ana R.</strong>
+                      <div class="stars">★★★★★ <span class="muted">5.0</span></div>
+                      <div class="small muted">Color &amp; corte</div>
+                    </div>
+                    <span class="badge badge-info">3 slots</span>
+                  </div>
+                </div>
+                <div class="card card-selectable" data-select-item="diego" data-pick="profesional" data-value="Diego P.">
+                  <div class="card-body row">
+                    <div class="avatar avatar-lg" style="background: #5c4033">DP</div>
+                    <div style="flex: 1">
+                      <strong>Diego P.</strong>
+                      <div class="stars">★★★★☆ <span class="muted">4.7</span></div>
+                      <div class="small muted">Barbero · fade specialist</div>
+                    </div>
+                    <span class="badge badge-warning">Pocas horas</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="wizard-panel" data-wizard-panel>
+              <h2 style="font-size: 1.2rem">Día y hora</h2>
+              <p class="small">Disponibilidad de <strong>Leo M.</strong> (ejemplo).</p>
+              <div class="calendar-strip">
+                <div class="day-chip is-selected" data-value="Mié 16 jul"><div class="d">Mié</div><div class="n">16</div></div>
+                <div class="day-chip" data-value="Jue 17 jul"><div class="d">Jue</div><div class="n">17</div></div>
+                <div class="day-chip" data-value="Vie 18 jul"><div class="d">Vie</div><div class="n">18</div></div>
+                <div class="day-chip" data-value="Sáb 19 jul"><div class="d">Sáb</div><div class="n">19</div></div>
+                <div class="day-chip" data-value="Lun 21 jul"><div class="d">Lun</div><div class="n">21</div></div>
+                <div class="day-chip" data-value="Mar 22 jul"><div class="d">Mar</div><div class="n">22</div></div>
+              </div>
+              <h3 style="font-size: 0.95rem">Horarios libres</h3>
+              <div class="slots">
+                <button type="button" class="slot is-disabled">10:00</button>
+                <button type="button" class="slot" data-value="10:30">10:30</button>
+                <button type="button" class="slot is-selected" data-value="11:30">11:30</button>
+                <button type="button" class="slot" data-value="12:00">12:00</button>
+                <button type="button" class="slot is-disabled">13:00</button>
+                <button type="button" class="slot" data-value="15:00">15:00</button>
+                <button type="button" class="slot" data-value="16:30">16:30</button>
+                <button type="button" class="slot" data-value="18:00">18:00</button>
+              </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="wizard-panel" data-wizard-panel>
+              <h2 style="font-size: 1.2rem">Tus datos y pago</h2>
+              <p class="small">Solo lo esencial. Más datos solo si pagas en línea.</p>
+              <div class="form-group">
+                <label class="form-label" for="nombre">Nombre</label>
+                <input class="form-control" id="nombre" value="Ross Rodríguez" />
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="email">Correo (o celular)</label>
+                  <input class="form-control" id="email" type="email" value="ross@email.com" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="tel">Celular (opcional si hay correo)</label>
+                  <input class="form-control" id="tel" type="tel" placeholder="55 0000 0000" />
+                </div>
+              </div>
+              <div class="form-hint" style="margin-bottom: 1rem">Registro mínimo: nombre + correo <em>o</em> celular.</div>
+
+              <h3 style="font-size: 0.95rem">¿Cómo pagas?</h3>
+              <div class="stack">
+                <label class="toggle-card is-selected">
+                  <input type="radio" name="pago" value="prepago" checked />
+                  <div>
+                    <strong>Prepago en línea · −10%</strong>
+                    <div class="small muted">Asegura tu lugar. Total: <strong style="color: var(--success)">$252</strong> (antes $280)</div>
+                  </div>
+                </label>
+                <label class="toggle-card">
+                  <input type="radio" name="pago" value="local" />
+                  <div>
+                    <strong>Pago en el salón</strong>
+                    <div class="small muted">Sin descuento. Total: $280 en caja.</div>
+                  </div>
+                </label>
+              </div>
+              <div class="notice" style="margin-top: 1rem">
+                En el producto real aquí iría Cloudflare Turnstile (anti-bot).
+              </div>
+            </div>
+
+            <div class="row" style="margin-top: 1.5rem; justify-content: space-between">
+              <button type="button" class="btn btn-secondary" data-wizard-prev>Atrás</button>
+              <button type="button" class="btn btn-primary" data-wizard-next>Continuar</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="card" style="position: sticky; top: 88px">
+          <div class="card-body">
+            <h3 style="font-size: 1rem; margin-bottom: 1rem">Resumen</h3>
+            <div class="stack" data-wizard-summary></div>
+            <div class="divider"></div>
+            <div class="row" style="justify-content: space-between">
+              <span class="muted">Estimado</span>
+              <span class="price">$252</span>
+            </div>
+            <p class="tiny muted" style="margin-top: 0.75rem; margin-bottom: 0">
+              Mockup: no se cobra ni se guarda nada.
+            </p>
+          </div>
+        </aside>
+      </div>
+    </main>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>

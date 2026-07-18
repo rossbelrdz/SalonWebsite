@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Corte clásico · Salon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body>
+    <div class="mock-banner">Mockup · <a href="../index.html">Índice</a></div>
+    <header class="public-nav">
+      <div class="inner">
+        <a class="logo" href="home.html"><span class="logo-mark">S</span> Salon</a>
+        <nav class="nav-links">
+          <a href="home.html">Inicio</a>
+          <a class="is-active" href="servicios.html">Servicios</a>
+          <a href="sucursales.html">Sucursales</a>
+          <a href="contacto.html">Contacto</a>
+        </nav>
+        <div class="nav-actions">
+          <a class="btn btn-primary btn-sm" href="agendar.html">Agendar cita</a>
+          <button class="nav-toggle" type="button" data-nav-toggle aria-label="Menú">☰</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="section">
+      <div class="container">
+        <p class="small muted"><a href="servicios.html">Servicios</a> / Corte clásico</p>
+        <div class="grid-2" style="gap: 2rem; align-items: start">
+          <div class="card">
+            <div class="media media-cut" style="aspect-ratio: 16/11"><div class="media-icon" style="font-size: 4rem">✂</div></div>
+          </div>
+          <div>
+            <span class="badge">Unisex</span>
+            <h1 style="margin-top: 0.75rem">Corte clásico</h1>
+            <p>
+              Corte con lavado y peinado final. Ideal para mantener forma y frescor.
+              Disponible en todas las sucursales.
+            </p>
+            <div class="row" style="gap: 1.5rem; margin: 1.25rem 0">
+              <div>
+                <div class="tiny muted">Duración</div>
+                <strong>45 min</strong>
+              </div>
+              <div>
+                <div class="tiny muted">Desde</div>
+                <div class="price">$280</div>
+              </div>
+              <div>
+                <div class="tiny muted">Con prepago</div>
+                <div class="price" style="color: var(--success)">$252</div>
+              </div>
+            </div>
+            <div class="notice notice-info" style="margin-bottom: 1.25rem">
+              Al agendar podrás elegir al profesional y el horario disponible.
+            </div>
+            <div class="row">
+              <a class="btn btn-accent" href="agendar.html">Agendar este servicio</a>
+              <a class="btn btn-secondary" href="servicios.html">Ver más</a>
+            </div>
+            <div class="divider"></div>
+            <h3 style="font-size: 1rem">Incluye</h3>
+            <ul class="muted" style="padding-left: 1.2rem">
+              <li>Consulta rápida de estilo</li>
+              <li>Lavado con producto del salón</li>
+              <li>Corte + acabado</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>

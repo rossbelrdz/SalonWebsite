@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Salon · Estilo que se siente bien</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body>
+    <div class="mock-banner">Mockup · <a href="../index.html">Índice de pantallas</a></div>
+    <header class="public-nav">
+      <div class="inner">
+        <a class="logo" href="home.html"><span class="logo-mark">S</span> Salon</a>
+        <nav class="nav-links">
+          <a class="is-active" href="home.html">Inicio</a>
+          <a href="servicios.html">Servicios</a>
+          <a href="sucursales.html">Sucursales</a>
+          <a href="contacto.html">Contacto</a>
+          <a href="mis-citas.html">Mis citas</a>
+        </nav>
+        <div class="nav-actions">
+          <a class="btn btn-ghost btn-sm" href="login.html">Entrar</a>
+          <a class="btn btn-primary btn-sm" href="agendar.html">Agendar cita</a>
+          <button class="nav-toggle" type="button" data-nav-toggle aria-label="Menú">☰</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="hero-kicker">✦ Barbería &amp; belleza · un solo lugar</div>
+          <h1>Tu estilo, tu pro, tu horario.</h1>
+          <p class="hero-lead">
+            Elige sucursal, servicio y a la persona que te va a atender. Agenda en minutos,
+            prepaga con descuento y olvídate de las esperas.
+          </p>
+          <div class="row">
+            <a class="btn btn-accent" href="agendar.html">Agendar ahora</a>
+            <a class="btn btn-secondary" href="servicios.html">Ver servicios</a>
+          </div>
+          <div class="row" style="margin-top: 1.75rem; gap: 1.5rem">
+            <div>
+              <div class="price" style="font-size: 1.4rem">4.9</div>
+              <div class="small muted">★ valoración media</div>
+            </div>
+            <div>
+              <div class="price" style="font-size: 1.4rem">12k+</div>
+              <div class="small muted">citas al mes</div>
+            </div>
+            <div>
+              <div class="price" style="font-size: 1.4rem">−10%</div>
+              <div class="small muted">con prepago</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="hero-float hero-float-1"><strong>Leo · Barbero</strong>Disponible hoy 11:30</div>
+          <div class="hero-float hero-float-2"><strong>Roma Norte</strong>Mapa · 3 sucursales</div>
+          <div class="hero-float hero-float-3"><strong>Prepago</strong>Confirma y ahorra</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <h2>Servicios para todos</h2>
+            <p class="muted" style="margin: 0">Cabello, barba, color, uñas, spa y más.</p>
+          </div>
+          <a class="btn btn-secondary btn-sm" href="servicios.html">Ver catálogo</a>
+        </div>
+        <div class="grid-3">
+          <a class="card card-hover" href="servicio.html">
+            <div class="media media-cut"><div class="media-icon">✂</div></div>
+            <div class="card-body">
+              <span class="badge">Unisex</span>
+              <h3 style="margin: 0.5rem 0 0.25rem; font-size: 1.15rem">Corte clásico</h3>
+              <p class="small" style="margin-bottom: 0.75rem">45 min · Estilo limpio y actual</p>
+              <div class="price">$280</div>
+            </div>
+          </a>
+          <a class="card card-hover" href="servicio.html">
+            <div class="media media-beard"><div class="media-icon">🧔</div></div>
+            <div class="card-body">
+              <span class="badge badge-info">Hombres</span>
+              <h3 style="margin: 0.5rem 0 0.25rem; font-size: 1.15rem">Barba full</h3>
+              <p class="small" style="margin-bottom: 0.75rem">30 min · Perfilado y cuidado</p>
+              <div class="price">$180</div>
+            </div>
+          </a>
+          <a class="card card-hover" href="servicio.html">
+            <div class="media media-color"><div class="media-icon">🎨</div></div>
+            <div class="card-body">
+              <span class="badge badge-accent">Mujeres</span>
+              <h3 style="margin: 0.5rem 0 0.25rem; font-size: 1.15rem">Balayage</h3>
+              <p class="small" style="margin-bottom: 0.75rem">150 min · Color natural</p>
+              <div class="price">$1,450</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <h2>¿Cómo funciona?</h2>
+            <p class="muted" style="margin: 0">Cuatro pasos. Sin sorpresas.</p>
+          </div>
+        </div>
+        <div class="grid-4">
+          <div class="card"><div class="card-body">
+            <div class="badge">01</div>
+            <h3 style="font-size: 1.05rem; margin-top: 0.75rem">Sucursal</h3>
+            <p class="small">Elige en el mapa la ubicación más conveniente.</p>
+          </div></div>
+          <div class="card"><div class="card-body">
+            <div class="badge">02</div>
+            <h3 style="font-size: 1.05rem; margin-top: 0.75rem">Servicio</h3>
+            <p class="small">Corte, color, uñas, spa… lo que necesites.</p>
+          </div></div>
+          <div class="card"><div class="card-body">
+            <div class="badge">03</div>
+            <h3 style="font-size: 1.05rem; margin-top: 0.75rem">Tu profesional</h3>
+            <p class="small">Tú decides quién te atiende. No “quien toque”.</p>
+          </div></div>
+          <div class="card"><div class="card-body">
+            <div class="badge badge-accent">04</div>
+            <h3 style="font-size: 1.05rem; margin-top: 0.75rem">Día, hora y listo</h3>
+            <p class="small">Slots reales. Prepago opcional con descuento.</p>
+          </div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <div class="grid-2" style="align-items: center">
+          <div>
+            <h2>Cerca de ti</h2>
+            <p>Tres sucursales con el mismo estándar. Revisa horarios y agenda en la que prefieras.</p>
+            <a class="btn btn-primary" href="sucursales.html">Ver mapa de sucursales</a>
+          </div>
+          <div class="card">
+            <div class="card-body stack">
+              <div class="row" style="justify-content: space-between">
+                <div><strong>Roma Norte</strong><div class="small muted">Álvaro Obregón 214</div></div>
+                <span class="badge badge-success">Abierta</span>
+              </div>
+              <div class="row" style="justify-content: space-between">
+                <div><strong>Polanco</strong><div class="small muted">Homero 1425</div></div>
+                <span class="badge badge-success">Abierta</span>
+              </div>
+              <div class="row" style="justify-content: space-between">
+                <div><strong>Coyoacán</strong><div class="small muted">Centenario 48</div></div>
+                <span class="badge badge-warning">Cierra 19:00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container text-center" style="max-width: 36rem">
+        <h2>¿Listo para tu próximo look?</h2>
+        <p>Agenda en menos de un minuto. Elige a tu favorito del equipo.</p>
+        <a class="btn btn-accent" href="agendar.html">Empezar a agendar</a>
+      </div>
+    </section>
+
+    <footer class="public-footer">
+      <div class="container footer-grid">
+        <div>
+          <div class="logo" style="color: #fff; margin-bottom: 0.75rem"><span class="logo-mark">S</span> Salon</div>
+          <p class="small">Plataforma demo para salones y barberías. Mockup sin datos reales.</p>
+        </div>
+        <div>
+          <h4>Explorar</h4>
+          <div class="stack" style="gap: 0.4rem">
+            <a class="small" href="servicios.html">Servicios</a>
+            <a class="small" href="sucursales.html">Sucursales</a>
+            <a class="small" href="agendar.html">Agendar</a>
+          </div>
+        </div>
+        <div>
+          <h4>Cuenta</h4>
+          <div class="stack" style="gap: 0.4rem">
+            <a class="small" href="login.html">Entrar</a>
+            <a class="small" href="mis-citas.html">Mis citas</a>
+          </div>
+        </div>
+        <div>
+          <h4>Contacto</h4>
+          <div class="stack" style="gap: 0.4rem">
+            <a class="small" href="contacto.html">Formulario</a>
+            <span class="small">WhatsApp · Facebook</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>

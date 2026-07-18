@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Catálogo · Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body class="admin-body">
+    <div class="mock-banner">Mockup · A-05 · <a href="../index.html">Índice</a></div>
+    <div class="admin-shell">
+      <div class="sidebar-backdrop" data-sidebar-close></div>
+      <aside class="sidebar">
+        <div class="sidebar-brand"><span class="logo-mark">S</span> Salon Admin</div>
+        <div class="sidebar-section">Operación</div>
+        <a href="index.html" data-nav="dashboard">Dashboard</a>
+        <a href="citas.html" data-nav="citas">Citas</a>
+        <a href="servicios.html" data-nav="servicios">Servicios</a>
+        <a href="catalogo.html" class="is-active" data-nav="catalogo">Catálogo / estilos</a>
+        <a href="sucursales.html" data-nav="sucursales">Sucursales</a>
+        <div class="sidebar-section">Personas</div>
+        <a href="personal.html" data-nav="personal">Personal</a>
+        <a href="clientes.html" data-nav="clientes">Clientes</a>
+        <a href="asistencia.html" data-nav="asistencia">Asistencia</a>
+        <a href="comisiones.html" data-nav="comisiones">Comisiones</a>
+        <div class="sidebar-section">Análisis</div>
+        <a href="reportes.html" data-nav="reportes">Reportes</a>
+        <div class="sidebar-section">Sistema</div>
+        <div class="sidebar-group" data-nav-group="config">
+          <a href="config.html#general" class="sidebar-parent" data-nav="config">Configuración</a>
+          <div class="sidebar-subnav">
+            <a href="config.html#general" data-config-tab="general">General</a>
+            <a href="config.html#correo" data-config-tab="correo">Correo (Resend)</a>
+            <a href="config.html#telegram" data-config-tab="telegram">Telegram</a>
+            <a href="config.html#turnstile" data-config-tab="turnstile">Turnstile</a>
+            <a href="config.html#usuarios" data-config-tab="usuarios">Usuarios</a>
+            <a href="config.html#citas" data-config-tab="citas">Citas / prepago</a>
+          </div>
+        </div>
+        <div class="sidebar-footer">
+          <a href="../empleado/agenda.html">Vista empleado</a>
+          <a href="../super/tenants.html">Super Admin</a>
+          <a href="../publico/home.html">Cerrar sesión</a>
+        </div>
+      </aside>
+      <div class="admin-main">
+        <header class="admin-topbar">
+          <strong>Catálogo de estilos</strong>
+          <button type="button" class="btn btn-primary btn-sm">+ Estilo</button>
+        </header>
+        <div class="admin-content">
+          <p class="muted">Galería de cortes, diseños de uñas, color… (imágenes vía MinIO en el producto real).</p>
+          <div class="grid-4">
+            <div class="card"><div class="media media-cut media-tall"><div class="media-icon">Fade</div></div><div class="card-body"><strong>Fade medio</strong><div class="tiny muted">Caballero</div></div></div>
+            <div class="card"><div class="media media-cut media-tall"><div class="media-icon">Bob</div></div><div class="card-body"><strong>Bob texturizado</strong><div class="tiny muted">Dama</div></div></div>
+            <div class="card"><div class="media media-nails media-tall"><div class="media-icon">✦</div></div><div class="card-body"><strong>French nude</strong><div class="tiny muted">Uñas</div></div></div>
+            <div class="card"><div class="media media-color media-tall"><div class="media-icon">◎</div></div><div class="card-body"><strong>Balayage miel</strong><div class="tiny muted">Color</div></div></div>
+            <div class="card"><div class="media media-beard media-tall"><div class="media-icon">Barba</div></div><div class="card-body"><strong>Barba boxed</strong><div class="tiny muted">Grooming</div></div></div>
+            <div class="card"><div class="media media-makeup media-tall"><div class="media-icon">★</div></div><div class="card-body"><strong>Glam noche</strong><div class="tiny muted">Maquillaje</div></div></div>
+            <div class="card"><div class="media media-nails media-tall"><div class="media-icon">◈</div></div><div class="card-body"><strong>Chrome silver</strong><div class="tiny muted">Uñas</div></div></div>
+            <div class="card"><div class="media media-spa media-tall"><div class="media-icon">○</div></div><div class="card-body"><strong>Brow lamination</strong><div class="tiny muted">Cejas</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>

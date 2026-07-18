@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mi agenda · Empleado</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Outfit:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/main.css" />
+  </head>
+  <body class="admin-body">
+    <div class="mock-banner">Mockup Empleado · E-01 · <a href="../index.html">Índice</a></div>
+    <div class="admin-shell">
+      <aside class="sidebar">
+        <div class="sidebar-brand"><span class="logo-mark">S</span> Leo M.</div>
+        <div class="sidebar-section">Mi día</div>
+        <a class="is-active" href="agenda.html">Agenda hoy</a>
+        <a href="manana.html">Mañana</a>
+        <a href="checador.html">Checador</a>
+        <a href="comisiones.html">Mis comisiones</a>
+        <a href="permiso.html">Solicitar permiso</a>
+        <div class="sidebar-footer">
+          <a href="../admin/index.html">Vista admin</a>
+          <a href="../publico/home.html">Salir</a>
+        </div>
+      </aside>
+      <div class="admin-main">
+        <header class="admin-topbar">
+          <div>
+            <strong>Agenda · Hoy miércoles</strong>
+            <div class="tiny muted">Roma Norte · 6 citas</div>
+          </div>
+          <span class="badge badge-success">Checado 09:52</span>
+        </header>
+        <div class="admin-content" style="max-width: 640px">
+          <div class="notice notice-info" style="margin-bottom: 1rem">
+            Prepara material con base en el servicio. Los prepagos están marcados.
+          </div>
+          <div class="stack">
+            <div class="card">
+              <div class="card-body">
+                <div class="row" style="justify-content: space-between">
+                  <strong>10:30 · Jorge T.</strong>
+                  <span class="badge badge-neutral">Local</span>
+                </div>
+                <p class="small" style="margin: 0.35rem 0">Barba full · 30 min</p>
+                <p class="tiny muted" style="margin: 0">Material: navaja, bálsamo, toalla caliente</p>
+              </div>
+            </div>
+            <div class="card" style="outline: 2px solid var(--primary)">
+              <div class="card-body">
+                <div class="row" style="justify-content: space-between">
+                  <strong>11:30 · Ross R.</strong>
+                  <span class="badge badge-success">Prepago</span>
+                </div>
+                <p class="small" style="margin: 0.35rem 0">Corte clásico · 45 min</p>
+                <p class="tiny muted" style="margin: 0">Material: tijera, máquina #2, spray texturizante</p>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-body">
+                <div class="row" style="justify-content: space-between">
+                  <strong>15:00 · Iván G.</strong>
+                  <span class="badge badge-success">Prepago</span>
+                </div>
+                <p class="small" style="margin: 0.35rem 0">Fade medio · 45 min</p>
+                <p class="tiny muted" style="margin: 0">Material: máquinas #1–#3, navaja contorno</p>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-body">
+                <div class="row" style="justify-content: space-between">
+                  <strong>17:00 · Pablo S.</strong>
+                  <span class="badge badge-neutral">Local</span>
+                </div>
+                <p class="small" style="margin: 0.35rem 0">Corte + barba · 50 min</p>
+                <p class="tiny muted" style="margin: 0">Material: set completo corte/barba</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="../assets/js/main.js"></script>
+  </body>
+</html>
