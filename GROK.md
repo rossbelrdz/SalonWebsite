@@ -84,18 +84,27 @@ Arquitectura: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
 
 ---
 
-## 5. Roles y matrices
+## 5. Roles, shells UI y matrices
 
-| Rol | Ámbito |
-|-----|--------|
-| `super_admin` | Plataforma (todos los tenants) |
-| `admin` | Un negocio / tenant |
-| `employee` | Sucursal(es) del negocio |
-| `client` | Usuario final |
+| Rol | Ámbito | Shell UI |
+|-----|--------|----------|
+| `super_admin` | Plataforma (todos los tenants) | **B** Admin (sidebar) |
+| `admin` | Un negocio / tenant | **B** Admin (sidebar) |
+| `employee` | Sucursal(es) del negocio | **C** Empleado (sidebar reducido) |
+| `client` | Usuario final | **A** Público (top nav) |
 
+**Tres shells — no mezclar menús** (error ya cometido y documentado como prohibido):
+
+| Shell | Chrome | Rutas | Mockup |
+|-------|--------|-------|--------|
+| A Público | Top nav | `(public)/*` | `mockup/publico/` |
+| B Admin | Sidebar | `/admin/*` | `mockup/admin/` |
+| C Empleado | Sidebar | `/empleado/*` | `mockup/empleado/` |
+
+- **Contrato obligatorio:** [docs/patterns/app-shells.md](./docs/patterns/app-shells.md)  
+- Roles y menús: [docs/ROLES_AND_UI.md](./docs/ROLES_AND_UI.md)  
 - Matriz de permisos: [docs/PERMISSIONS_MATRIX.md](./docs/PERMISSIONS_MATRIX.md)  
-- Matriz de notificaciones: [docs/NOTIFICATIONS_MATRIX.md](./docs/NOTIFICATIONS_MATRIX.md)  
-- Roles y sidebar admin: [docs/ROLES_AND_UI.md](./docs/ROLES_AND_UI.md)
+- Matriz de notificaciones: [docs/NOTIFICATIONS_MATRIX.md](./docs/NOTIFICATIONS_MATRIX.md)
 
 ---
 
@@ -128,14 +137,15 @@ Detalle: [docs/CONFIGURATION.md](./docs/CONFIGURATION.md)
 | [docs/STACK.md](./docs/STACK.md) | Versiones pinneadas y dependencias |
 | [docs/SECURITY.md](./docs/SECURITY.md) | Seguridad, CVEs, secrets |
 | [docs/PRODUCT.md](./docs/PRODUCT.md) | Producto, flujos, prepago, catálogo |
-| [docs/ROLES_AND_UI.md](./docs/ROLES_AND_UI.md) | Roles, sidebar, pantallas admin |
+| [docs/patterns/app-shells.md](./docs/patterns/app-shells.md) | **UI shells (3 áreas)** — leer antes de menús/layouts |
+| [docs/ROLES_AND_UI.md](./docs/ROLES_AND_UI.md) | Roles, menús por shell, pantallas |
 | [docs/PERMISSIONS_MATRIX.md](./docs/PERMISSIONS_MATRIX.md) | Quién puede qué |
 | [docs/NOTIFICATIONS_MATRIX.md](./docs/NOTIFICATIONS_MATRIX.md) | Quién recibe qué aviso |
 | [docs/CONFIGURATION.md](./docs/CONFIGURATION.md) | Config: Apariencia, Resend, Telegram, Turnstile |
 | [docs/DEPLOY.md](./docs/DEPLOY.md) | Docker + Cloudflare Tunnel (`salon.freonx.org`, token) |
-| [docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md) | Design system (tokens + theme tenant) |
-| [docs/MOCKUP.md](./docs/MOCKUP.md) | Mockup estático (congelado, referencia) |
-| [docs/patterns/README.md](./docs/patterns/README.md) | Pattern library (F2) |
+| [docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md) | Design system (tokens + layouts shells + theme) |
+| [docs/MOCKUP.md](./docs/MOCKUP.md) | Mockup estático (congelado, referencia de shells) |
+| [docs/patterns/README.md](./docs/patterns/README.md) | Pattern library (shells, nav, wizard, …) |
 | [docs/credentials.example.md](./docs/credentials.example.md) | Plantilla secretos (real: `credentials.md` gitignored) |
 | [docs/COMMISSIONS_RESEARCH.md](./docs/COMMISSIONS_RESEARCH.md) | Investigación comisiones (pendiente contenido profundo) |
 
@@ -157,6 +167,8 @@ Detalle: [docs/CONFIGURATION.md](./docs/CONFIGURATION.md)
 ## 9. Principios para agentes
 
 1. Leer **solo** este archivo + los docs del área de la tarea.  
+1b. Si la tarea toca **menú, layout, nav o pantallas nuevas:** leer [docs/patterns/app-shells.md](./docs/patterns/app-shells.md) y **no** unificar shells.  
+
 2. No saturar contexto copiando matrices o arquitectura enteras si no hacen falta.  
 3. Cambios de alcance → actualizar el doc correspondiente **y** una línea en CHANGELOG si es release.  
 4. Seguridad primero: dependencias auditadas, secrets fuera del repo, Postgres/Redis pinneados.  

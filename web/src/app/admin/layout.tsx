@@ -1,3 +1,7 @@
+/**
+ * Shell B — panel admin (sidebar). No PublicNav.
+ * @see docs/patterns/app-shells.md
+ */
 import { redirect } from "next/navigation";
 import { readSession } from "@/lib/session";
 import { hasAdminAccess } from "@/lib/auth";

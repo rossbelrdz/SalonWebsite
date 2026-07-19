@@ -53,13 +53,8 @@ export interface PaymentAdapter {
   refund(input: RefundInput, creds: ProviderCredentials): Promise<RefundResult>;
 }
 
-export function appBaseUrl() {
-  return (
-    process.env.PUBLIC_APP_URL ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    "http://localhost:3010"
-  ).replace(/\/$/, "");
-}
+/** @deprecated Import from `@/lib/url` — re-export for compatibility. */
+export { appBaseUrl } from "@/lib/url";
 
 export function centsToDecimal(cents: number) {
   return Math.round(cents) / 100;

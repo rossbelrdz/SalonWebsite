@@ -13,6 +13,18 @@ Estado: **`congelado` (referencia)** — v0.2.x.
 
 **Cómo verlo:** abrir [`mockup/index.html`](../mockup/index.html) en el navegador.
 
+### Shells UI (fuente de verdad estructural)
+
+El mockup **define** tres áreas de chrome que la app debe respetar. Contrato:
+[patterns/app-shells.md](./patterns/app-shells.md).
+
+| Carpeta mockup | Shell | Chrome | App |
+|----------------|-------|--------|-----|
+| `mockup/publico/` | A | Top nav `.public-nav` | `app/(public)/` |
+| `mockup/admin/` | B | Sidebar `.admin-shell` | `app/admin/` |
+| `mockup/empleado/` | C | Sidebar (menú reducido) — **no** public-nav | `app/empleado/` |
+| `mockup/super/` | B | Ítems de plataforma en admin | `/admin/plataforma` |
+
 ---
 
 ## 1. Principios del mockup

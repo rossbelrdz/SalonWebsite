@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * Shell B — panel admin (sidebar + topbar).
- * Contrato: docs/patterns/app-shells.md + docs/patterns/admin-sidebar.md
- * NO montar PublicNav aquí. Móvil = este sidebar en drawer, no el menú del sitio.
+ * Shell C — área empleado (sidebar reducido + topbar).
+ * Contrato: docs/patterns/app-shells.md + mockup/empleado/*
+ * Mismo esqueleto CSS que admin; NO PublicNav. F8: checador/comisiones van aquí.
  */
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -11,37 +11,27 @@ import { useEffect, useState } from "react";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MobileMenuToggle } from "@/components/MobileMenuToggle";
 
-const baseLinks = [
-  { href: "/admin", label: "Dashboard", section: "Operación" },
-  { href: "/admin/citas", label: "Citas" },
-  { href: "/admin/servicios", label: "Servicios" },
-  { href: "/admin/sucursales", label: "Sucursales" },
-  { href: "/admin/personal", label: "Personal", section: "Personas" },
-  { href: "/admin/clientes", label: "Clientes" },
-  { href: "/admin/notificaciones", label: "Log notificaciones", section: "Sistema" },
-  { href: "/admin/permisos", label: "Matriz permisos" },
-  { href: "/admin/matriz-notificaciones", label: "Matriz notificaciones" },
-  { href: "/admin/config", label: "Configuración" },
+const links = [
+  { href: "/empleado", label: "Agenda hoy", section: "Mi día" },
+  { href: "/empleado#permiso", label: "Solicitar permiso" },
 ];
 
-export function AdminShell({
-  isSuperAdmin = false,
+export function EmpleadoShell({
   userName,
+  showAdmin = false,
   children,
 }: {
-  isSuperAdmin?: boolean;
   userName: string;
+  showAdmin?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  // Cerrar menú al navegar (móvil)
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
-  // Evitar scroll del fondo con drawer abierto
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -51,7 +41,6 @@ export function AdminShell({
     };
   }, [open]);
 
-  // Escape cierra el menú
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -60,13 +49,6 @@ export function AdminShell({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
-
-  const links = isSuperAdmin
-    ? [
-        ...baseLinks,
-        { href: "/admin/plataforma", label: "Plataforma", section: "Sistema" },
-      ]
-    : baseLinks;
 
   let lastSection = "";
 
@@ -80,10 +62,10 @@ export function AdminShell({
         onClick={() => setOpen(false)}
       />
 
-      <aside className="sidebar" id="admin-sidebar">
+      <aside className="sidebar" id="empleado-sidebar">
         <div className="sidebar-brand">
           <span className="logo-mark">S</span>
-          <span>Salon Admin</span>
+          <span>Empleado</span>
           <button
             type="button"
             className="sidebar-close-btn"
@@ -94,14 +76,15 @@ export function AdminShell({
           </button>
         </div>
 
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav" aria-label="Empleado">
           {links.map((l) => {
             const showSection = Boolean(l.section && l.section !== lastSection);
             if (l.section) lastSection = l.section;
+            const base = l.href.split("#")[0];
             const active =
-              l.href === "/admin"
-                ? pathname === "/admin"
-                : pathname.startsWith(l.href);
+              base === "/empleado"
+                ? pathname === "/empleado" && !l.href.includes("#")
+                : pathname.startsWith(base);
             return (
               <div key={l.href}>
                 {showSection && <div className="sidebar-section">{l.section}</div>}
@@ -118,9 +101,11 @@ export function AdminShell({
         </nav>
 
         <div className="sidebar-footer">
-          <Link href="/empleado" onClick={() => setOpen(false)}>
-            Vista empleado
-          </Link>
+          {showAdmin && (
+            <Link href="/admin" onClick={() => setOpen(false)}>
+              Vista admin
+            </Link>
+          )}
           <Link href="/cuenta" onClick={() => setOpen(false)}>
             Mi cuenta
           </Link>
@@ -142,21 +127,16 @@ export function AdminShell({
               className="admin-menu-btn"
               open={open}
               onClick={() => setOpen(true)}
-              controlsId="admin-sidebar"
+              controlsId="empleado-sidebar"
             />
             <div>
-              <strong>Panel admin</strong>
+              <strong>Mi agenda</strong>
               <div className="tiny muted">{userName}</div>
             </div>
           </div>
           <div className="admin-topbar-right">
             <NotificationBell href="/cuenta" />
-            <Link href="/cuenta" className="btn btn-ghost btn-sm admin-topbar-cuenta">
-              Cuenta
-            </Link>
-            <span className="badge badge-accent">
-              {isSuperAdmin ? "Super" : "Admin"}
-            </span>
+            <span className="badge badge-info">Empleado</span>
           </div>
         </header>
         <div className="admin-content">{children}</div>

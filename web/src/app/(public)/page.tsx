@@ -7,14 +7,32 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const tenant = await getDefaultTenant();
-  const services = await prisma.service.findMany({
-    where: { tenantId: tenant.id, active: true },
-    take: 3,
-    orderBy: { name: "asc" },
-  });
-  const branches = await prisma.branch.count({
-    where: { tenantId: tenant.id, active: true },
-  });
+  // Destacados variados (todas las categorías), no solo los primeros alfabéticos.
+  const featuredIds = [
+    "seed-svc-corte",
+    "seed-svc-balayage",
+    "seed-svc-barba",
+    "seed-svc-unas",
+    "seed-svc-pestañas",
+    "seed-svc-makeup",
+  ];
+  const [allActive, serviceCount, branches] = await Promise.all([
+    prisma.service.findMany({
+      where: { tenantId: tenant.id, active: true },
+      orderBy: [{ category: "asc" }, { name: "asc" }],
+    }),
+    prisma.service.count({
+      where: { tenantId: tenant.id, active: true },
+    }),
+    prisma.branch.count({
+      where: { tenantId: tenant.id, active: true },
+    }),
+  ]);
+  const byId = new Map(allActive.map((s) => [s.id, s]));
+  const featuredServices = [
+    ...featuredIds.map((id) => byId.get(id)).filter(Boolean),
+    ...allActive.filter((s) => !featuredIds.includes(s.id)),
+  ].slice(0, 6) as typeof allActive;
 
   return (
     <>
@@ -36,7 +54,7 @@ export default async function HomePage() {
               </Link>
             </div>
             <p className="tiny muted" style={{ marginTop: "1.25rem" }}>
-              {branches} sucursales · {services.length}+ servicios destacados
+              {branches} sucursales · {serviceCount} servicios
             </p>
           </div>
           <div className="hero-visual" aria-hidden>
@@ -65,7 +83,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="grid-3">
-            {services.map((s) => (
+            {featuredServices.map((s) => (
               <Link key={s.id} href={`/servicios/${s.id}`} className="card card-hover">
                 <div className={`media ${s.mediaClass}`}>
                   <span className="media-icon">✦</span>

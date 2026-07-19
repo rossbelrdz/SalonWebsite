@@ -54,6 +54,15 @@ export async function setSessionCookie(payload: SessionPayload) {
 
 export async function clearSessionCookie() {
   const jar = await cookies();
+  // Borrar con los mismos atributos path/sameSite para que el browser la elimine
+  // (delete() a veces no basta si la cookie se fijó con path o secure distintos).
+  jar.set(COOKIE, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.PUBLIC_APP_URL?.startsWith("https") ?? false,
+    path: "/",
+    maxAge: 0,
+  });
   jar.delete(COOKIE);
 }
 

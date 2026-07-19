@@ -107,17 +107,33 @@ Carga (mockup / app): Google Fonts `DM Sans` + `Outfit`. En prod se puede self-h
 
 ---
 
-## 5. Layouts
+## 5. Layouts (tres shells — no mezclar)
 
-| Contexto | Estructura |
-|----------|------------|
-| **Cliente** | Top nav (desktop) / bottom o menú compacto (móvil); `container` max 1180px |
-| **Admin** | Sidebar izquierdo fijo + topbar + content; sidebar drawer en &lt;960px |
-| **Empleado** | Mismo shell admin con menú reducido |
-| **Super Admin** | Shell admin; listado de tenants |
+> **Contrato:** [patterns/app-shells.md](./patterns/app-shells.md).  
+> El mockup define **tres** áreas de chrome. Unificar menús entre ellas es un error.
 
-Detalle menú: [ROLES_AND_UI.md](./ROLES_AND_UI.md).  
-Patrón: [patterns/admin-sidebar.md](./patterns/admin-sidebar.md).
+| Shell | Contexto | Estructura | App | Mockup |
+|-------|----------|------------|-----|--------|
+| **A** | Cliente / público | **Top nav** (`.public-nav`); drawer ☰ en móvil con *los mismos* links del sitio; `container` max 1180px | `app/(public)/*` | `mockup/publico/*` |
+| **B** | Admin (+ superadmin) | **Sidebar** + topbar + content (`.admin-shell`); sidebar drawer en ≤900px | `app/admin/*` | `mockup/admin/*` |
+| **C** | Empleado | **Mismo shell visual que B**, menú reducido “Mi día” | `app/empleado/*` | `mockup/empleado/*` |
+
+### Clases CSS de contrato (no renombrar a la ligera)
+
+| Shell | Clases clave |
+|-------|----------------|
+| A | `.public-nav`, `.nav-links`, `.nav-actions`, `.mobile-nav-drawer` |
+| B/C | `.admin-body`, `.admin-shell`, `.sidebar`, `.admin-topbar`, `.admin-content`, `.sidebar-open` |
+
+### Anti-patrones (prohibidos)
+
+- Montar `PublicNav` dentro de admin o empleado.  
+- Meter el árbol de operación (Dashboard, Config, matrices…) en el top-nav o drawer público.  
+- Un solo componente de menú “para todos los roles” que combine sitio + panel.  
+- Empujar el layout con un sidebar fijo en móvil (usar drawer overlay).
+
+Menús por rol: [ROLES_AND_UI.md](./ROLES_AND_UI.md).  
+Patrones: [app-shells](./patterns/app-shells.md) · [public-nav](./patterns/public-nav.md) · [admin-sidebar](./patterns/admin-sidebar.md).
 
 ---
 
@@ -132,7 +148,8 @@ Implementar en código reutilizando estas clases del mockup como referencia de n
 | Card | `.card`, `.card-body`, `.card-hover`, `.card-selectable` | [service-card](./patterns/service-card.md) |
 | Form | `.form-group`, `.form-label`, `.form-hint`, `.form-control`, secret | [secret-fields](./patterns/secret-fields.md) |
 | Tabs | `.tabs` / `.tab` + paneles `data-tab-panel` | Config admin |
-| Sidebar | `.sidebar`, `.sidebar-subnav`, groups | [admin-sidebar](./patterns/admin-sidebar.md) |
+| Public nav | `.public-nav`, drawer móvil | [public-nav](./patterns/public-nav.md), [app-shells](./patterns/app-shells.md) |
+| Sidebar (admin/empleado) | `.sidebar`, `.sidebar-subnav`, groups | [admin-sidebar](./patterns/admin-sidebar.md) |
 | Stepper / wizard | pasos de cita | [booking-wizard](./patterns/booking-wizard.md) |
 | Time slots | chips de horario | [time-slots](./patterns/time-slots.md) |
 | Empty / skeleton | estados vacíos | [empty-states](./patterns/empty-states.md) |
@@ -196,24 +213,28 @@ Super Admin puede tener defaults de plataforma; cada negocio override.
 
 ## 9. Mapa mockup → implementación
 
-| Mockup | App (futuro) |
-|--------|----------------|
-| `mockup/publico/*` | Rutas públicas / app cliente |
-| `mockup/admin/*` | `/admin/*` |
-| `mockup/empleado/*` | `/empleado/*` o área staff |
-| `mockup/assets/css/main.css` | tokens + componentes UI |
+| Mockup | Shell | App (runtime) |
+|--------|-------|----------------|
+| `mockup/publico/*` | A top-nav | `web/src/app/(public)/*` + `PublicNav` |
+| `mockup/admin/*` | B sidebar | `web/src/app/admin/*` + `AdminShell` |
+| `mockup/empleado/*` | C sidebar | `web/src/app/empleado/*` + `EmpleadoShell` |
+| `mockup/super/*` | B (ítems plataforma) | `/admin/plataforma` |
+| `mockup/assets/css/main.css` | tokens | `web/src/app/design-system.css` + `globals.css` |
 
-El mockup **se deja** como referencia; no es el runtime de producción.
+El mockup está **congelado** como referencia visual; no es el runtime.  
+Al dudar de un menú o layout, **abrir el HTML del mockup del área** y [app-shells](./patterns/app-shells.md).
 
 ---
 
 ## 10. Checklist Fase 2
 
 - [x] Tokens volcados desde mockup  
-- [x] Principios y layouts  
+- [x] Principios y layouts (**3 shells** documentados)  
 - [x] Apariencia / colores por tenant documentada  
-- [x] Patterns base en `docs/patterns/`  
+- [x] Patterns base en `docs/patterns/` (incl. app-shells, public-nav, admin-sidebar)  
 - [x] Admin: iterativo (no bloquea F3)  
+- [x] Contrato anti-mezcla de menús (2026-07-18)  
 - [ ] Checklist contraste formal al implementar componentes en código (F3)  
 
-**Criterio de salida F2:** se puede implementar UI en Next sin reinventar estilos ni flujos clave.
+**Criterio de salida F2:** se puede implementar UI en Next sin reinventar estilos ni flujos clave.  
+**Regresión a evitar:** unificar nav público con sidebar admin “por comodidad móvil”.

@@ -53,3 +53,7 @@ next-env.d.ts
 # Vercel / turbo
 .vercel
 .turbo
+
+# Local screenshots / agent scratch
+tmp/
+*.tar.gz

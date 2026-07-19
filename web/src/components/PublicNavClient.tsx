@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Shell A — sitio público (top nav).
+ * Contrato: docs/patterns/app-shells.md + docs/patterns/public-nav.md
+ * NO meter aquí el menú de operación de admin/empleado.
+ */
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -12,13 +17,19 @@ export type PublicNavSession = {
   isSuperAdmin: boolean;
 } | null;
 
-const MAIN_LINKS = [
+/** Links del sitio (cliente). Admin/empleado: shells B/C con sidebar. */
+const PUBLIC_LINKS = [
   { href: "/", label: "Inicio" },
   { href: "/servicios", label: "Servicios" },
   { href: "/sucursales", label: "Sucursales" },
   { href: "/agendar", label: "Agendar" },
   { href: "/contacto", label: "Contacto" },
 ];
+
+function isActive(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export function PublicNavClient({
   session,
@@ -49,22 +60,10 @@ export function PublicNavClient({
   }, [open]);
 
   const close = () => setOpen(false);
-
-  const accountLinks = session
-    ? [
-        { href: "/mis-citas", label: "Mis citas" },
-        { href: "/cuenta", label: "Cuenta" },
-        ...(session.isSuperAdmin || session.role === "ADMIN"
-          ? [{ href: "/admin", label: "Admin" }]
-          : []),
-        ...(session.role === "EMPLOYEE" || session.isSuperAdmin
-          ? [{ href: "/empleado", label: "Empleado" }]
-          : []),
-      ]
-    : [
-        { href: "/login", label: "Entrar" },
-        { href: "/agendar", label: "Agendar" },
-      ];
+  const canAdmin = Boolean(session?.isSuperAdmin || session?.role === "ADMIN");
+  const canEmployee = Boolean(
+    session?.role === "EMPLOYEE" || session?.isSuperAdmin || session?.role === "ADMIN",
+  );
 
   return (
     <header className={`public-nav ${open ? "is-open" : ""}`}>
@@ -74,40 +73,46 @@ export function PublicNavClient({
           {brand}
         </Link>
 
-        {/* Desktop: links en barra */}
-        <nav className="nav-links nav-links-desktop" aria-label="Principal">
-          {MAIN_LINKS.map((l) => (
+        <nav className="nav-links nav-links-desktop" aria-label="Sitio público">
+          {PUBLIC_LINKS.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className={pathname === l.href ? "is-active" : undefined}
+              className={isActive(pathname, l.href) ? "is-active" : undefined}
             >
               {l.label}
             </Link>
           ))}
+          {session && (
+            <Link
+              href="/mis-citas"
+              className={isActive(pathname, "/mis-citas") ? "is-active" : undefined}
+            >
+              Mis citas
+            </Link>
+          )}
         </nav>
 
         <div className="nav-actions">
-          {session && (
-            <span className="nav-actions-desktop">
-              <NotificationBell href="/cuenta" />
-            </span>
-          )}
           <div className="nav-actions-desktop">
             {session ? (
               <>
-                <Link href="/mis-citas" className="btn btn-secondary btn-sm">
-                  Mis citas
-                </Link>
+                <NotificationBell href="/cuenta" />
                 <Link href="/cuenta" className="btn btn-ghost btn-sm">
                   Cuenta
                 </Link>
-                {(session.isSuperAdmin || session.role === "ADMIN") && (
-                  <Link href="/admin" className="btn btn-ghost btn-sm">
+                {/* Entrada a otras áreas (no menús de admin) */}
+                {canAdmin && (
+                  <Link href="/admin" className="btn btn-secondary btn-sm">
                     Admin
                   </Link>
                 )}
-                {(session.role === "EMPLOYEE" || session.isSuperAdmin) && (
+                {canEmployee && !canAdmin && (
+                  <Link href="/empleado" className="btn btn-secondary btn-sm">
+                    Mi agenda
+                  </Link>
+                )}
+                {canAdmin && canEmployee && (
                   <Link href="/empleado" className="btn btn-ghost btn-sm">
                     Empleado
                   </Link>
@@ -130,7 +135,6 @@ export function PublicNavClient({
             )}
           </div>
 
-          {/* Móvil: campanita + hamburguesa */}
           <div className="nav-actions-mobile">
             {session && <NotificationBell href="/cuenta" />}
             <MobileMenuToggle open={open} onClick={() => setOpen((v) => !v)} />
@@ -138,7 +142,6 @@ export function PublicNavClient({
         </div>
       </div>
 
-      {/* Backdrop + drawer móvil */}
       <button
         type="button"
         className="mobile-nav-backdrop"
@@ -151,7 +154,7 @@ export function PublicNavClient({
         id="mobile-nav-drawer"
         role="dialog"
         aria-modal="true"
-        aria-label="Menú de navegación"
+        aria-label="Menú del sitio"
       >
         <div className="mobile-nav-drawer-head">
           <strong>Menú</strong>
@@ -160,35 +163,58 @@ export function PublicNavClient({
             ×
           </button>
         </div>
-        <nav className="mobile-nav-list">
-          <p className="mobile-nav-section">Sitio</p>
-          {MAIN_LINKS.map((l) => (
+        <nav className="mobile-nav-list" aria-label="Sitio público">
+          {PUBLIC_LINKS.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className={pathname === l.href ? "is-active" : undefined}
+              className={isActive(pathname, l.href) ? "is-active" : undefined}
               onClick={close}
             >
               {l.label}
             </Link>
           ))}
-          <p className="mobile-nav-section">Cuenta</p>
-          {accountLinks.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={pathname === l.href || pathname.startsWith(l.href + "/") ? "is-active" : undefined}
-              onClick={close}
-            >
-              {l.label}
-            </Link>
-          ))}
-          {session && (
-            <form action="/api/auth/logout" method="post" className="mobile-nav-logout">
-              <button type="submit" className="btn btn-secondary btn-sm" style={{ width: "100%" }}>
-                Cerrar sesión
-              </button>
-            </form>
+          {session ? (
+            <>
+              <Link
+                href="/mis-citas"
+                className={isActive(pathname, "/mis-citas") ? "is-active" : undefined}
+                onClick={close}
+              >
+                Mis citas
+              </Link>
+              <Link
+                href="/cuenta"
+                className={isActive(pathname, "/cuenta") ? "is-active" : undefined}
+                onClick={close}
+              >
+                Cuenta
+              </Link>
+              {canAdmin && (
+                <Link href="/admin" className="mobile-nav-area-link" onClick={close}>
+                  Ir al panel admin
+                </Link>
+              )}
+              {canEmployee && (
+                <Link href="/empleado" className="mobile-nav-area-link" onClick={close}>
+                  Ir a mi agenda
+                </Link>
+              )}
+              <form action="/api/auth/logout" method="post" className="mobile-nav-logout">
+                <button type="submit" className="btn btn-secondary btn-sm" style={{ width: "100%" }}>
+                  Cerrar sesión
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
+              <Link href="/login" onClick={close}>
+                Entrar
+              </Link>
+              <Link href="/agendar" onClick={close}>
+                Agendar cita
+              </Link>
+            </>
           )}
         </nav>
       </div>

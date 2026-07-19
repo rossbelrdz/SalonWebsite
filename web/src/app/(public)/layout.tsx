@@ -1,3 +1,7 @@
+/**
+ * Shell A — sitio público / cliente (top nav).
+ * @see docs/patterns/app-shells.md
+ */
 import { PublicNav } from "@/components/PublicNav";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {

@@ -628,6 +628,15 @@ textarea.form-control {
     color: #fff;
   }
 
+  /* Entrada a otras áreas (admin/empleado), no ítems del menú privado */
+  .mobile-nav-area-link {
+    margin-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 0.85rem !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 600 !important;
+  }
+
   .mobile-nav-logout {
     margin-top: 1rem;
     padding-top: 0.75rem;

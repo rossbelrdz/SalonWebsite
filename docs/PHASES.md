@@ -30,8 +30,9 @@ Estado: `pendiente` | `en_curso` | `hecha` | `bloqueada`
 
 ## Fase 2 — Design System + Pattern Library
 
-**Estado:** `hecha`  
-**Criterio:** tokens + patterns + apariencia tenant. ✅
+**Estado:** `hecha` (ampliada 2026-07-18: contrato de 3 shells)  
+**Criterio:** tokens + patterns + apariencia tenant + **app-shells**. ✅  
+Contrato UI: [patterns/app-shells.md](./patterns/app-shells.md).
 
 ---
 
@@ -122,9 +123,21 @@ Detalle: [NOTIFICATIONS.md](./NOTIFICATIONS.md)
 
 **Estado:** `pendiente` ← **siguiente de producto**
 
+**Shells (obligatorio):** ver [patterns/app-shells.md](./patterns/app-shells.md).
+
+| Entregable | Shell | Dónde va el menú |
+|------------|-------|------------------|
+| Checador (propio) | **C** Empleado | Sidebar `/empleado` |
+| Checador / asistencia (negocio) | **B** Admin | Sidebar `/admin` (p. ej. Asistencia) |
+| Comisiones propias | **C** Empleado | Sidebar empleado |
+| Comisiones / reportes negocio | **B** Admin | Sidebar admin |
+| Reportes | **B** Admin | Sidebar admin |
+
 - [ ] Checador  
 - [ ] Comisiones  
 - [ ] Reportes  
+
+**No** reintroducir un menú unificado público+admin. Empleado = sidebar (mockup `empleado/`), no `PublicNav`.
 
 ---
 
