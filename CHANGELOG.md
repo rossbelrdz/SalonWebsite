@@ -18,6 +18,16 @@ Política completa: [docs/VERSIONING.md](./docs/VERSIONING.md).
 
 ---
 
+## [0.11.1] — 2026-07-19
+
+### Changed
+
+- **Sucursales demo** en seed: 3 ubicaciones reales del área metropolitana de Monterrey, N.L.
+  (Centro Histórico, San Pedro Valle, Cumbres) con dirección, teléfono 81 y coords MapLibre.
+  Sustituyen las antiguas de CDMX (Reforma / Polanco).
+
+---
+
 ## [0.11.0] — 2026-07-19
 
 ### Added — Fase 8 (operación del personal)

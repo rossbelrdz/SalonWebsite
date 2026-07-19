@@ -173,9 +173,9 @@ agent-browser skills get core
 agent-browser skills get core --full
 
 # Loop típico
-agent-browser open 'http://localhost:3010/sucursales?lat=19.4335&lng=-99.1945'
+agent-browser open 'http://localhost:3010/sucursales?lat=25.6512&lng=-100.3615'
 agent-browser set device "iPhone 12"          # o: set viewport 390 844
-agent-browser set geo 19.4335 -99.1945        # override CDP (si el browser concede permiso)
+agent-browser set geo 25.6512 -100.3615       # San Pedro Valle (si el browser concede permiso)
 agent-browser wait --load networkidle
 agent-browser snapshot -i                     # árbol con refs @eN
 agent-browser screenshot /tmp/sucursales.png
@@ -183,10 +183,10 @@ agent-browser close                           # al terminar (o close --all)
 ```
 
 **Sucursal más cercana:** en headless, `set geo` a veces no concede permiso. Para
-probar la lógica de cercanía usa query params en la URL:  
-`/sucursales?lat=19.4335&lng=-99.1945` (Polanco demo) o coords de Centro  
-`lat=19.4326&lng=-99.1332`. En móvil/real el flujo es `navigator.geolocation` (si el
-usuario acepta).
+probar la lógica de cercanía usa query params en la URL (demo Monterrey/NL):  
+`/sucursales?lat=25.6512&lng=-100.3615` (San Pedro Valle),  
+`lat=25.6693&lng=-100.3097` (Centro Histórico) o  
+`lat=25.7328&lng=-100.3915` (Cumbres). En móvil/real: `navigator.geolocation`.
 
 | Comando útil | Para qué |
 |--------------|----------|

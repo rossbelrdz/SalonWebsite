@@ -138,16 +138,16 @@ async function main() {
     });
   }
 
-  // Coords reales (demo CDMX) para MapLibre en /sucursales
+  // Sucursales demo en Monterrey / área metropolitana (NL) — coords reales para MapLibre
   const branchCentro = await prisma.branch.upsert({
     where: { id: "seed-branch-centro" },
     update: {
-      name: "Sucursal Centro",
-      address: "Av. Reforma 123",
-      city: "CDMX",
-      lat: 19.4326,
-      lng: -99.1332,
-      phone: "55 1000 1000",
+      name: "Sucursal Centro Histórico",
+      address: "Calle Morelos 520, entre Zuazua y Escobedo, Zona Centro",
+      city: "Monterrey, N.L.",
+      lat: 25.6693,
+      lng: -100.3097,
+      phone: "81 8123 4501",
       openTime: "09:00",
       closeTime: "20:00",
       active: true,
@@ -155,43 +155,73 @@ async function main() {
     create: {
       id: "seed-branch-centro",
       tenantId: tenant.id,
-      name: "Sucursal Centro",
-      address: "Av. Reforma 123",
-      city: "CDMX",
-      lat: 19.4326,
-      lng: -99.1332,
-      phone: "55 1000 1000",
+      name: "Sucursal Centro Histórico",
+      address: "Calle Morelos 520, entre Zuazua y Escobedo, Zona Centro",
+      city: "Monterrey, N.L.",
+      lat: 25.6693,
+      lng: -100.3097,
+      phone: "81 8123 4501",
       openTime: "09:00",
       closeTime: "20:00",
     },
   });
 
-  const branchPolanco = await prisma.branch.upsert({
+  // id estable seed-branch-polanco (histórico); datos = San Pedro / Valle
+  const branchSanPedro = await prisma.branch.upsert({
     where: { id: "seed-branch-polanco" },
     update: {
-      name: "Sucursal Polanco",
-      address: "Av. Presidente Masaryk 45",
-      city: "CDMX",
-      lat: 19.4335,
-      lng: -99.1945,
-      phone: "55 2000 2000",
+      name: "Sucursal San Pedro Valle",
+      address: "Calzada del Valle 400, Col. del Valle, San Pedro Garza García",
+      city: "San Pedro Garza García, N.L.",
+      lat: 25.6512,
+      lng: -100.3615,
+      phone: "81 8123 4502",
       openTime: "10:00",
-      closeTime: "19:00",
+      closeTime: "20:00",
       active: true,
     },
     create: {
       id: "seed-branch-polanco",
       tenantId: tenant.id,
-      name: "Sucursal Polanco",
-      address: "Av. Presidente Masaryk 45",
-      city: "CDMX",
-      lat: 19.4335,
-      lng: -99.1945,
-      phone: "55 2000 2000",
+      name: "Sucursal San Pedro Valle",
+      address: "Calzada del Valle 400, Col. del Valle, San Pedro Garza García",
+      city: "San Pedro Garza García, N.L.",
+      lat: 25.6512,
+      lng: -100.3615,
+      phone: "81 8123 4502",
       openTime: "10:00",
+      closeTime: "20:00",
+    },
+  });
+
+  const branchCumbres = await prisma.branch.upsert({
+    where: { id: "seed-branch-cumbres" },
+    update: {
+      name: "Sucursal Cumbres",
+      address: "Av. Paseo de los Leones 1601, Cumbres 2° Sector",
+      city: "Monterrey, N.L.",
+      lat: 25.7328,
+      lng: -100.3915,
+      phone: "81 8123 4503",
+      openTime: "09:00",
+      closeTime: "19:00",
+      active: true,
+    },
+    create: {
+      id: "seed-branch-cumbres",
+      tenantId: tenant.id,
+      name: "Sucursal Cumbres",
+      address: "Av. Paseo de los Leones 1601, Cumbres 2° Sector",
+      city: "Monterrey, N.L.",
+      lat: 25.7328,
+      lng: -100.3915,
+      phone: "81 8123 4503",
+      openTime: "09:00",
       closeTime: "19:00",
     },
   });
+
+  const allBranches = [branchCentro, branchSanPedro, branchCumbres];
 
   // Catálogo demo inspirado en salones top de Monterrey/NL (Valle, San Pedro, Cumbres).
   // Precios MXN en centavos; upsert idempotente por id fijo.
@@ -461,7 +491,7 @@ async function main() {
   });
 
   for (const emp of [emp1, emp2]) {
-    for (const branch of [branchCentro, branchPolanco]) {
+    for (const branch of allBranches) {
       await prisma.employeeBranch.upsert({
         where: {
           employeeId_branchId: { employeeId: emp.id, branchId: branch.id },
@@ -514,7 +544,7 @@ async function main() {
       startsAt.setHours(10 + (i % 5), 0, 0, 0);
       const svc = demoServices[i % demoServices.length];
       const emp = i % 2 === 0 ? emp1 : emp2;
-      const branch = i % 2 === 0 ? branchCentro : branchPolanco;
+      const branch = allBranches[i % allBranches.length];
       const endsAt = new Date(startsAt.getTime() + svc.durationMin * 60_000);
       const id = `seed-appt-f8-${i}`;
       await prisma.appointment.upsert({

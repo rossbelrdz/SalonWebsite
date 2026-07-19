@@ -117,7 +117,7 @@ Puede aplazarse a mockup v1.1 si se prioriza salón + cliente.
 
 ## 7. Contenido fake sugerido
 
-- 2–3 sucursales (CDMX / área demo).  
+- 3 sucursales demo (Monterrey / San Pedro / Cumbres, N.L.).  
 - 8–12 servicios mixtos H/M.  
 - 4–6 profesionales con fotos placeholder.  
 - Slots de un día laborable de ejemplo.
