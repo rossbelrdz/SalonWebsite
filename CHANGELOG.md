@@ -11,6 +11,11 @@ Política completa: [docs/VERSIONING.md](./docs/VERSIONING.md).
 
 ## [Unreleased]
 
+### Changed
+
+- Política de versionado reforzada: **changelog + VERSION obligatorios** en cada
+  entrega de código ([docs/VERSIONING.md](./docs/VERSIONING.md), `AGENTS.md`, `GROK.md`).
+
 ### Planeado
 
 - Fase 8: checador, comisiones, reportes

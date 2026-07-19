@@ -170,11 +170,14 @@ Detalle: [docs/CONFIGURATION.md](./docs/CONFIGURATION.md)
 1b. Si la tarea toca **menú, layout, nav o pantallas nuevas:** leer [docs/patterns/app-shells.md](./docs/patterns/app-shells.md) y **no** unificar shells.  
 
 2. No saturar contexto copiando matrices o arquitectura enteras si no hacen falta.  
-3. Cambios de alcance → actualizar el doc correspondiente **y** una línea en CHANGELOG si es release.  
+3. Cambios de alcance → actualizar el doc del área **y** rastro en [CHANGELOG.md](./CHANGELOG.md).  
 4. Seguridad primero: dependencias auditadas, secrets fuera del repo, Postgres/Redis pinneados.  
 5. UI y copy en **español**.  
 6. Registro/cita del cliente: **mínima fricción**.  
-7. Versionar cada release (SemVer). Ver [docs/VERSIONING.md](./docs/VERSIONING.md).
+7. **Versionado obligatorio:** cada cambio de producto/fix/seguridad deja entrada en
+   `CHANGELOG.md`; al cerrar el lote se actualiza `VERSION` (+ `web/package.json`).
+   Política: [docs/VERSIONING.md](./docs/VERSIONING.md). **No** entregar código sin
+   historial en changelog.
 
 ---
 

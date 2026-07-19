@@ -119,9 +119,12 @@ Salon/
   `SKIP_SEED=1`/`SKIP_DB_PUSH=1`, depende de `app` healthy (`/api/health`).
 - Scripts npm útiles (`web/package.json`): `db:generate`, `db:push`, `db:seed`, `db:setup`,
   `db:reset` (destructivo), `db:assert`.
-- Versionado: SemVer; `VERSION` raíz es la fuente de verdad; `CHANGELOG.md` con Keep a
-  Changelog; convención en `docs/VERSIONING.md` (prefijos commit: `feat:`, `fix:`, `docs:`,
-  `security:`, `chore:`, `refactor:`).
+- **Versionado (OBLIGATORIO en cada cambio de producto/fix/seguridad):**  
+  1. Anotar en `CHANGELOG.md` (`[Unreleased]` o sección de versión).  
+  2. Al cerrar el lote entregable: subir `VERSION` + `web/package.json` y mover
+     `[Unreleased]` → `## [X.Y.Z] — fecha`.  
+  3. Política completa: `docs/VERSIONING.md`.  
+  **No** dar por cerrada una tarea de código sin rastro en changelog/versión.
 - Variables de entorno requeridas: ver `.env.example` raíz (infra Postgres/Redis/MinIO,
   `APP_ENCRYPTION_KEY`, `SESSION_SECRET`, `TENANT_SLUG`, `PUBLIC_APP_URL`,
   `CLOUDFLARE_TUNNEL_TOKEN`, `VAPID_*`, integraciones opcionales).
@@ -165,6 +168,8 @@ Roles/menús: `docs/ROLES_AND_UI.md`. Tokens: `docs/DESIGN_SYSTEM.md` §5.
 
 ## 8. Convenciones de código
 
+- **Changelog + versión en cada entrega de código** — ver §6 y `docs/VERSIONING.md`.
+  Sin esto se pierde el historial de lo implementado (regla del equipo, 2026-07-18).
 - UI/rutas/mensajes/docs en español; código en inglés.
 - Server Components por defecto con Prisma directo en página (`export const dynamic =
   "force-dynamic"`); interactividad en componentes cliente (`*Client.tsx` o nombre de acción).
