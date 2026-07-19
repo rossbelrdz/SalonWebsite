@@ -301,6 +301,10 @@ export function PublicNavClient({
 
           <div className="nav-actions-mobile">
             {session && <NotificationBell href="/cuenta" />}
+            {/* CTA siempre visible en móvil (junto a ☰); no depende del drawer */}
+            <Link href="/agendar" className="btn btn-accent btn-sm nav-mobile-agendar">
+              Agendar
+            </Link>
             <MobileMenuToggle open={open} onClick={() => setOpen((v) => !v)} />
           </div>
         </div>

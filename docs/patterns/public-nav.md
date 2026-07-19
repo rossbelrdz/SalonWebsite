@@ -29,7 +29,7 @@ en el mismo cajón.
 │ [Logo]  Inicio · Servicios · Sucursales · Agendar · Contacto │
 │                         [Entrar|Mi cuenta]  [Agendar]        │
 └──────────────────────────────────────────────────────────────┘
- Móvil ☰: SOLO links del sitio + “Entrar” o “Ir a mi cuenta”
+ Móvil: [Agendar] [☰] — ☰ solo links del sitio + “Entrar” o “Ir a mi cuenta”
 ```
 
 ### Contexto A2 — Cuenta (`/cuenta`, `/mis-citas`)
@@ -38,14 +38,14 @@ en el mismo cajón.
 ┌──────────────────────────────────────────────────────────────┐
 │ [Mi espacio]  Mis citas · Mi cuenta     [Sitio] [Salir]     │
 └──────────────────────────────────────────────────────────────┘
- Móvil ☰: Mis citas · Mi cuenta · Volver al sitio · Salir
+ Móvil: [Agendar] [☰] — Mis citas · Mi cuenta · Volver al sitio · Salir
           (+ “Paneles” solo si admin/empleado, no el árbol)
 ```
 
 | Zona | Desktop | Móvil |
 |------|---------|--------|
 | Links | Solo del **contexto actual** (sitio **o** cuenta) | Igual |
-| Acciones sesión | Sitio: Entrar/Mi cuenta + Agendar. Cuenta: Sitio + Salir | En el drawer del contexto |
+| Acciones sesión | Sitio: Entrar/Mi cuenta + Agendar. Cuenta: Sitio + Salir | **Agendar** siempre junto al ☰; resto en el drawer del contexto |
 | Puerta Admin/Empleado | **Solo en menú de cuenta**, una línea | Igual |
 | Menú operación admin | **nunca** en Shell A | **nunca** |
 

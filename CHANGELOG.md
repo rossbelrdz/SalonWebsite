@@ -18,6 +18,21 @@ Política completa: [docs/VERSIONING.md](./docs/VERSIONING.md).
 
 ---
 
+## [0.10.3] — 2026-07-19
+
+### Added
+
+- **Servicios:** búsqueda opcional (nombre, descripción, categoría) y filtro tipo tabs/chips
+  por categoría (Todas + solo categorías con servicios activos).
+- Contador de resultados y estado vacío con “Ver todos”.
+
+### Changed
+
+- Nav público móvil: botón **Agendar** siempre visible junto al ☰ (no solo en el drawer).
+- Copy de la página de servicios alineado con búsqueda/filtro.
+
+---
+
 ## [0.10.2] — 2026-07-19
 
 ### Added
