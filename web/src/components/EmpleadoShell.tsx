@@ -27,6 +27,18 @@ export function EmpleadoShell({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [isMobileNav, setIsMobileNav] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 900px)");
+    const apply = () => {
+      setIsMobileNav(mq.matches);
+      if (!mq.matches) setOpen(false);
+    };
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
 
   useEffect(() => {
     setOpen(false);
@@ -51,18 +63,26 @@ export function EmpleadoShell({
   }, [open]);
 
   const close = () => setOpen(false);
+  const drawerClosed = isMobileNav && !open;
 
   return (
     <div className={`admin-shell ${open ? "sidebar-open" : ""}`}>
       <button
         type="button"
-        className="sidebar-backdrop"
+        className={`sidebar-backdrop${open ? " is-open" : ""}`}
         aria-label="Cerrar menú"
         tabIndex={open ? 0 : -1}
+        aria-hidden={!open}
         onClick={close}
       />
 
-      <aside className="sidebar" id="empleado-sidebar" aria-label="Navegación empleado">
+      <aside
+        className={`sidebar${open ? " is-open" : ""}`}
+        id="empleado-sidebar"
+        aria-label="Navegación empleado"
+        aria-hidden={drawerClosed || undefined}
+        inert={drawerClosed ? true : undefined}
+      >
         <div className="sidebar-brand">
           <span className="logo-mark">S</span>
           <span>Empleado</span>

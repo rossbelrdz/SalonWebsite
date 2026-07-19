@@ -78,10 +78,23 @@ export function AdminShell({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  /** Solo en viewport drawer (≤900px) el sidebar puede estar “cerrado”. */
+  const [isMobileNav, setIsMobileNav] = useState(false);
 
   const systemLinks: NavLink[] = isSuperAdmin
     ? [...SYSTEM_LINKS, { href: "/admin/plataforma", label: "Plataforma" }]
     : SYSTEM_LINKS;
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 900px)");
+    const apply = () => {
+      setIsMobileNav(mq.matches);
+      if (!mq.matches) setOpen(false);
+    };
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
 
   useEffect(() => {
     setOpen(false);
@@ -106,18 +119,27 @@ export function AdminShell({
   }, [open]);
 
   const close = () => setOpen(false);
+  /** En desktop el sidebar siempre es usable; en móvil solo si está abierto. */
+  const drawerClosed = isMobileNav && !open;
 
   return (
     <div className={`admin-shell ${open ? "sidebar-open" : ""}`}>
       <button
         type="button"
-        className="sidebar-backdrop"
+        className={`sidebar-backdrop${open ? " is-open" : ""}`}
         aria-label="Cerrar menú"
         tabIndex={open ? 0 : -1}
+        aria-hidden={!open}
         onClick={close}
       />
 
-      <aside className="sidebar" id="admin-sidebar" aria-label="Navegación admin">
+      <aside
+        className={`sidebar${open ? " is-open" : ""}`}
+        id="admin-sidebar"
+        aria-label="Navegación admin"
+        aria-hidden={drawerClosed || undefined}
+        inert={drawerClosed ? true : undefined}
+      >
         <div className="sidebar-brand">
           <span className="logo-mark">S</span>
           <span>Salon Admin</span>

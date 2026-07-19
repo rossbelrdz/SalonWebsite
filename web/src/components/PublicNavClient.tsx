@@ -7,10 +7,14 @@
  * Dos contextos de menú (no un cajón multi-rol con todo):
  *  - Sitio: solo links del salón + puerta a sesión (Entrar / Mi cuenta).
  *  - Cuenta: Mis citas · Cuenta · Volver al sitio · Salir (+ puertas admin/empleado).
+ *
+ * Drawer móvil se monta en document.body (portal): backdrop-filter/sticky del
+ * header no deben crear containing block y dejar el menú “siempre visible”.
  */
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MobileMenuToggle } from "@/components/MobileMenuToggle";
 
@@ -58,7 +62,12 @@ export function PublicNavClient({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const accountMode = Boolean(session) && isAccountArea(pathname);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setOpen(false);
@@ -82,6 +91,142 @@ export function PublicNavClient({
   const canAdmin = Boolean(session?.isSuperAdmin || session?.role === "ADMIN");
   const canEmployee = Boolean(
     session?.role === "EMPLOYEE" || session?.isSuperAdmin || session?.role === "ADMIN",
+  );
+
+  const drawer = (
+    <>
+      <button
+        type="button"
+        className={`mobile-nav-backdrop${open ? " is-open" : ""}`}
+        aria-label="Cerrar menú"
+        tabIndex={open ? 0 : -1}
+        aria-hidden={!open}
+        onClick={close}
+      />
+
+      <div
+        className={`mobile-nav-drawer${open ? " is-open" : ""}`}
+        id="mobile-nav-drawer"
+        role="dialog"
+        aria-modal={open}
+        aria-hidden={!open}
+        aria-label={accountMode ? "Menú de mi cuenta" : "Menú del sitio"}
+        inert={!open ? true : undefined}
+      >
+        <div className="mobile-nav-drawer-head">
+          <strong>{accountMode ? "Mi cuenta" : "Menú"}</strong>
+          {session && <span className="tiny muted">{session.name}</span>}
+          <button type="button" className="mobile-nav-close" onClick={close} aria-label="Cerrar">
+            ×
+          </button>
+        </div>
+
+        {accountMode ? (
+          <nav className="mobile-nav-list" aria-label="Mi cuenta">
+            {ACCOUNT_LINKS.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={isActive(pathname, l.href) ? "is-active" : undefined}
+                onClick={close}
+                tabIndex={open ? 0 : -1}
+              >
+                {l.label}
+              </Link>
+            ))}
+
+            <p className="mobile-nav-section">Sitio</p>
+            <Link href="/" onClick={close} tabIndex={open ? 0 : -1}>
+              Volver al sitio
+            </Link>
+            <Link href="/agendar" onClick={close} tabIndex={open ? 0 : -1}>
+              Agendar cita
+            </Link>
+
+            {(canAdmin || canEmployee) && (
+              <>
+                <p className="mobile-nav-section">Paneles</p>
+                {canAdmin && (
+                  <Link
+                    href="/admin"
+                    className="mobile-nav-area-link"
+                    onClick={close}
+                    tabIndex={open ? 0 : -1}
+                  >
+                    Panel admin
+                  </Link>
+                )}
+                {canEmployee && (
+                  <Link
+                    href="/empleado"
+                    className="mobile-nav-area-link"
+                    onClick={close}
+                    tabIndex={open ? 0 : -1}
+                  >
+                    Mi agenda (empleado)
+                  </Link>
+                )}
+              </>
+            )}
+
+            <form action="/api/auth/logout" method="post" className="mobile-nav-logout">
+              <button
+                type="submit"
+                className="btn btn-secondary btn-sm"
+                style={{ width: "100%" }}
+                tabIndex={open ? 0 : -1}
+              >
+                Cerrar sesión
+              </button>
+            </form>
+          </nav>
+        ) : (
+          <nav className="mobile-nav-list" aria-label="Sitio público">
+            {SITE_LINKS.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={isActive(pathname, l.href) ? "is-active" : undefined}
+                onClick={close}
+                tabIndex={open ? 0 : -1}
+              >
+                {l.label}
+              </Link>
+            ))}
+
+            {session ? (
+              <>
+                <p className="mobile-nav-section">Sesión</p>
+                <Link
+                  href="/cuenta"
+                  className="mobile-nav-area-link"
+                  onClick={close}
+                  tabIndex={open ? 0 : -1}
+                  style={{ marginTop: 0, borderTop: "none", paddingTop: "0.75rem" }}
+                >
+                  Ir a mi cuenta
+                </Link>
+              </>
+            ) : (
+              <>
+                <p className="mobile-nav-section">Acceso</p>
+                <Link href="/login" onClick={close} tabIndex={open ? 0 : -1}>
+                  Entrar
+                </Link>
+                <Link
+                  href="/agendar"
+                  className="mobile-nav-area-link"
+                  onClick={close}
+                  tabIndex={open ? 0 : -1}
+                >
+                  Agendar cita
+                </Link>
+              </>
+            )}
+          </nav>
+        )}
+      </div>
+    </>
   );
 
   return (
@@ -161,111 +306,7 @@ export function PublicNavClient({
         </div>
       </div>
 
-      <button
-        type="button"
-        className="mobile-nav-backdrop"
-        aria-label="Cerrar menú"
-        tabIndex={open ? 0 : -1}
-        onClick={close}
-      />
-
-      <div
-        className="mobile-nav-drawer"
-        id="mobile-nav-drawer"
-        role="dialog"
-        aria-modal="true"
-        aria-label={accountMode ? "Menú de mi cuenta" : "Menú del sitio"}
-      >
-        <div className="mobile-nav-drawer-head">
-          <strong>{accountMode ? "Mi cuenta" : "Menú"}</strong>
-          {session && <span className="tiny muted">{session.name}</span>}
-          <button type="button" className="mobile-nav-close" onClick={close} aria-label="Cerrar">
-            ×
-          </button>
-        </div>
-
-        {accountMode ? (
-          <nav className="mobile-nav-list" aria-label="Mi cuenta">
-            {ACCOUNT_LINKS.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={isActive(pathname, l.href) ? "is-active" : undefined}
-                onClick={close}
-              >
-                {l.label}
-              </Link>
-            ))}
-
-            <p className="mobile-nav-section">Sitio</p>
-            <Link href="/" onClick={close}>
-              Volver al sitio
-            </Link>
-            <Link href="/agendar" onClick={close}>
-              Agendar cita
-            </Link>
-
-            {(canAdmin || canEmployee) && (
-              <>
-                <p className="mobile-nav-section">Paneles</p>
-                {canAdmin && (
-                  <Link href="/admin" className="mobile-nav-area-link" onClick={close}>
-                    Panel admin
-                  </Link>
-                )}
-                {canEmployee && (
-                  <Link href="/empleado" className="mobile-nav-area-link" onClick={close}>
-                    Mi agenda (empleado)
-                  </Link>
-                )}
-              </>
-            )}
-
-            <form action="/api/auth/logout" method="post" className="mobile-nav-logout">
-              <button type="submit" className="btn btn-secondary btn-sm" style={{ width: "100%" }}>
-                Cerrar sesión
-              </button>
-            </form>
-          </nav>
-        ) : (
-          <nav className="mobile-nav-list" aria-label="Sitio público">
-            {SITE_LINKS.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={isActive(pathname, l.href) ? "is-active" : undefined}
-                onClick={close}
-              >
-                {l.label}
-              </Link>
-            ))}
-
-            {session ? (
-              <>
-                <p className="mobile-nav-section">Sesión</p>
-                <Link
-                  href="/cuenta"
-                  className="mobile-nav-area-link"
-                  onClick={close}
-                  style={{ marginTop: 0, borderTop: "none", paddingTop: "0.75rem" }}
-                >
-                  Ir a mi cuenta
-                </Link>
-              </>
-            ) : (
-              <>
-                <p className="mobile-nav-section">Acceso</p>
-                <Link href="/login" onClick={close}>
-                  Entrar
-                </Link>
-                <Link href="/agendar" className="mobile-nav-area-link" onClick={close}>
-                  Agendar cita
-                </Link>
-              </>
-            )}
-          </nav>
-        )}
-      </div>
+      {mounted ? createPortal(drawer, document.body) : null}
     </header>
   );
 }

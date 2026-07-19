@@ -45,6 +45,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Evita que drawers off-screen expandan el scroll horizontal en móvil */
+  overflow-x: clip;
 }
 
 body {
@@ -54,6 +56,7 @@ body {
   background: var(--bg);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
 }
 
 img {
@@ -498,10 +501,11 @@ textarea.form-control {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-.mobile-nav-backdrop {
-  display: none;
-}
-
+/*
+ * Drawer/backdrop viven en document.body (portal). En desktop no se muestran.
+ * Estado abierto = clase .is-open en el propio nodo (no depende del header).
+ */
+.mobile-nav-backdrop,
 .mobile-nav-drawer {
   display: none;
 }
@@ -525,18 +529,23 @@ textarea.form-control {
     padding: 0;
     margin: 0;
     background: rgba(15, 18, 22, 0.45);
-    z-index: 60;
+    z-index: 200;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.25s ease, visibility 0.25s ease;
+    transition: opacity 0.25s ease, visibility 0s linear 0.25s;
     cursor: pointer;
+    /* viewport real, no atrapado por sticky/backdrop-filter del header */
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
   }
 
-  .public-nav.is-open .mobile-nav-backdrop {
+  .mobile-nav-backdrop.is-open {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+    transition: opacity 0.25s ease, visibility 0s linear 0s;
   }
 
   .mobile-nav-drawer {
@@ -545,23 +554,27 @@ textarea.form-control {
     position: fixed;
     top: 0;
     right: 0;
-    z-index: 70;
+    z-index: 210;
     width: min(300px, 86vw);
     height: 100vh;
     height: 100dvh;
+    max-height: 100dvh;
     background: #12171e;
     color: rgba(255, 255, 255, 0.85);
-    transform: translateX(105%);
-    transition: transform 0.28s var(--ease);
+    transform: translate3d(105%, 0, 0);
+    transition: transform 0.28s var(--ease), visibility 0s linear 0.28s;
     box-shadow: none;
     pointer-events: none;
     overflow: hidden;
+    visibility: hidden;
   }
 
-  .public-nav.is-open .mobile-nav-drawer {
-    transform: translateX(0);
+  .mobile-nav-drawer.is-open {
+    transform: translate3d(0, 0, 0);
     box-shadow: -12px 0 40px rgba(0, 0, 0, 0.28);
     pointer-events: auto;
+    visibility: visible;
+    transition: transform 0.28s var(--ease), visibility 0s linear 0s;
   }
 
   .mobile-nav-drawer-head {
@@ -1497,27 +1510,32 @@ textarea.form-control {
     justify-content: center;
   }
 
-  /* Drawer: fuera de pantalla, no empuja el layout */
+  /* Drawer: fuera de pantalla, no empuja el layout. .is-open en el propio nodo. */
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 50;
+    z-index: 200;
     width: min(var(--sidebar-w), 86vw);
     max-width: 320px;
     height: 100vh;
     height: 100dvh;
-    transform: translateX(-105%);
-    transition: transform 0.28s var(--ease);
+    max-height: 100dvh;
+    transform: translate3d(-105%, 0, 0);
+    transition: transform 0.28s var(--ease), visibility 0s linear 0.28s;
     box-shadow: none;
     pointer-events: none;
+    visibility: hidden;
     padding-top: max(1.25rem, env(safe-area-inset-top, 0px));
   }
 
-  .admin-shell.sidebar-open .sidebar {
-    transform: translateX(0);
+  .admin-shell.sidebar-open .sidebar,
+  .sidebar.is-open {
+    transform: translate3d(0, 0, 0);
     box-shadow: 12px 0 40px rgba(0, 0, 0, 0.28);
     pointer-events: auto;
+    visibility: visible;
+    transition: transform 0.28s var(--ease), visibility 0s linear 0s;
   }
 
   .sidebar-backdrop {
@@ -1528,18 +1546,23 @@ textarea.form-control {
     padding: 0;
     margin: 0;
     background: rgba(15, 18, 22, 0.45);
-    z-index: 40;
+    z-index: 190;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.25s ease, visibility 0.25s ease;
+    transition: opacity 0.25s ease, visibility 0s linear 0.25s;
     cursor: pointer;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
   }
 
-  .admin-shell.sidebar-open .sidebar-backdrop {
+  .admin-shell.sidebar-open .sidebar-backdrop,
+  .sidebar-backdrop.is-open {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+    transition: opacity 0.25s ease, visibility 0s linear 0s;
   }
 
   .admin-topbar {

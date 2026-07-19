@@ -18,6 +18,19 @@ Política completa: [docs/VERSIONING.md](./docs/VERSIONING.md).
 
 ---
 
+## [0.10.1] — 2026-07-19
+
+### Fixed
+
+- **Menú móvil siempre visible:** el drawer del sitio público quedaba atrapado por el
+  `backdrop-filter` / sticky del header (containing block), y el backdrop solo cubría
+  ~64px. Ahora el drawer se monta en `document.body` (portal), estado cerrado con
+  `visibility: hidden` + `translate3d`, y `overflow-x: clip` en `html`/`body`.
+- Admin/empleado: sidebar drawer endurecido (`.is-open` en el nodo, `visibility` al
+  cerrar, `inert` solo en viewport ≤900px para no romper el sidebar de desktop).
+
+---
+
 ## [0.10.0] — 2026-07-19
 
 ### Added
