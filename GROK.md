@@ -173,20 +173,27 @@ agent-browser skills get core
 agent-browser skills get core --full
 
 # Loop típico
-agent-browser open http://localhost:3010/sucursales
+agent-browser open 'http://localhost:3010/sucursales?lat=19.4335&lng=-99.1945'
 agent-browser set device "iPhone 12"          # o: set viewport 390 844
-agent-browser set geo 19.4335 -99.1945        # simular ubicación (Polanco demo)
+agent-browser set geo 19.4335 -99.1945        # override CDP (si el browser concede permiso)
 agent-browser wait --load networkidle
 agent-browser snapshot -i                     # árbol con refs @eN
 agent-browser screenshot /tmp/sucursales.png
 agent-browser close                           # al terminar (o close --all)
 ```
 
+**Sucursal más cercana:** en headless, `set geo` a veces no concede permiso. Para
+probar la lógica de cercanía usa query params en la URL:  
+`/sucursales?lat=19.4335&lng=-99.1945` (Polanco demo) o coords de Centro  
+`lat=19.4326&lng=-99.1332`. En móvil/real el flujo es `navigator.geolocation` (si el
+usuario acepta).
+
 | Comando útil | Para qué |
 |--------------|----------|
 | `open` / `snapshot -i` / `click @eN` | Navegar e interactuar |
 | `screenshot [path]` / `--annotate` | Ver UI (multimodal) |
-| `set geo <lat> <lng>` | Geolocalización (sucursal más cercana, etc.) |
+| `set geo <lat> <lng>` | Geolocalización CDP (puede requerir permiso) |
+| `open '...?lat=&lng='` | Forzar origen para tests de “más cercana” |
 | `set device` / `set viewport` | Móvil vs desktop |
 | `eval <js>` | Comprobar estado en cliente |
 | `skills get dogfood` | Exploración sistemática de la app |

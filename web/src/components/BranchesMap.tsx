@@ -7,6 +7,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import maplibregl, { type Map, type Marker } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { formatDistanceKm, haversineKm, nearestIndex } from "@/lib/geo";
@@ -47,7 +48,14 @@ function makePinEl(active: boolean) {
   return el;
 }
 
+function parseCoord(raw: string | null): number | null {
+  if (raw == null || raw === "") return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
+
 export function BranchesMap({ branches }: { branches: BranchMapItem[] }) {
+  const searchParams = useSearchParams();
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
   const markersRef = useRef<MapMarker[]>([]);
@@ -62,9 +70,48 @@ export function BranchesMap({ branches }: { branches: BranchMapItem[] }) {
 
   type MapMarker = { id: string; marker: Marker; el: HTMLButtonElement };
 
-  // Geolocalización opcional → sucursal más cercana
+  const applyOrigin = (origin: { lat: number; lng: number }, label: string) => {
+    const idx = nearestIndex(origin, branches);
+    if (idx < 0) {
+      setGeoHint("");
+      return;
+    }
+    const nearest = branches[idx];
+    const distances: Record<string, number> = {};
+    for (const b of branches) {
+      distances[b.id] = haversineKm(origin.lat, origin.lng, b.lat, b.lng);
+    }
+    setDistanceById(distances);
+    setNearestId(nearest.id);
+    setSelectedId(nearest.id);
+    setGeoHint(
+      `${label} (${formatDistanceKm(distances[nearest.id])})`,
+    );
+
+    const map = mapRef.current;
+    if (map) {
+      map.flyTo({
+        center: [nearest.lng, nearest.lat],
+        zoom: Math.max(map.getZoom(), 14),
+        essential: true,
+      });
+    }
+  };
+
+  // Ubicación → sucursal más cercana.
+  // 1) ?lat=&lng= (tests / deep-link; no pide permiso)
+  // 2) navigator.geolocation (si el usuario concede)
+  // Si falla o deniega: se queda la primera de la lista.
   useEffect(() => {
     if (branches.length === 0) return;
+
+    const qLat = parseCoord(searchParams.get("lat"));
+    const qLng = parseCoord(searchParams.get("lng"));
+    if (qLat != null && qLng != null) {
+      applyOrigin({ lat: qLat, lng: qLng }, "Seleccionamos la más cercana a la ubicación indicada");
+      return;
+    }
+
     if (typeof navigator === "undefined" || !navigator.geolocation) return;
 
     let cancelled = false;
@@ -73,35 +120,12 @@ export function BranchesMap({ branches }: { branches: BranchMapItem[] }) {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         if (cancelled) return;
-        const origin = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        const idx = nearestIndex(origin, branches);
-        if (idx < 0) {
-          setGeoHint("");
-          return;
-        }
-        const nearest = branches[idx];
-        const distances: Record<string, number> = {};
-        for (const b of branches) {
-          distances[b.id] = haversineKm(origin.lat, origin.lng, b.lat, b.lng);
-        }
-        setDistanceById(distances);
-        setNearestId(nearest.id);
-        setSelectedId(nearest.id);
-        setGeoHint(
-          `Seleccionamos la más cercana a ti (${formatDistanceKm(distances[nearest.id])})`,
+        applyOrigin(
+          { lat: pos.coords.latitude, lng: pos.coords.longitude },
+          "Seleccionamos la más cercana a ti",
         );
-
-        const map = mapRef.current;
-        if (map) {
-          map.flyTo({
-            center: [nearest.lng, nearest.lat],
-            zoom: Math.max(map.getZoom(), 14),
-            essential: true,
-          });
-        }
       },
       () => {
-        // Denegado, timeout o no disponible: silencioso, se mantiene la primera.
         if (!cancelled) setGeoHint("");
       },
       {
@@ -114,7 +138,8 @@ export function BranchesMap({ branches }: { branches: BranchMapItem[] }) {
     return () => {
       cancelled = true;
     };
-  }, [branches]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [branches, searchParams]);
 
   // Init map once
   useEffect(() => {

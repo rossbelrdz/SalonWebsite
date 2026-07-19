@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/db";
 import { getDefaultTenant } from "@/lib/auth";
 import { BranchesMap, type BranchMapItem } from "@/components/BranchesMap";
@@ -52,7 +53,19 @@ export default async function SucursalesPage() {
             </div>
           </div>
         ) : (
-          <BranchesMap branches={branches} />
+          <Suspense
+            fallback={
+              <div className="card">
+                <div className="card-body">
+                  <p className="tiny muted" style={{ margin: 0 }}>
+                    Cargando sucursales…
+                  </p>
+                </div>
+              </div>
+            }
+          >
+            <BranchesMap branches={branches} />
+          </Suspense>
         )}
       </div>
     </section>

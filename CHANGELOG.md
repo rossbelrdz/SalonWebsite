@@ -25,6 +25,8 @@ Política completa: [docs/VERSIONING.md](./docs/VERSIONING.md).
 - **Sucursales:** al cargar `/sucursales`, si el usuario concede geolocalización se selecciona
   la sucursal más cercana (haversine), con badge “Más cercana”, distancia y fly-to en el mapa.
   Si deniega o falla el permiso, se mantiene el comportamiento anterior (primera de la lista).
+- Override de tests/demo: `/sucursales?lat=&lng=` elige la más cercana sin pedir permiso
+  (útil con `agent-browser` en headless).
 - Util `web/src/lib/geo.ts` (`haversineKm`, `nearestIndex`, `formatDistanceKm`).
 
 ### Changed
