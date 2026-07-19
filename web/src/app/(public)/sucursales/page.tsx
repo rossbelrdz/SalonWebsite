@@ -34,7 +34,8 @@ export default async function SucursalesPage() {
           <div>
             <h2>Sucursales</h2>
             <p className="muted" style={{ margin: 0 }}>
-              Elige en la lista o toca el pin en el mapa
+              Si permites ubicación, elegimos la más cercana. También puedes tocar el pin o la
+              lista.
             </p>
           </div>
         </div>

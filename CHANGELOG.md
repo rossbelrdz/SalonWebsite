@@ -18,6 +18,22 @@ Política completa: [docs/VERSIONING.md](./docs/VERSIONING.md).
 
 ---
 
+## [0.10.2] — 2026-07-19
+
+### Added
+
+- **Sucursales:** al cargar `/sucursales`, si el usuario concede geolocalización se selecciona
+  la sucursal más cercana (haversine), con badge “Más cercana”, distancia y fly-to en el mapa.
+  Si deniega o falla el permiso, se mantiene el comportamiento anterior (primera de la lista).
+- Util `web/src/lib/geo.ts` (`haversineKm`, `nearestIndex`, `formatDistanceKm`).
+
+### Changed
+
+- Copy de la página de sucursales y documentación de pruebas: **`agent-browser`** es la
+  herramienta obligatoria de UI para agentes (documentado en `GROK.md` §8).
+
+---
+
 ## [0.10.1] — 2026-07-19
 
 ### Fixed

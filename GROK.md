@@ -162,6 +162,37 @@ Detalle: [docs/CONFIGURATION.md](./docs/CONFIGURATION.md)
 - **Mockup:** no ampliar; solo referencia. Admin se retoca en la app.
 - **Correr:** `docker compose up -d` → http://localhost:3010 (o `APP_PORT`).
 
+### Pruebas visuales / browser (OBLIGATORIO para agentes)
+
+Usar **`agent-browser`** (CLI en PATH: `/opt/homebrew/bin/agent-browser`).  
+**No** improvisar con Playwright/Puppeteer/Chromium viejos de caché de ms-playwright ni CDP a mano: se rompen, son lentos y no dan el flujo pensado para agentes.
+
+```bash
+# Guía embebida (siempre al día con la versión instalada)
+agent-browser skills get core
+agent-browser skills get core --full
+
+# Loop típico
+agent-browser open http://localhost:3010/sucursales
+agent-browser set device "iPhone 12"          # o: set viewport 390 844
+agent-browser set geo 19.4335 -99.1945        # simular ubicación (Polanco demo)
+agent-browser wait --load networkidle
+agent-browser snapshot -i                     # árbol con refs @eN
+agent-browser screenshot /tmp/sucursales.png
+agent-browser close                           # al terminar (o close --all)
+```
+
+| Comando útil | Para qué |
+|--------------|----------|
+| `open` / `snapshot -i` / `click @eN` | Navegar e interactuar |
+| `screenshot [path]` / `--annotate` | Ver UI (multimodal) |
+| `set geo <lat> <lng>` | Geolocalización (sucursal más cercana, etc.) |
+| `set device` / `set viewport` | Móvil vs desktop |
+| `eval <js>` | Comprobar estado en cliente |
+| `skills get dogfood` | Exploración sistemática de la app |
+
+Instalación (una vez en la máquina del dev): `npm i -g agent-browser && agent-browser install`.
+
 ---
 
 ## 9. Principios para agentes
@@ -174,7 +205,9 @@ Detalle: [docs/CONFIGURATION.md](./docs/CONFIGURATION.md)
 4. Seguridad primero: dependencias auditadas, secrets fuera del repo, Postgres/Redis pinneados.  
 5. UI y copy en **español**.  
 6. Registro/cita del cliente: **mínima fricción**.  
-7. **Versionado obligatorio:** cada cambio de producto/fix/seguridad deja entrada en
+7. **Pruebas de UI en el browser:** usar **`agent-browser`** (ver §8). No CDP/Playwright caseros
+   ni Chromium de cachés viejos.  
+8. **Versionado obligatorio:** cada cambio de producto/fix/seguridad deja entrada en
    `CHANGELOG.md`; al cerrar el lote se actualiza `VERSION` (+ `web/package.json`).
    Política: [docs/VERSIONING.md](./docs/VERSIONING.md). **No** entregar código sin
    historial en changelog.

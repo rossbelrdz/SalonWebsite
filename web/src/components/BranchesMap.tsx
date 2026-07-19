@@ -2,12 +2,14 @@
 
 /**
  * Mapa de sucursales con MapLibre GL (tiles OpenFreeMap).
- * Sin logo/watermark de Mapbox; atribución OSM compacta (requerida por licencia).
+ * Al cargar intenta geolocalizar al usuario y selecciona la sucursal más cercana.
+ * Si niega o falla el permiso, se queda la primera de la lista (sin bloquear).
  */
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import maplibregl, { type Map, type Marker } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { formatDistanceKm, haversineKm, nearestIndex } from "@/lib/geo";
 
 export type BranchMapItem = {
   id: string;
@@ -52,10 +54,67 @@ export function BranchesMap({ branches }: { branches: BranchMapItem[] }) {
   const [selectedId, setSelectedId] = useState<string | null>(
     branches[0]?.id ?? null,
   );
+  const [nearestId, setNearestId] = useState<string | null>(null);
+  const [distanceById, setDistanceById] = useState<Record<string, number>>({});
+  const [geoHint, setGeoHint] = useState<string>("");
   const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState("");
 
   type MapMarker = { id: string; marker: Marker; el: HTMLButtonElement };
+
+  // Geolocalización opcional → sucursal más cercana
+  useEffect(() => {
+    if (branches.length === 0) return;
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+
+    let cancelled = false;
+    setGeoHint("Buscando la sucursal más cercana…");
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (cancelled) return;
+        const origin = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const idx = nearestIndex(origin, branches);
+        if (idx < 0) {
+          setGeoHint("");
+          return;
+        }
+        const nearest = branches[idx];
+        const distances: Record<string, number> = {};
+        for (const b of branches) {
+          distances[b.id] = haversineKm(origin.lat, origin.lng, b.lat, b.lng);
+        }
+        setDistanceById(distances);
+        setNearestId(nearest.id);
+        setSelectedId(nearest.id);
+        setGeoHint(
+          `Seleccionamos la más cercana a ti (${formatDistanceKm(distances[nearest.id])})`,
+        );
+
+        const map = mapRef.current;
+        if (map) {
+          map.flyTo({
+            center: [nearest.lng, nearest.lat],
+            zoom: Math.max(map.getZoom(), 14),
+            essential: true,
+          });
+        }
+      },
+      () => {
+        // Denegado, timeout o no disponible: silencioso, se mantiene la primera.
+        if (!cancelled) setGeoHint("");
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 120_000,
+      },
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [branches]);
 
   // Init map once
   useEffect(() => {
@@ -149,6 +208,23 @@ export function BranchesMap({ branches }: { branches: BranchMapItem[] }) {
     }
   }, [branches, mapReady, selectedId]);
 
+  // Si la geo resolvió antes de que el mapa estuviera listo, centrar al selected
+  useEffect(() => {
+    if (!mapReady || !selectedId || !nearestId) return;
+    if (selectedId !== nearestId) return;
+    const map = mapRef.current;
+    const b = branches.find((x) => x.id === nearestId);
+    if (map && b) {
+      map.flyTo({
+        center: [b.lng, b.lat],
+        zoom: Math.max(map.getZoom(), 14),
+        essential: true,
+      });
+    }
+    // solo cuando mapReady y nearest se alinean
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapReady, nearestId]);
+
   function selectBranch(id: string) {
     setSelectedId(id);
     const b = branches.find((x) => x.id === id);
@@ -161,8 +237,15 @@ export function BranchesMap({ branches }: { branches: BranchMapItem[] }) {
   return (
     <div className="map-layout">
       <div className="map-list" role="list">
+        {geoHint ? (
+          <p className="tiny muted" style={{ margin: "0 0 0.65rem", padding: "0 0.15rem" }}>
+            {geoHint}
+          </p>
+        ) : null}
         {branches.map((b) => {
           const active = b.id === selectedId;
+          const dist = distanceById[b.id];
+          const isNearest = b.id === nearestId;
           return (
             <div
               key={b.id}
@@ -180,10 +263,16 @@ export function BranchesMap({ branches }: { branches: BranchMapItem[] }) {
               <div className="card-body">
                 <div className="row" style={{ justifyContent: "space-between", gap: "0.5rem" }}>
                   <h3 style={{ margin: 0, fontSize: "1.05rem" }}>{b.name}</h3>
-                  {active && <span className="badge badge-success">Seleccionada</span>}
+                  <div className="row" style={{ gap: "0.35rem", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                    {isNearest && (
+                      <span className="badge badge-info">Más cercana</span>
+                    )}
+                    {active && <span className="badge badge-success">Seleccionada</span>}
+                  </div>
                 </div>
                 <p className="small muted" style={{ margin: "0.35rem 0 0.25rem" }}>
                   {b.address}, {b.city}
+                  {typeof dist === "number" ? ` · ${formatDistanceKm(dist)}` : ""}
                 </p>
                 <p className="tiny muted" style={{ margin: 0 }}>
                   {b.openTime} – {b.closeTime}
