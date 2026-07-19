@@ -161,6 +161,8 @@ Roles/menús: `docs/ROLES_AND_UI.md`. Tokens: `docs/DESIGN_SYSTEM.md` §5.
 
 ## 8. Convenciones de código
 
+- **Pruebas UI / browser (OBLIGATORIO):** usar **`agent-browser`** (`agent-browser skills get core`).
+  No CDP/Playwright improvisado ni Chromium de cachés viejos. Detalle: `GROK.md` §8.
 - **Changelog + versión + commit + push en cada entrega de código** (OBLIGATORIO):
   1. Actualizar `CHANGELOG.md` (sección de la versión), `VERSION` y `web/package.json`.
   2. `git add` (nunca `.env` ni secretos) → `git commit` con mensaje claro.
