@@ -38,7 +38,8 @@ export default async function AgendarPage({
       <div className="container" style={{ maxWidth: 720 }}>
         <h2 style={{ marginBottom: "0.35rem" }}>Agendar cita</h2>
         <p className="muted">
-          Sucursal → servicio → profesional → fecha/hora → tus datos
+          Sucursal → categorías → servicios (1 o más) → profesional → fecha/hora →
+          tus datos
         </p>
         <BookingWizard
           branches={branches.map((b) => ({

@@ -5,23 +5,37 @@ import { parseTimeToMinutes } from "./format";
 export async function getAvailableSlots(params: {
   employeeId: string;
   branchId: string;
-  serviceId: string;
-  date: Date; // day
+  /** Uno o varios servicios: la duración se suma. */
+  serviceIds: string[];
+  date: Date;
 }) {
-  const { employeeId, branchId, serviceId, date } = params;
+  const { employeeId, branchId, serviceIds, date } = params;
+  const ids = [...new Set(serviceIds.filter(Boolean))];
+  if (!ids.length) return [] as string[];
 
-  const service = await prisma.service.findUnique({ where: { id: serviceId } });
-  const branch = await prisma.branch.findUnique({ where: { id: branchId } });
-  const schedule = await prisma.workSchedule.findUnique({
-    where: {
-      employeeId_dayOfWeek: {
-        employeeId,
-        dayOfWeek: date.getDay(),
+  const [services, branch, schedule] = await Promise.all([
+    prisma.service.findMany({ where: { id: { in: ids }, active: true } }),
+    prisma.branch.findUnique({ where: { id: branchId } }),
+    prisma.workSchedule.findUnique({
+      where: {
+        employeeId_dayOfWeek: {
+          employeeId,
+          dayOfWeek: date.getDay(),
+        },
       },
-    },
-  });
+    }),
+  ]);
 
-  if (!service || !branch || !schedule) return [] as string[];
+  if (services.length !== ids.length || !branch || !schedule) return [] as string[];
+
+  // Profesional debe ofrecer todos los servicios
+  const links = await prisma.employeeService.findMany({
+    where: { employeeId, serviceId: { in: ids } },
+  });
+  if (links.length !== ids.length) return [] as string[];
+
+  const duration = services.reduce((s, svc) => s + svc.durationMin, 0);
+  if (duration <= 0) return [] as string[];
 
   const dayStart = startOfDay(date);
   const dayEnd = addDays(dayStart, 1);
@@ -44,7 +58,6 @@ export async function getAvailableSlots(params: {
     parseTimeToMinutes(schedule.endTime),
   );
 
-  const duration = service.durationMin;
   const slots: string[] = [];
   const now = new Date();
 

@@ -6,6 +6,7 @@ import {
   statusBadgeClass,
   statusLabel,
 } from "@/lib/format";
+import { appointmentServicesLabel } from "@/lib/appointment-services";
 import { PageHeader } from "@/components/ui";
 import { AdminCancelButton } from "./AdminCancelButton";
 import { ReassignButton } from "./ReassignButton";
@@ -20,6 +21,7 @@ export default async function AdminCitasPage() {
       where: { tenantId: tenant.id },
       include: {
         service: true,
+        lines: { include: { service: true }, orderBy: { sortOrder: "asc" } },
         branch: true,
         employee: { include: { user: true } },
         proposedEmployee: { include: { user: true } },
@@ -49,7 +51,8 @@ export default async function AdminCitasPage() {
               <tr>
                 <th>Fecha</th>
                 <th>Cliente</th>
-                <th>Servicio</th>
+                <th>Servicios</th>
+                <th>Duración</th>
                 <th>Sucursal</th>
                 <th>Profesional</th>
                 <th>Estado</th>
@@ -67,7 +70,18 @@ export default async function AdminCitasPage() {
                       {a.clientEmail || a.clientPhone || "—"}
                     </div>
                   </td>
-                  <td>{a.service.name}</td>
+                  <td>
+                    {appointmentServicesLabel(a)}
+                    {a.lines.length > 1 && (
+                      <div className="tiny muted">{a.lines.length} servicios</div>
+                    )}
+                  </td>
+                  <td className="small muted">
+                    {Math.round(
+                      (a.endsAt.getTime() - a.startsAt.getTime()) / 60_000,
+                    )}{" "}
+                    min
+                  </td>
                   <td>{a.branch.name}</td>
                   <td>
                     {a.employee.user.name}

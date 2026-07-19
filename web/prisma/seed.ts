@@ -12,6 +12,7 @@ function assertPrismaModels() {
     "payment",
     "appointment",
     "timeEntry",
+    "appointmentService",
   ] as const;
   const missing = required.filter(
     (k) => !(prisma as unknown as Record<string, { upsert?: unknown }>)[k]?.upsert,
@@ -568,6 +569,26 @@ async function main() {
           status: i % 5 === 0 ? "PREPAID" : "COMPLETED",
           prepaid: i % 5 === 0,
           priceCents: svc.priceCents,
+        },
+      });
+    }
+  }
+
+  // Backfill líneas multi-servicio (citas viejas sin AppointmentService)
+  if (prisma.appointmentService?.create) {
+    const orphans = await prisma.appointment.findMany({
+      where: { tenantId: tenant.id, lines: { none: {} } },
+      include: { service: true },
+      take: 500,
+    });
+    for (const a of orphans) {
+      await prisma.appointmentService.create({
+        data: {
+          appointmentId: a.id,
+          serviceId: a.serviceId,
+          sortOrder: 0,
+          durationMin: a.service.durationMin,
+          priceCents: a.service.priceCents,
         },
       });
     }

@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { readSession } from "@/lib/session";
 import { formatDateTime, formatPrice } from "@/lib/format";
+import { appointmentServicesLabel } from "@/lib/appointment-services";
 import { ReassignClient } from "./ReassignClient";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,7 @@ export default async function ReasignacionPage({
     where: { id },
     include: {
       service: true,
+      lines: { include: { service: true }, orderBy: { sortOrder: "asc" } },
       branch: true,
       employee: { include: { user: true } },
       proposedEmployee: { include: { user: true } },
@@ -51,11 +53,18 @@ export default async function ReasignacionPage({
     );
   }
 
+  const lineServiceIds =
+    appt.lines.length > 0
+      ? appt.lines.map((l) => l.serviceId)
+      : [appt.serviceId];
+
   const employees = await prisma.employeeProfile.findMany({
     where: {
       tenantId: appt.tenantId,
       active: true,
-      services: { some: { serviceId: appt.serviceId } },
+      AND: lineServiceIds.map((serviceId) => ({
+        services: { some: { serviceId } },
+      })),
     },
     include: { user: true },
   });
@@ -67,7 +76,7 @@ export default async function ReasignacionPage({
           <div>
             <h2>Tu cita necesita una decisión</h2>
             <p className="muted" style={{ margin: 0 }}>
-              {appt.service.name} · {formatDateTime(appt.startsAt)} ·{" "}
+              {appointmentServicesLabel(appt)} · {formatDateTime(appt.startsAt)} ·{" "}
               {formatPrice(appt.priceCents)}
               {appt.prepaid ? " · Prepagada" : ""}
             </p>

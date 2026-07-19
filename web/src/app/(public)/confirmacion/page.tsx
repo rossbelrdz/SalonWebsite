@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { formatDateTime, formatPrice, statusBadgeClass, statusLabel } from "@/lib/format";
+import { appointmentServicesLabel } from "@/lib/appointment-services";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,7 @@ export default async function ConfirmacionPage({
     where: { id },
     include: {
       service: true,
+      lines: { include: { service: true }, orderBy: { sortOrder: "asc" } },
       branch: true,
       employee: { include: { user: true } },
       payments: { orderBy: { createdAt: "desc" }, take: 1 },
@@ -26,6 +28,10 @@ export default async function ConfirmacionPage({
 
   const payment = appt.payments[0];
   const isPendingPay = appt.status === "PENDING" && appt.prepaid;
+  const servicesLabel = appointmentServicesLabel(appt);
+  const durationMin = Math.round(
+    (appt.endsAt.getTime() - appt.startsAt.getTime()) / 60_000,
+  );
 
   return (
     <section className="section">
@@ -39,7 +45,7 @@ export default async function ConfirmacionPage({
               {isPendingPay ? "Cita reservada — completa el pago" : "Cita confirmada"}
             </h1>
             <p className="muted">
-              {appt.service.name} · {formatDateTime(appt.startsAt)}
+              {servicesLabel} · {formatDateTime(appt.startsAt)}
             </p>
             {demo === "1" && (
               <p className="small" style={{ marginTop: "0.5rem" }}>
@@ -47,6 +53,12 @@ export default async function ConfirmacionPage({
               </p>
             )}
             <div style={{ textAlign: "left", margin: "1.5rem 0" }}>
+              <p>
+                <strong>Servicios:</strong> {servicesLabel}
+              </p>
+              <p>
+                <strong>Duración:</strong> {durationMin} min
+              </p>
               <p>
                 <strong>Sucursal:</strong> {appt.branch.name}
               </p>

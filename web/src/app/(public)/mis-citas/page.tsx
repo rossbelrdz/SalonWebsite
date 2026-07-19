@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { readSession } from "@/lib/session";
 import { formatDateTime, formatPrice, statusBadgeClass, statusLabel } from "@/lib/format";
+import { appointmentServicesLabel } from "@/lib/appointment-services";
 import { CancelButton } from "./CancelButton";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,7 @@ export default async function MisCitasPage() {
     where: { clientUserId: session.userId },
     include: {
       service: true,
+      lines: { include: { service: true }, orderBy: { sortOrder: "asc" } },
       branch: true,
       employee: { include: { user: true } },
       payments: { orderBy: { createdAt: "desc" }, take: 1 },
@@ -54,9 +56,14 @@ export default async function MisCitasPage() {
                 <div className="card-body">
                   <div className="row" style={{ justifyContent: "space-between" }}>
                     <div>
-                      <strong>{a.service.name}</strong>
+                      <strong>{appointmentServicesLabel(a)}</strong>
                       <div className="small muted">
                         {formatDateTime(a.startsAt)} · {a.branch.name}
+                        {" · "}
+                        {Math.round(
+                          (a.endsAt.getTime() - a.startsAt.getTime()) / 60_000,
+                        )}{" "}
+                        min
                       </div>
                       <div className="small muted">
                         Con {a.employee.user.name} · {formatPrice(a.priceCents)}

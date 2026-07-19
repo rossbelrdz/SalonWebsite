@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { readSession } from "@/lib/session";
 import { hasStaffAccess } from "@/lib/auth";
 import { formatDateTime, statusBadgeClass, statusLabel } from "@/lib/format";
+import { appointmentServicesLabel } from "@/lib/appointment-services";
 import { CompleteAppointmentButton } from "@/components/CompleteAppointmentButton";
 import { AbsenceForm } from "./AbsenceForm";
 
@@ -43,7 +44,11 @@ export default async function EmpleadoAgendaPage() {
         startsAt: { gte: todayStart, lte: todayEnd },
         status: { not: "CANCELLED" },
       },
-      include: { service: true, branch: true },
+      include: {
+        service: true,
+        lines: { include: { service: true }, orderBy: { sortOrder: "asc" } },
+        branch: true,
+      },
       orderBy: { startsAt: "asc" },
     }),
     prisma.appointment.findMany({
@@ -52,7 +57,11 @@ export default async function EmpleadoAgendaPage() {
         startsAt: { gte: tomorrowStart, lte: tomorrowEnd },
         status: { not: "CANCELLED" },
       },
-      include: { service: true, branch: true },
+      include: {
+        service: true,
+        lines: { include: { service: true }, orderBy: { sortOrder: "asc" } },
+        branch: true,
+      },
       orderBy: { startsAt: "asc" },
     }),
   ]);
@@ -68,9 +77,13 @@ export default async function EmpleadoAgendaPage() {
             <div key={a.id} className="card">
               <div className="card-body row" style={{ justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
                 <div>
-                  <strong>{a.service.name}</strong>
+                  <strong>{appointmentServicesLabel(a)}</strong>
                   <div className="small muted">
-                    {formatDateTime(a.startsAt)} · {a.branch.name}
+                    {formatDateTime(a.startsAt)} · {a.branch.name} ·{" "}
+                    {Math.round(
+                      (a.endsAt.getTime() - a.startsAt.getTime()) / 60_000,
+                    )}{" "}
+                    min
                   </div>
                   <div className="small">Cliente: {a.clientName}</div>
                 </div>
@@ -94,8 +107,14 @@ export default async function EmpleadoAgendaPage() {
           {tomorrow.map((a) => (
             <div key={a.id} className="card">
               <div className="card-body">
-                <strong>{a.service.name}</strong>
-                <div className="small muted">{formatDateTime(a.startsAt)}</div>
+                <strong>{appointmentServicesLabel(a)}</strong>
+                <div className="small muted">
+                  {formatDateTime(a.startsAt)} ·{" "}
+                  {Math.round(
+                    (a.endsAt.getTime() - a.startsAt.getTime()) / 60_000,
+                  )}{" "}
+                  min
+                </div>
               </div>
             </div>
           ))}

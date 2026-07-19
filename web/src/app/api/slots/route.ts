@@ -5,10 +5,17 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const employeeId = searchParams.get("employeeId") || "";
   const branchId = searchParams.get("branchId") || "";
-  const serviceId = searchParams.get("serviceId") || "";
   const date = searchParams.get("date") || "";
+  // Multi: serviceIds=a,b,c  | legacy: serviceId=a
+  const multi = searchParams.get("serviceIds") || "";
+  const single = searchParams.get("serviceId") || "";
+  const serviceIds = multi
+    ? multi.split(",").map((s) => s.trim()).filter(Boolean)
+    : single
+      ? [single]
+      : [];
 
-  if (!employeeId || !branchId || !serviceId || !date) {
+  if (!employeeId || !branchId || serviceIds.length === 0 || !date) {
     return NextResponse.json({ error: "Parámetros incompletos" }, { status: 400 });
   }
 
@@ -17,6 +24,11 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Fecha inválida" }, { status: 400 });
   }
 
-  const slots = await getAvailableSlots({ employeeId, branchId, serviceId, date: day });
+  const slots = await getAvailableSlots({
+    employeeId,
+    branchId,
+    serviceIds,
+    date: day,
+  });
   return NextResponse.json({ slots });
 }

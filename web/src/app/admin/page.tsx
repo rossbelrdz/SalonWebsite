@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { getDefaultTenant } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
+import { appointmentServicesLabel } from "@/lib/appointment-services";
 import { PageHeader } from "@/components/ui";
 import { startOfDay, endOfDay } from "date-fns";
 
@@ -29,7 +30,12 @@ export default async function AdminDashboard() {
         startsAt: { gte: now },
         status: { not: "CANCELLED" },
       },
-      include: { service: true, client: true, employee: { include: { user: true } } },
+      include: {
+        service: true,
+        lines: { include: { service: true }, orderBy: { sortOrder: "asc" } },
+        client: true,
+        employee: { include: { user: true } },
+      },
       orderBy: { startsAt: "asc" },
       take: 5,
     }),
@@ -89,7 +95,7 @@ export default async function AdminDashboard() {
                 <tbody>
                   {upcoming.map((a) => (
                     <tr key={a.id}>
-                      <td>{a.service.name}</td>
+                      <td>{appointmentServicesLabel(a)}</td>
                       <td>{a.clientName}</td>
                       <td>{a.employee.user.name}</td>
                       <td>{a.startsAt.toLocaleString("es-MX")}</td>

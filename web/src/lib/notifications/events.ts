@@ -20,6 +20,18 @@ import {
   tplStaffAppointment,
   type AppointmentContext,
 } from "./templates";
+import { appointmentServicesLabel } from "@/lib/appointment-services";
+
+const APPT_NOTIFY_INCLUDE = {
+  service: true,
+  lines: {
+    include: { service: true },
+    orderBy: { sortOrder: "asc" as const },
+  },
+  branch: true,
+  employee: { include: { user: true } },
+  proposedEmployee: { include: { user: true } },
+};
 
 async function tenantAdmins(tenantId: string) {
   return prisma.membership.findMany({
@@ -346,6 +358,10 @@ function apptCtx(
     priceCents: number;
     prepaid?: boolean;
     service: { name: string };
+    lines?: {
+      sortOrder: number;
+      service: { name: string };
+    }[];
     branch: { name: string };
     employee: { id: string; user: { name: string } };
     proposedEmployee?: { user: { name: string } } | null;
@@ -360,7 +376,7 @@ function apptCtx(
   return {
     appointmentId: a.id,
     clientName: a.clientName,
-    serviceName: a.service.name,
+    serviceName: appointmentServicesLabel(a),
     branchName: a.branch.name,
     employeeName: a.employee.user.name,
     startsAt: a.startsAt,
@@ -421,11 +437,7 @@ export async function notifyAccountCreated(opts: {
 export async function notifyAppointmentCreated(appointmentId: string) {
   const a = await prisma.appointment.findUnique({
     where: { id: appointmentId },
-    include: {
-      service: true,
-      branch: true,
-      employee: { include: { user: true } },
-    },
+    include: APPT_NOTIFY_INCLUDE,
   });
   if (!a) return;
   const name = await tenantName(a.tenantId);
@@ -452,11 +464,7 @@ export async function notifyAppointmentCreated(appointmentId: string) {
 export async function notifyAppointmentPrepaid(appointmentId: string) {
   const a = await prisma.appointment.findUnique({
     where: { id: appointmentId },
-    include: {
-      service: true,
-      branch: true,
-      employee: { include: { user: true } },
-    },
+    include: APPT_NOTIFY_INCLUDE,
   });
   if (!a) return;
   const name = await tenantName(a.tenantId);
@@ -485,11 +493,7 @@ export async function notifyAppointmentCancelled(
 ) {
   const a = await prisma.appointment.findUnique({
     where: { id: appointmentId },
-    include: {
-      service: true,
-      branch: true,
-      employee: { include: { user: true } },
-    },
+    include: APPT_NOTIFY_INCLUDE,
   });
   if (!a) return;
   const name = await tenantName(a.tenantId);
@@ -529,12 +533,7 @@ export async function notifyAppointmentCancelled(
 export async function notifyReassignment(appointmentId: string) {
   const a = await prisma.appointment.findUnique({
     where: { id: appointmentId },
-    include: {
-      service: true,
-      branch: true,
-      employee: { include: { user: true } },
-      proposedEmployee: { include: { user: true } },
-    },
+    include: APPT_NOTIFY_INCLUDE,
   });
   if (!a) return;
   const name = await tenantName(a.tenantId);
@@ -573,11 +572,7 @@ export async function notifyReassignmentResolved(
 ) {
   const a = await prisma.appointment.findUnique({
     where: { id: appointmentId },
-    include: {
-      service: true,
-      branch: true,
-      employee: { include: { user: true } },
-    },
+    include: APPT_NOTIFY_INCLUDE,
   });
   if (!a) return;
   const name = await tenantName(a.tenantId);
@@ -616,11 +611,7 @@ export async function notifyReassignmentResolved(
 export async function notifyReminder(appointmentId: string, kind: "24h" | "2h") {
   const a = await prisma.appointment.findUnique({
     where: { id: appointmentId },
-    include: {
-      service: true,
-      branch: true,
-      employee: { include: { user: true } },
-    },
+    include: APPT_NOTIFY_INCLUDE,
   });
   if (!a) return;
   const eventType: EventType =

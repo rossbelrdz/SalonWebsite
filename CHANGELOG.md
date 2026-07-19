@@ -18,6 +18,24 @@ Política completa: [docs/VERSIONING.md](./docs/VERSIONING.md).
 
 ---
 
+## [0.12.0] — 2026-07-19
+
+### Added
+
+- **Agendar multi-servicio:** wizard con paso de **categorías** (1+) y **servicios** (1+).
+  Ejemplo: Color + Uñas en la misma cita.
+- Modelo `AppointmentService` (líneas con duración/precio snapshot).
+- Slots y bloqueo de agenda usan la **duración sumada** de todos los servicios.
+- Profesional filtrado: debe ofrecer **todos** los servicios elegidos.
+
+### Changed
+
+- Confirmación, mis citas, admin citas, agenda empleado y notificaciones muestran
+  el paquete de servicios (`Tinte + Manicure`) y la duración total.
+- Seed: backfill de líneas en citas existentes.
+
+---
+
 ## [0.11.1] — 2026-07-19
 
 ### Changed
