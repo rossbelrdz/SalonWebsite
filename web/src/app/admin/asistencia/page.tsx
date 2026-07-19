@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/db";
 import { getDefaultTenant } from "@/lib/auth";
 import { listAttendanceForDate } from "@/lib/attendance";
 import { PageHeader } from "@/components/ui";

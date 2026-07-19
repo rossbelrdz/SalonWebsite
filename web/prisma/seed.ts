@@ -555,8 +555,8 @@ async function main() {
       where: { employeeId: emp1.id, workDate },
     });
     if (!existing && prisma.timeEntry?.create) {
-      const checkIn = new Date();
-      checkIn.setHours(9, 52, 0, 0);
+      // ~hace 2h (UTC correcto; evita 09:52 del host Docker = 03:52 en México)
+      const checkIn = new Date(Date.now() - 2 * 60 * 60 * 1000);
       await prisma.timeEntry.create({
         data: {
           tenantId: tenant.id,
