@@ -57,6 +57,10 @@ Cada servicio puede tener: nombre, descripción, duración, precio, imágenes, s
 
 Catálogo de **estilos** (cortes, diseños de uñas, etc.) como galería asociada.
 
+**Demo actual (seed):** ~22 servicios en todas las categorías anteriores, con precios MXN
+orientados a salones de Monterrey/NL (balayage, keratina, soft gel, laminado de cejas,
+maquillaje novia, etc.). Fuente: `web/prisma/seed.ts` (ids `seed-svc-*`, upsert idempotente).
+
 ---
 
 ## 5. Flujo de cita (cliente)

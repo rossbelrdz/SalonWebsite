@@ -83,7 +83,8 @@ Contrato UI: [patterns/app-shells.md](./patterns/app-shells.md).
 - [x] Personal (perfiles, sucursales, servicios, horarios en seed)  
 - [x] Wizard de cita real (slots por profesional)  
 - [x] Confirmación + mis citas + cancelación cliente/admin  
-- [x] Prepago **stub** (supersedido por F6)
+- [x] Prepago **stub** (supersedido por F6)  
+- [x] *(post-F5 / v0.8.0)* Seed demo ampliado a **22 servicios** multi-categoría (estilo MTY)
 
 ---
 

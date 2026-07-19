@@ -45,7 +45,7 @@ pero **sin uso en código**. Turnstile se guarda en settings pero **no se verifi
 Salon/
 ├── AGENTS.md                 # este archivo
 ├── GROK.md / README.md       # contexto de entrada
-├── VERSION / CHANGELOG.md    # SemVer + Keep a Changelog (actual: 0.7.3)
+├── VERSION / CHANGELOG.md    # SemVer + Keep a Changelog (actual: 0.8.0)
 ├── docker-compose.yml        # postgres, redis, minio, app, worker, tunnel (perfil)
 ├── docs/                     # ~22 docs por tema (ver §8) + patterns/ (12 patrones UI)
 ├── mockup/                   # HTML estático CONGELADO — solo referencia visual

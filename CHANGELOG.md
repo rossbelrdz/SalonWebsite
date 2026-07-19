@@ -18,6 +18,33 @@ Política completa: [docs/VERSIONING.md](./docs/VERSIONING.md).
 
 ---
 
+## [0.8.0] — 2026-07-18
+
+### Added
+
+- **Contrato de 3 UI shells** (no mezclar navegación):
+  - **A Público** — top bar `PublicNav` en `(public)/*` (incluye `/cuenta`, `/mis-citas`).
+  - **B Admin** — sidebar `AdminShell` en `/admin/*`.
+  - **C Empleado** — sidebar `EmpleadoShell` + layout propio en `/empleado/*`.
+- Docs canónicos: [docs/patterns/app-shells.md](./docs/patterns/app-shells.md), [docs/patterns/public-nav.md](./docs/patterns/public-nav.md); actualizados `AGENTS.md`, `ROLES_AND_UI.md`, `DESIGN_SYSTEM.md`, `PHASES.md`.
+- Menú **hamburguesa + drawer** en móvil en los tres shells (contenido no empuja el layout).
+- Helper [web/src/lib/url.ts](./web/src/lib/url.ts): `appBaseUrl`, `requestPublicOrigin`, `absoluteUrl` (respeta `x-forwarded-*` y `PUBLIC_APP_URL`).
+- **Catálogo demo ampliado** (seed): **22 servicios** estilo salones top de Monterrey/NL — cabello, color, barba, uñas, spa (cejas/pestañas/facial), maquillaje; precios MXN realistas. Upsert idempotente.
+- Home: contador real de servicios + **6 destacados variados** por categoría.
+
+### Fixed
+
+- Logout / redirects que usaban `req.url` y mandaban al browser a **`http://0.0.0.0:3000`** dentro de Docker.
+- Borrado de cookie de sesión con los mismos atributos `path`/`sameSite`/`secure` (logout confiable).
+- Separación de menús: cuenta y área pública ya no mezclan árbol de admin/empleado.
+
+### Changed
+
+- `appBaseUrl` de payments reexporta desde `@/lib/url` (un solo origen de verdad).
+- Seed de servicios reescrito (ids fijos `seed-svc-*`); personal se re-vincula a todos los servicios activos (María sin categoría barba).
+
+---
+
 ## [0.7.3] — 2026-07-16
 
 ### Fixed
