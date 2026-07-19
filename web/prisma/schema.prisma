@@ -94,6 +94,7 @@ model Tenant {
   rolePermissions     RolePermission[]
   notificationMatrix  NotificationMatrixRule[]
   telegramTargets     TelegramTarget[]
+  timeEntries         TimeEntry[]
 }
 
 enum TelegramTargetKind {
@@ -215,6 +216,8 @@ model TenantSettings {
   /// Recordatorios de cita (horas antes).
   remindHoursBefore   Int      @default(24)
   remindHoursBefore2  Int      @default(2)
+  /// % comisión por defecto al crear personal (modelo F8 provisional).
+  defaultCommissionPct Int     @default(40)
   updatedAt           DateTime @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -336,6 +339,7 @@ model Branch {
   tenant       Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   employees    EmployeeBranch[]
   appointments Appointment[]
+  timeEntries  TimeEntry[]
 
   @@index([tenantId])
 }
@@ -369,6 +373,8 @@ model EmployeeProfile {
   title     String   @default("Estilista")
   bio       String   @default("")
   active    Boolean  @default(true)
+  /// % de comisión sobre servicios del periodo (F8; por empleado).
+  commissionPct Int  @default(40)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -380,9 +386,33 @@ model EmployeeProfile {
   appointments Appointment[]
   proposedFor  Appointment[]     @relation("ProposedEmployee")
   absences     AbsenceRequest[]
+  timeEntries  TimeEntry[]
 
   @@unique([userId, tenantId])
   @@index([tenantId])
+}
+
+/// Checador: entrada/salida por día laboral (F8).
+model TimeEntry {
+  id         String    @id @default(cuid())
+  tenantId   String
+  employeeId String
+  branchId   String?
+  /// Fecha laboral en timezone del tenant (YYYY-MM-DD).
+  workDate   String
+  checkInAt  DateTime
+  checkOutAt DateTime?
+  note       String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  tenant   Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  employee EmployeeProfile @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branch   Branch?         @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, workDate])
+  @@index([employeeId, workDate])
+  @@index([employeeId, checkOutAt])
 }
 
 model EmployeeBranch {

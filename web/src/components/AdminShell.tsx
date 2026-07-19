@@ -21,6 +21,9 @@ const OP_LINKS: NavLink[] = [
   { href: "/admin/sucursales", label: "Sucursales" },
   { href: "/admin/personal", label: "Personal", section: "Personas" },
   { href: "/admin/clientes", label: "Clientes" },
+  { href: "/admin/asistencia", label: "Asistencia" },
+  { href: "/admin/comisiones", label: "Comisiones" },
+  { href: "/admin/reportes", label: "Reportes", section: "Análisis" },
 ];
 
 const SYSTEM_LINKS: NavLink[] = [

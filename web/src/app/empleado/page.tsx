@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { readSession } from "@/lib/session";
 import { hasStaffAccess } from "@/lib/auth";
 import { formatDateTime, statusBadgeClass, statusLabel } from "@/lib/format";
+import { CompleteAppointmentButton } from "@/components/CompleteAppointmentButton";
 import { AbsenceForm } from "./AbsenceForm";
 
 export const dynamic = "force-dynamic";
@@ -65,7 +66,7 @@ export default async function EmpleadoAgendaPage() {
         <div className="stack" style={{ marginBottom: "2rem" }}>
           {today.map((a) => (
             <div key={a.id} className="card">
-              <div className="card-body row" style={{ justifyContent: "space-between" }}>
+              <div className="card-body row" style={{ justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
                 <div>
                   <strong>{a.service.name}</strong>
                   <div className="small muted">
@@ -73,7 +74,12 @@ export default async function EmpleadoAgendaPage() {
                   </div>
                   <div className="small">Cliente: {a.clientName}</div>
                 </div>
-                <span className={statusBadgeClass(a.status)}>{statusLabel(a.status)}</span>
+                <div className="row" style={{ gap: 8, alignItems: "center" }}>
+                  <span className={statusBadgeClass(a.status)}>{statusLabel(a.status)}</span>
+                  {a.status !== "CANCELLED" && a.status !== "COMPLETED" && (
+                    <CompleteAppointmentButton id={a.id} />
+                  )}
+                </div>
               </div>
             </div>
           ))}

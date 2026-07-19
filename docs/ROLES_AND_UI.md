@@ -96,9 +96,9 @@ Patrones: [public-nav](./patterns/public-nav.md) · [admin-sidebar](./patterns/a
 │  Sucursales      │                             │
 │  Personal        │                             │
 │  Clientes        │                             │
-│  (F8 Asistencia) │                             │
-│  (F8 Comisiones) │                             │
-│  (F8 Reportes)   │                             │
+│  Asistencia      │                             │
+│  Comisiones      │                             │
+│  Reportes        │                             │
 │  ────────────    │                             │
 │  Log notifs      │                             │
 │  Matriz permisos │                             │
@@ -133,7 +133,8 @@ Patrones: [public-nav](./patterns/public-nav.md) · [admin-sidebar](./patterns/a
 
 Igual esqueleto visual que admin (`admin-shell`), menú del **mockup empleado**:
 
-- Agenda hoy · (F8) Mañana · Checador · Comisiones · Solicitar permiso  
+- Agenda hoy · Checador · Mis comisiones · Solicitar permiso  
+
 - Footer: Vista admin (si aplica) · Mi cuenta · Sitio público · Salir  
 
 **No** reutilizar `PublicNav` aquí.

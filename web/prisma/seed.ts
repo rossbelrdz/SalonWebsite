@@ -11,6 +11,7 @@ function assertPrismaModels() {
     "notificationMatrixRule",
     "payment",
     "appointment",
+    "timeEntry",
   ] as const;
   const missing = required.filter(
     (k) => !(prisma as unknown as Record<string, { upsert?: unknown }>)[k]?.upsert,
@@ -437,23 +438,25 @@ async function main() {
 
   const emp1 = await prisma.employeeProfile.upsert({
     where: { userId_tenantId: { userId: employeeUser.id, tenantId: tenant.id } },
-    update: { title: "Estilista senior", active: true },
+    update: { title: "Estilista senior", active: true, commissionPct: 40 },
     create: {
       userId: employeeUser.id,
       tenantId: tenant.id,
       title: "Estilista senior",
       bio: "Especialista en cortes modernos.",
+      commissionPct: 40,
     },
   });
 
   const emp2 = await prisma.employeeProfile.upsert({
     where: { userId_tenantId: { userId: employee2User.id, tenantId: tenant.id } },
-    update: { title: "Colorista", active: true },
+    update: { title: "Colorista", active: true, commissionPct: 45 },
     create: {
       userId: employee2User.id,
       tenantId: tenant.id,
       title: "Colorista",
       bio: "Color y tratamientos capilares.",
+      commissionPct: 45,
     },
   });
 
@@ -492,6 +495,76 @@ async function main() {
         },
         update: {},
         create: { employeeId: emp.id, serviceId: svc.id },
+      });
+    }
+  }
+
+  // F8 demo: citas completadas de la última quincena (idempotente por id fijo)
+  const demoServices = await prisma.service.findMany({
+    where: { tenantId: tenant.id, active: true },
+    take: 6,
+    orderBy: { name: "asc" },
+  });
+  if (demoServices.length > 0) {
+    const now = new Date();
+    for (let i = 0; i < 12; i++) {
+      const dayOffset = (i % 10) + 1;
+      const startsAt = new Date(now);
+      startsAt.setDate(startsAt.getDate() - dayOffset);
+      startsAt.setHours(10 + (i % 5), 0, 0, 0);
+      const svc = demoServices[i % demoServices.length];
+      const emp = i % 2 === 0 ? emp1 : emp2;
+      const branch = i % 2 === 0 ? branchCentro : branchPolanco;
+      const endsAt = new Date(startsAt.getTime() + svc.durationMin * 60_000);
+      const id = `seed-appt-f8-${i}`;
+      await prisma.appointment.upsert({
+        where: { id },
+        update: {
+          status: i % 5 === 0 ? "PREPAID" : "COMPLETED",
+          priceCents: svc.priceCents,
+          prepaid: i % 5 === 0,
+        },
+        create: {
+          id,
+          tenantId: tenant.id,
+          branchId: branch.id,
+          serviceId: svc.id,
+          employeeId: emp.id,
+          clientUserId: client.id,
+          clientName: client.name,
+          clientEmail: client.email,
+          startsAt,
+          endsAt,
+          status: i % 5 === 0 ? "PREPAID" : "COMPLETED",
+          prepaid: i % 5 === 0,
+          priceCents: svc.priceCents,
+        },
+      });
+    }
+  }
+
+  // Entrada de ejemplo hoy para emp1 (solo si no hay registro del día)
+  {
+    const workDate = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Mexico_City",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    const existing = await prisma.timeEntry.findFirst({
+      where: { employeeId: emp1.id, workDate },
+    });
+    if (!existing && prisma.timeEntry?.create) {
+      const checkIn = new Date();
+      checkIn.setHours(9, 52, 0, 0);
+      await prisma.timeEntry.create({
+        data: {
+          tenantId: tenant.id,
+          employeeId: emp1.id,
+          branchId: branchCentro.id,
+          workDate,
+          checkInAt: checkIn,
+        },
       });
     }
   }

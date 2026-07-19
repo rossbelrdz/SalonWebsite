@@ -13,8 +13,31 @@ Política completa: [docs/VERSIONING.md](./docs/VERSIONING.md).
 
 ### Planeado
 
-- Fase 8: checador, comisiones, reportes
 - Hardening prod (F9): no publicar DB/Redis al host, pin de cloudflared, migrate deploy
+- Seguridad P0: secrets, firmas webhook, rate limit, `allowDemoPayments` fuera de dev
+
+---
+
+## [0.11.0] — 2026-07-19
+
+### Added — Fase 8 (operación del personal)
+
+- **Checador empleado** (`/empleado/checador`): entrada/salida, reloj en vivo, estado del día.
+- **Asistencia admin** (`/admin/asistencia`): tabla por día (Presente / Retraso / Ausente / Completo / …).
+- **Comisiones empleado** (`/empleado/comisiones`): quincena + hoy/ayer/semana con % del perfil.
+- **Comisiones admin** (`/admin/comisiones`): tabla del periodo + edición de % por empleado.
+- **Reportes admin** (`/admin/reportes`): KPIs del mes, barras de ingresos por día, top servicios.
+- Modelo Prisma `TimeEntry`; `EmployeeProfile.commissionPct`; `TenantSettings.defaultCommissionPct`.
+- API `POST/GET /api/attendance/clock`, `GET/PATCH /api/admin/commissions`,
+  `POST /api/appointments/[id]/complete`.
+- Botón **Completar** cita en agenda empleado y admin citas.
+- Seed: 12 citas F8 de demo + entrada de ejemplo y % 40/45.
+
+### Changed
+
+- Shells: menú empleado (Checador, Mis comisiones) y admin (Asistencia, Comisiones, Reportes).
+- `docs/PHASES.md` F8 → hecha; siguiente = F9.
+- `docs/COMMISSIONS_RESEARCH.md` documenta modelo provisional.
 
 ---
 

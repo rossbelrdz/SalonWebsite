@@ -9,6 +9,7 @@ import {
 import { PageHeader } from "@/components/ui";
 import { AdminCancelButton } from "./AdminCancelButton";
 import { ReassignButton } from "./ReassignButton";
+import { CompleteAppointmentButton } from "@/components/CompleteAppointmentButton";
 
 export const dynamic = "force-dynamic";
 
@@ -95,6 +96,9 @@ export default async function AdminCitasPage() {
                         a.status !== "REASSIGNMENT_PENDING" && (
                           <ReassignButton id={a.id} employees={empOpts} />
                         )}
+                      {a.status !== "CANCELLED" && a.status !== "COMPLETED" && (
+                        <CompleteAppointmentButton id={a.id} />
+                      )}
                       {a.status !== "CANCELLED" && a.status !== "COMPLETED" && (
                         <AdminCancelButton id={a.id} />
                       )}

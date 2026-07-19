@@ -1,64 +1,57 @@
 # Investigación: comisiones en salones y barberías
 
-**Estado:** placeholder estructurado.  
-**Objetivo (Fase 8):** documentar cómo comisionan los sistemas líderes del sector y proponer un modelo para este producto.
-
-No bloquear Fases 0–5.
+**Estado:** modelo provisional implementado (F8 / v0.11.0).  
+**Objetivo:** documentar el cálculo actual y el camino a un modelo más fino.
 
 ---
 
-## 1. Preguntas a responder
+## 1. Modelo en producción (provisional)
 
-1. ¿Salario fijo + comisión, solo comisión, o renta de sillón (booth rental)?  
-2. ¿% sobre servicio, sobre producto, o ambos?  
-3. ¿La comisión se calcula sobre precio lleno o sobre precio con descuento/prepago?  
-4. ¿El prepago afecta la comisión del empleado?  
-5. ¿Cómo manejan propinas (tips)?  
-6. ¿Reportes estándar que espera un dueño?
+| Pieza | Detalle |
+|-------|---------|
+| Base | `priceCents` de la cita |
+| Estados que cuentan | `CONFIRMED`, `PREPAID`, `COMPLETED` |
+| % | `EmployeeProfile.commissionPct` (default 40; seed: Leo 40%, María 45%) |
+| Fórmula | `round(servicesCents * pct / 100)` |
+| Periodo UI empleado | Quincena actual + hoy / ayer / 7 días |
+| Periodo UI admin | Quincena actual (query `?from=&to=`) |
+| Default tenant | `TenantSettings.defaultCommissionPct` (40) |
 
----
-
-## 2. Sistemas a revisar (Top del sector — lista de trabajo)
-
-Investigar al implementar F8 (nombres orientativos del mercado):
-
-- Fresha  
-- Booker / Mindbody  
-- Vagaro  
-- Square Appointments  
-- Zenoti  
-- Salonist / GlossGenius / Boulevard  
-- Sistemas locales LATAM relevantes  
-
-Por cada uno anotar: modelo de comisión, flexibilidad, reportes, limitaciones.
+**No incluido aún:** propinas, productos retail, booth rental, escalones por volumen, comisión sobre neto post-descuento distinto del `priceCents` ya guardado.
 
 ---
 
-## 3. Modelos candidatos (borrador)
+## 2. Pantallas
 
-| Modelo | Descripción | Pros | Contras |
-|--------|-------------|------|---------|
-| A | % fijo por servicio | Simple | Poco flexible |
-| B | % por categoría / por empleado | Flexible | Más config |
-| C | Fijo + % | Estable para el staff | Más contabilidad |
-| D | Booth rental | Independencia del staff | Menos control de marca |
+| Rol | Ruta |
+|-----|------|
+| Empleado | `/empleado/comisiones` |
+| Admin | `/admin/comisiones` (+ editar %) |
 
-Recomendación de producto: **posponer decisión** hasta investigación; default técnico probable **B o C**.
+Permisos RBAC: `staff.commissions.own` / `staff.commissions.all`.
 
 ---
 
-## 4. Datos que el sistema debe poder registrar
+## 3. Sistemas de referencia (para evolución)
 
-- Empleado, servicio, precio cobrado, descuento, prepago sí/no.  
-- % o monto de comisión aplicable.  
-- Periodo de liquidación (semana/quincena/mes).  
-- Ajustes manuales del admin.
+Fresha, Booker/Mindbody, Vagaro, Square Appointments, Zenoti, GlossGenius — típico: % por servicio o categoría, liquidación semanal/quincenal, propinas aparte.
+
+### Modelos candidatos a futuro
+
+| Modelo | Descripción |
+|--------|-------------|
+| A | % fijo por servicio (actual = global por empleado) |
+| B | % por categoría / por empleado |
+| C | Fijo + % |
+| D | Booth rental |
+
+Recomendación actual: **A** (simple, operable). Evolucionar a **B** si un tenant lo pide.
 
 ---
 
-## 5. Entregable final de esta investigación
+## 4. Checklist de investigación profunda (opcional)
 
 - [ ] Tabla comparativa Top 10–15  
-- [ ] Modelo recomendado para Salon  
-- [ ] Campos de DB y pantallas de reporte  
-- [ ] Actualización de PRODUCT.md y PHASES (F8)
+- [ ] Decisión formal A/B/C/D por mercado LATAM  
+- [ ] Propinas y productos  
+- [ ] Liquidación exportable (CSV / nómina)

@@ -13,6 +13,8 @@ import { MobileMenuToggle } from "@/components/MobileMenuToggle";
 
 const DAY_LINKS = [
   { href: "/empleado", label: "Agenda hoy" },
+  { href: "/empleado/checador", label: "Checador" },
+  { href: "/empleado/comisiones", label: "Mis comisiones" },
   { href: "/empleado#permiso", label: "Solicitar permiso" },
 ];
 

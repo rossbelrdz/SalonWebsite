@@ -2,7 +2,7 @@
 
 > Contexto para agentes (y humanos) que trabajen en este repo. Actualizar cuando cambien
 > arquitectura, deploy, convenciones, UI shells o seguridad.
-> Última revisión: 2026-07-18 — shells UI documentados en `docs/patterns/app-shells.md`.
+> Última revisión: 2026-07-19 — F8 checador/comisiones/reportes en app.
 
 ## 1. Qué es
 
@@ -16,8 +16,7 @@ Flujo núcleo: cliente elige sucursal → servicio → profesional → horario; 
 con descuento; cancelación/reagendado; reasignación de citas con decisión del cliente
 (aceptar / reagendar / cancelar con reembolso).
 
-Estado de fases: F0–F7 hechas; **F8 pendiente** (checador, comisiones, reportes) — ver
-`docs/PHASES.md`.
+Estado de fases: F0–F8 hechas; **F9 pendiente** (hardening / 1.0) — ver `docs/PHASES.md`.
 
 ## 2. Stack
 

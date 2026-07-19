@@ -123,21 +123,25 @@ Detalle: [NOTIFICATIONS.md](./NOTIFICATIONS.md)
 
 ## Fase 8 — Operación del personal
 
-**Estado:** `pendiente` ← **siguiente de producto**
+**Estado:** `hecha` (release `0.11.0`)
 
 **Shells (obligatorio):** ver [patterns/app-shells.md](./patterns/app-shells.md).
 
-| Entregable | Shell | Dónde va el menú |
-|------------|-------|------------------|
-| Checador (propio) | **C** Empleado | Sidebar `/empleado` |
-| Checador / asistencia (negocio) | **B** Admin | Sidebar `/admin` (p. ej. Asistencia) |
-| Comisiones propias | **C** Empleado | Sidebar empleado |
-| Comisiones / reportes negocio | **B** Admin | Sidebar admin |
-| Reportes | **B** Admin | Sidebar admin |
+| Entregable | Shell | Ruta |
+|------------|-------|------|
+| Checador (propio) | **C** Empleado | `/empleado/checador` |
+| Asistencia (negocio) | **B** Admin | `/admin/asistencia` |
+| Comisiones propias | **C** Empleado | `/empleado/comisiones` |
+| Comisiones negocio | **B** Admin | `/admin/comisiones` |
+| Reportes | **B** Admin | `/admin/reportes` |
 
-- [ ] Checador  
-- [ ] Comisiones  
-- [ ] Reportes  
+- [x] Checador (`TimeEntry` + API clock in/out)  
+- [x] Asistencia admin (tabla del día, estados Presente/Retraso/Ausente/…)  
+- [x] Comisiones (% por empleado, quincena, cálculo sobre citas)  
+- [x] Reportes (KPIs mes, barras ingresos, top servicios)  
+- [x] Completar cita (empleado/admin) para cerrar servicio  
+
+Modelo de comisión: **provisional** (% fijo por empleado). Ver [COMMISSIONS_RESEARCH.md](./COMMISSIONS_RESEARCH.md).
 
 **No** reintroducir un menú unificado público+admin. Empleado = sidebar (mockup `empleado/`), no `PublicNav`.
 
@@ -145,10 +149,11 @@ Detalle: [NOTIFICATIONS.md](./NOTIFICATIONS.md)
 
 ## Fase 9 — Hardening, deploy y Tunnel
 
-**Estado:** `en_curso` parcial (tunnel cableado; hardening pendiente)
+**Estado:** `en_curso` parcial (tunnel cableado; hardening pendiente) ← **siguiente**
 
 - [x] Tunnel compose + token  
 - [ ] Backups, políticas MinIO, checklist prod  
+- [ ] Hardening seguridad (secrets, webhooks, rate limit)  
 - [ ] Release `1.0.0`  
 
 ---
@@ -162,8 +167,8 @@ F4 Auth/Config ✅
 F5 Citas core ✅
 F6 Prepago / reembolsos / reasignación ✅
 F7 Notificaciones ✅
-  → F8 Personal  ← siguiente
-  → F9 Hardening
+F8 Personal ✅  (checador, comisiones, reportes)
+  → F9 Hardening  ← siguiente
 ```
 
 ## Cómo correr
