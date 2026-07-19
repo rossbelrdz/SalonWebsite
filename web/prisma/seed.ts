@@ -137,9 +137,20 @@ async function main() {
     });
   }
 
+  // Coords reales (demo CDMX) para MapLibre en /sucursales
   const branchCentro = await prisma.branch.upsert({
     where: { id: "seed-branch-centro" },
-    update: {},
+    update: {
+      name: "Sucursal Centro",
+      address: "Av. Reforma 123",
+      city: "CDMX",
+      lat: 19.4326,
+      lng: -99.1332,
+      phone: "55 1000 1000",
+      openTime: "09:00",
+      closeTime: "20:00",
+      active: true,
+    },
     create: {
       id: "seed-branch-centro",
       tenantId: tenant.id,
@@ -156,7 +167,17 @@ async function main() {
 
   const branchPolanco = await prisma.branch.upsert({
     where: { id: "seed-branch-polanco" },
-    update: {},
+    update: {
+      name: "Sucursal Polanco",
+      address: "Av. Presidente Masaryk 45",
+      city: "CDMX",
+      lat: 19.4335,
+      lng: -99.1945,
+      phone: "55 2000 2000",
+      openTime: "10:00",
+      closeTime: "19:00",
+      active: true,
+    },
     create: {
       id: "seed-branch-polanco",
       tenantId: tenant.id,
@@ -173,6 +194,7 @@ async function main() {
 
   // Catálogo demo inspirado en salones top de Monterrey/NL (Valle, San Pedro, Cumbres).
   // Precios MXN en centavos; upsert idempotente por id fijo.
+  // imageUrl: assets en public/img/services (4:3, ver media/salon-images/GUIA-IMAGENES.md)
   const servicesData = [
     {
       id: "seed-svc-corte",
@@ -182,6 +204,7 @@ async function main() {
       priceCents: 38000,
       category: ServiceCategory.HAIR,
       mediaClass: "media-cut",
+      imageUrl: "/img/services/seed-svc-corte.webp",
     },
     {
       id: "seed-svc-corte-dama",
@@ -191,6 +214,7 @@ async function main() {
       priceCents: 52000,
       category: ServiceCategory.HAIR,
       mediaClass: "media-cut",
+      imageUrl: "/img/services/seed-svc-corte-dama.webp",
     },
     {
       id: "seed-svc-fade",
@@ -200,6 +224,7 @@ async function main() {
       priceCents: 35000,
       category: ServiceCategory.HAIR,
       mediaClass: "media-cut",
+      imageUrl: "/img/services/seed-svc-fade.webp",
     },
     {
       id: "seed-svc-corte-barba",
@@ -209,6 +234,7 @@ async function main() {
       priceCents: 52000,
       category: ServiceCategory.HAIR,
       mediaClass: "media-cut",
+      imageUrl: "/img/services/seed-svc-corte-barba.webp",
     },
     {
       id: "seed-svc-brushing",
@@ -218,6 +244,7 @@ async function main() {
       priceCents: 32000,
       category: ServiceCategory.HAIR,
       mediaClass: "media-cut",
+      imageUrl: "/img/services/seed-svc-brushing.webp",
     },
     {
       id: "seed-svc-keratina",
@@ -227,6 +254,7 @@ async function main() {
       priceCents: 180000,
       category: ServiceCategory.HAIR,
       mediaClass: "media-cut",
+      imageUrl: "/img/services/seed-svc-keratina.webp",
     },
     {
       id: "seed-svc-botox",
@@ -236,6 +264,7 @@ async function main() {
       priceCents: 140000,
       category: ServiceCategory.HAIR,
       mediaClass: "media-spa",
+      imageUrl: "/img/services/seed-svc-botox.webp",
     },
     {
       id: "seed-svc-color",
@@ -245,6 +274,7 @@ async function main() {
       priceCents: 110000,
       category: ServiceCategory.COLOR,
       mediaClass: "media-color",
+      imageUrl: "/img/services/seed-svc-color.webp",
     },
     {
       id: "seed-svc-raiz",
@@ -254,6 +284,7 @@ async function main() {
       priceCents: 75000,
       category: ServiceCategory.COLOR,
       mediaClass: "media-color",
+      imageUrl: "/img/services/seed-svc-raiz.webp",
     },
     {
       id: "seed-svc-balayage",
@@ -263,6 +294,7 @@ async function main() {
       priceCents: 220000,
       category: ServiceCategory.COLOR,
       mediaClass: "media-color",
+      imageUrl: "/img/services/seed-svc-balayage.webp",
     },
     {
       id: "seed-svc-mechas",
@@ -272,6 +304,7 @@ async function main() {
       priceCents: 165000,
       category: ServiceCategory.COLOR,
       mediaClass: "media-color",
+      imageUrl: "/img/services/seed-svc-mechas.webp",
     },
     {
       id: "seed-svc-barba",
@@ -281,6 +314,7 @@ async function main() {
       priceCents: 28000,
       category: ServiceCategory.BEARD,
       mediaClass: "media-beard",
+      imageUrl: "/img/services/seed-svc-barba.webp",
     },
     {
       id: "seed-svc-afeitado",
@@ -290,6 +324,7 @@ async function main() {
       priceCents: 32000,
       category: ServiceCategory.BEARD,
       mediaClass: "media-beard",
+      imageUrl: "/img/services/seed-svc-afeitado.webp",
     },
     {
       id: "seed-svc-unas",
@@ -299,6 +334,7 @@ async function main() {
       priceCents: 42000,
       category: ServiceCategory.NAILS,
       mediaClass: "media-nails",
+      imageUrl: "/img/services/seed-svc-unas.webp",
     },
     {
       id: "seed-svc-pedicure",
@@ -308,6 +344,7 @@ async function main() {
       priceCents: 48000,
       category: ServiceCategory.NAILS,
       mediaClass: "media-nails",
+      imageUrl: "/img/services/seed-svc-pedicure.webp",
     },
     {
       id: "seed-svc-softgel",
@@ -317,6 +354,7 @@ async function main() {
       priceCents: 65000,
       category: ServiceCategory.NAILS,
       mediaClass: "media-nails",
+      imageUrl: "/img/services/seed-svc-softgel.webp",
     },
     {
       id: "seed-svc-cejas",
@@ -326,6 +364,7 @@ async function main() {
       priceCents: 22000,
       category: ServiceCategory.SPA,
       mediaClass: "media-spa",
+      imageUrl: "/img/services/seed-svc-cejas.webp",
     },
     {
       id: "seed-svc-laminado-cejas",
@@ -335,6 +374,7 @@ async function main() {
       priceCents: 48000,
       category: ServiceCategory.SPA,
       mediaClass: "media-spa",
+      imageUrl: "/img/services/seed-svc-laminado-cejas.webp",
     },
     {
       id: "seed-svc-pestañas",
@@ -344,6 +384,7 @@ async function main() {
       priceCents: 75000,
       category: ServiceCategory.SPA,
       mediaClass: "media-spa",
+      imageUrl: "/img/services/seed-svc-pestañas.webp",
     },
     {
       id: "seed-svc-facial",
@@ -353,6 +394,7 @@ async function main() {
       priceCents: 55000,
       category: ServiceCategory.SPA,
       mediaClass: "media-spa",
+      imageUrl: "/img/services/seed-svc-facial.webp",
     },
     {
       id: "seed-svc-makeup",
@@ -362,6 +404,7 @@ async function main() {
       priceCents: 75000,
       category: ServiceCategory.MAKEUP,
       mediaClass: "media-makeup",
+      imageUrl: "/img/services/seed-svc-makeup.webp",
     },
     {
       id: "seed-svc-makeup-novia",
@@ -371,6 +414,7 @@ async function main() {
       priceCents: 180000,
       category: ServiceCategory.MAKEUP,
       mediaClass: "media-makeup",
+      imageUrl: "/img/services/seed-svc-makeup-novia.webp",
     },
   ] as const;
 
@@ -384,6 +428,7 @@ async function main() {
         priceCents: s.priceCents,
         category: s.category,
         mediaClass: s.mediaClass,
+        imageUrl: s.imageUrl,
         active: true,
       },
       create: { ...s, tenantId: tenant.id },

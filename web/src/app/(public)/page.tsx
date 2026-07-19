@@ -1,7 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/db";
 import { getDefaultTenant } from "@/lib/auth";
 import { formatPrice, categoryLabel } from "@/lib/format";
+import { ServiceMedia } from "@/components/ServiceMedia";
 
 export const dynamic = "force-dynamic";
 
@@ -57,18 +59,41 @@ export default async function HomePage() {
               {branches} sucursales · {serviceCount} servicios
             </p>
           </div>
-          <div className="hero-visual" aria-hidden>
-            <div className="hero-float hero-float-1">
-              <strong>Hoy</strong>
-              Slots en tiempo real
+          <div>
+            <div className="hero-visual" aria-hidden>
+              <Image
+                src="/img/home/hero.webp"
+                alt=""
+                fill
+                sizes="(max-width: 900px) 100vw, 45vw"
+                className="hero-visual-img"
+                priority
+              />
+              <div className="hero-visual-overlay" />
+              <div className="hero-float hero-float-1">
+                <strong>Hoy</strong>
+                Slots en tiempo real
+              </div>
+              <div className="hero-float hero-float-2">
+                <strong>Prepago</strong>
+                Hasta {tenant.settings?.prepaidDiscountPct ?? 10}% off
+              </div>
+              <div className="hero-float hero-float-3">
+                <strong>Tú eliges</strong>
+                Profesional concreto
+              </div>
             </div>
-            <div className="hero-float hero-float-2">
-              <strong>Prepago</strong>
-              Hasta {tenant.settings?.prepaidDiscountPct ?? 10}% off
-            </div>
-            <div className="hero-float hero-float-3">
-              <strong>Tú eliges</strong>
-              Profesional concreto
+            {/* Mobile: chips instead of clipped float cards */}
+            <div className="hero-chips" aria-label="Beneficios">
+              <span className="hero-chip">
+                <strong>Hoy</strong> · slots en vivo
+              </span>
+              <span className="hero-chip">
+                <strong>Prepago</strong> · hasta {tenant.settings?.prepaidDiscountPct ?? 10}% off
+              </span>
+              <span className="hero-chip">
+                <strong>Tú eliges</strong> · profesional
+              </span>
             </div>
           </div>
         </div>
@@ -85,9 +110,7 @@ export default async function HomePage() {
           <div className="grid-3">
             {featuredServices.map((s) => (
               <Link key={s.id} href={`/servicios/${s.id}`} className="card card-hover">
-                <div className={`media ${s.mediaClass}`}>
-                  <span className="media-icon">✦</span>
-                </div>
+                <ServiceMedia mediaClass={s.mediaClass} imageUrl={s.imageUrl} name={s.name} />
                 <div className="card-body">
                   <span className="badge">{categoryLabel(s.category)}</span>
                   <h3 style={{ margin: "0.5rem 0 0.25rem", fontSize: "1.1rem" }}>{s.name}</h3>

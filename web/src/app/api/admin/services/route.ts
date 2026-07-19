@@ -14,6 +14,8 @@ export async function POST(req: Request) {
     const category = (body.category as ServiceCategory) || ServiceCategory.OTHER;
     const description = String(body.description || "");
     const mediaClass = String(body.mediaClass || "media-cut");
+    const imageUrlRaw = body.imageUrl != null ? String(body.imageUrl).trim() : "";
+    const imageUrl = imageUrlRaw || null;
 
     if (!name || !durationMin || !priceCents) {
       return NextResponse.json({ error: "Nombre, duración y precio requeridos" }, { status: 400 });
@@ -28,6 +30,7 @@ export async function POST(req: Request) {
         category,
         description,
         mediaClass,
+        imageUrl,
       },
     });
     return NextResponse.json({ ok: true, id: service.id });
@@ -55,6 +58,10 @@ export async function PATCH(req: Request) {
     if (body.category !== undefined) data.category = body.category;
     if (body.active !== undefined) data.active = Boolean(body.active);
     if (body.mediaClass !== undefined) data.mediaClass = body.mediaClass;
+    if (body.imageUrl !== undefined) {
+      const u = String(body.imageUrl || "").trim();
+      data.imageUrl = u || null;
+    }
 
     await prisma.service.update({ where: { id }, data });
     return NextResponse.json({ ok: true });

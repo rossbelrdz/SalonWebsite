@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Variante clara del mark (para fondos oscuros / tiles) -->
+  <path d="M7 23 C 15 12, 25 34, 33 23 S 50 11, 58 18"
+        stroke="#e36f4a" stroke-width="4" stroke-linecap="round"/>
+  <g stroke="#f7f3ec" stroke-width="5.5" stroke-linecap="round">
+    <path d="M23.5 43.5 L 40 28"/>
+    <path d="M40.5 43.5 L 24 28"/>
+    <circle cx="17" cy="50" r="8"/>
+    <circle cx="47" cy="50" r="8"/>
+  </g>
+  <circle cx="32" cy="35.7" r="2.6" fill="#f7f3ec"/>
+</svg>

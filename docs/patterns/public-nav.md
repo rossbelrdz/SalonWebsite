@@ -17,30 +17,45 @@ privados de operación.
 - `/empleado/*` → `EmpleadoShell`  
 - No como “menú universal” multi-rol
 
-## Anatomía
+## Anatomía — dos contextos (no un menú con todo)
+
+El drawer / top bar **cambia** según la zona. No se listan sitio + cuenta + admin
+en el mismo cajón.
+
+### Contexto A1 — Sitio (home, servicios, agendar, …)
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
 │ [Logo]  Inicio · Servicios · Sucursales · Agendar · Contacto │
-│                              [Mis citas]  [Cuenta|Entrar] CTA│
+│                         [Entrar|Mi cuenta]  [Agendar]        │
 └──────────────────────────────────────────────────────────────┘
- Móvil: logo | campanita | ☰  → drawer con los MISMOS links del sitio
+ Móvil ☰: SOLO links del sitio + “Entrar” o “Ir a mi cuenta”
+```
+
+### Contexto A2 — Cuenta (`/cuenta`, `/mis-citas`)
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ [Mi espacio]  Mis citas · Mi cuenta     [Sitio] [Salir]     │
+└──────────────────────────────────────────────────────────────┘
+ Móvil ☰: Mis citas · Mi cuenta · Volver al sitio · Salir
+          (+ “Paneles” solo si admin/empleado, no el árbol)
 ```
 
 | Zona | Desktop | Móvil |
 |------|---------|--------|
-| Links sitio | fila en barra | lista en drawer |
-| Acciones sesión | botones a la derecha | en el drawer |
-| Puerta a Admin/Empleado | 1 botón secundario máx. por área | enlace “Ir al panel…” al final, no árbol de menú |
-| Menú operación (citas admin, config…) | **nunca** | **nunca** |
+| Links | Solo del **contexto actual** (sitio **o** cuenta) | Igual |
+| Acciones sesión | Sitio: Entrar/Mi cuenta + Agendar. Cuenta: Sitio + Salir | En el drawer del contexto |
+| Puerta Admin/Empleado | **Solo en menú de cuenta**, una línea | Igual |
+| Menú operación admin | **nunca** en Shell A | **nunca** |
 
 ## Variantes
 
 | Estado | Chrome |
 |--------|--------|
-| Anónimo | Links sitio + Entrar + Agendar |
-| Cliente | + Mis citas + Cuenta + Salir (+ campanita) |
-| Staff en sitio público | Igual que cliente + puerta “Admin” y/o “Mi agenda” |
+| Anónimo (sitio) | Links sitio + Entrar + Agendar |
+| Logueado (sitio) | Links sitio + **Mi cuenta** + Agendar (sin Mis citas/Admin en la barra) |
+| Logueado (cuenta) | Links cuenta + Volver al sitio + Salir (+ paneles si aplica) |
 
 ## Comportamiento
 

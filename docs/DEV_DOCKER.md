@@ -1,62 +1,61 @@
-# Docker + Prisma (dev) — anti-desync
+# Docker + Prisma — anti-desync y modos
 
-## Problema que resolvimos
+## Producción (default)
 
-`node_modules` vive en un **volumen Docker** (`web_node_modules`).  
-El código se monta desde el host (`./web`).  
-Si el schema Prisma cambia y el Client dentro del volumen no se regenera, aparece:
+```bash
+docker compose up -d --build
+# o con tunnel:
+docker compose --profile tunnel up -d --build
+```
+
+- `NODE_ENV=production`
+- Imagen `Dockerfile` target **`runner`**: `next build` en imagen → **`next start`**
+- **Sin** montar `./web` (el código va cocinado en la imagen)
+- Entrypoint: `scripts/docker-prod-entrypoint.sh`
+
+Cualquier cambio de código requiere **rebuild**:
+
+```bash
+docker compose up -d --build app worker
+```
+
+## Desarrollo (hot-reload)
+
+```bash
+docker compose -f docker-compose.dev.yml up
+```
+
+- `NODE_ENV=development`
+- `next dev --turbopack`
+- Volumen `./web:/app` + `web_node_modules`
+- Entrypoint: `scripts/docker-dev-entrypoint.sh`
+
+### Problema clásico en dev
+
+`node_modules` vive en volumen Docker. Si el schema Prisma cambia y el Client no se regenera:
 
 ```text
 Cannot read properties of undefined (reading 'upsert')
 ```
 
-## Flujo correcto al arrancar
-
-`scripts/docker-dev-entrypoint.sh` (app y worker):
-
-1. `npm ci` solo si `node_modules` vacío o `FORCE_NPM_CI=1`
-2. **`prisma generate` siempre**
-3. **`prisma db push`** (app; worker lo salta con `SKIP_DB_PUSH=1`)
-4. **Assert** de modelos críticos (`rolePermission`, `notificationMatrixRule`, …)
-5. **Seed idempotente** (app; worker con `SKIP_SEED=1`)
-6. Arranca Next o worker
-
-## Comandos útiles
+El entrypoint dev hace `prisma generate` siempre y `db push` + seed (app).
 
 ```bash
-# Arranque normal
-docker compose up -d --build
-
-# Client/volumen roto (force reinstall + generate)
-FORCE_NPM_CI=1 docker compose up -d --build app worker
-
-# Reset total DB demo (destructivo)
-docker compose exec app npm run db:reset
-
-# Solo seed / matrices
-docker compose exec app npm run db:seed
-SEED_RESET_MATRICES=1 docker compose exec app npm run db:seed
-
-# Assert client
-docker compose exec app npm run db:assert
+FORCE_NPM_CI=1 docker compose -f docker-compose.dev.yml up -d --build app worker
+docker compose -f docker-compose.dev.yml exec app npm run db:reset   # destructivo
 ```
 
-## Scripts npm (en `web/`)
+## Scripts npm (`web/`)
 
 | Script | Uso |
 |--------|-----|
+| `build` | `prisma generate` + `next build` (estricto) |
+| `start` / `start:prod` | `next start` en production |
 | `db:setup` | generate + push + seed + assert |
 | `db:seed` | seed idempotente |
-| `db:reset` | wipe schema + seed + reset matrices |
+| `db:reset` | wipe + seed |
 | `db:assert` | falla si faltan modelos |
-
-## Producción (futuro)
-
-- **No** usar `db push` ni seed en cada start.
-- Usar `prisma migrate deploy`.
-- Seed solo en bootstrap controlado.
-- Imagen `runner` con client generado en build.
 
 ## Worker
 
-Depende de `app` **healthy** (no solo started), para no competir con el primer `npm ci`/`generate`.
+Mismo target de imagen que `app`. En prod: `npx tsx worker/index.ts` con `SKIP_SEED=1` y `SKIP_DB_PUSH=1`.

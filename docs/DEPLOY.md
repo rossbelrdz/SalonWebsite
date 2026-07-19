@@ -125,49 +125,38 @@ El token **identifica el tunnel**; el enrutamiento hostname → servicio se conf
 
 ---
 
-## 4. Servicio Docker `tunnel` (objetivo Compose)
+## 4. Compose: producción vs desarrollo
 
-Cuando exista `docker-compose.yml` (Fase 3 / 9), el servicio opcional será similar a:
+| Archivo | `NODE_ENV` | Next.js | Volúmenes de código |
+|---------|------------|---------|---------------------|
+| **`docker-compose.yml`** (default) | **production** | `next build` + **`next start`** | **No** (imagen con build) |
+| `docker-compose.dev.yml` | development | `next dev` (Turbopack) | Sí (`./web` montado) |
 
-```yaml
-services:
-  app:
-    # ...
-    expose:
-      - "3000"
-    # En deploy con tunnel: no publicar 3000 al host, o solo en localhost
-    # ports: ["3000:3000"]  # solo dev local
+La imagen `runner` del `web/Dockerfile` compila en build y arranca con
+`scripts/docker-prod-entrypoint.sh` (prisma generate + db push + seed opcional → `next start`).
 
-  tunnel:
-    image: cloudflare/cloudflared:latest  # pinnear tag/digest en prod
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run
-    environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
-    depends_on:
-      - app
-    profiles:
-      - tunnel   # no se levanta en dev a menos que se pida
-```
-
-### Comandos previstos
+### Comandos
 
 ```bash
-# Desarrollo local (sin tunnel)
-docker compose up
+# Producción / demo (recomendado en el servidor y con tunnel)
+docker compose --profile tunnel up -d --build
 
-# Deploy / demo pública con tunnel
-docker compose --profile tunnel up -d
+# Solo stack prod sin tunnel (localhost:APP_PORT)
+docker compose up -d --build
+
+# Desarrollo con hot-reload
+docker compose -f docker-compose.dev.yml up
 ```
 
-Requisito: `CLOUDFLARE_TUNNEL_TOKEN` no vacío en `.env`. Si falta, el contenedor `tunnel` fallará al arrancar (esperado).
+Requisito tunnel: `CLOUDFLARE_TUNNEL_TOKEN` en `.env`.  
+`PUBLIC_APP_URL` / `NEXT_PUBLIC_APP_URL` = `https://salon.freonx.org` en prod.
 
 ### Perfil `tunnel`
 
-| Entorno | Perfil | Exposición |
-|---------|--------|-----------|
-| Dev local | (ninguno) | `localhost:APP_PORT` |
-| Demo / prod en freonx | `tunnel` | `https://salon.freonx.org` |
+| Entorno | Compose | Exposición |
+|---------|---------|-----------|
+| Prod / demo freonx | `docker-compose.yml` + `--profile tunnel` | `https://salon.freonx.org` |
+| Dev local | `docker-compose.dev.yml` | `localhost:APP_PORT` |
 
 ---
 

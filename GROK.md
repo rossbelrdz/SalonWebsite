@@ -183,7 +183,7 @@ Detalle: [docs/CONFIGURATION.md](./docs/CONFIGURATION.md)
 
 ## 10. Estado actual
 
-- **Versión:** `0.8.0`  
+- **Versión:** `0.9.0`  
 - **Fases hechas:** F0–F7 (+ matrices admin, PWA/push/MFA, fix Prisma Docker).  
 - **Siguiente:** elegir bloque del roadmap de auditoría o F8.  
 - **Live:** https://salon.freonx.org · local http://localhost:3010  

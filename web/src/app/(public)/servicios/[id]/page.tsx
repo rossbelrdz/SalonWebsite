@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getDefaultTenant } from "@/lib/auth";
 import { categoryLabel, formatPrice } from "@/lib/format";
+import { ServiceMedia } from "@/components/ServiceMedia";
 
 export const dynamic = "force-dynamic";
 
@@ -25,9 +26,13 @@ export default async function ServicioDetailPage({
           ← Servicios
         </Link>
         <div className="card" style={{ marginTop: "1rem" }}>
-          <div className={`media ${service.mediaClass}`} style={{ maxHeight: 280 }}>
-            <span className="media-icon">✦</span>
-          </div>
+          <ServiceMedia
+            mediaClass={`${service.mediaClass} media-detail`}
+            imageUrl={service.imageUrl}
+            name={service.name}
+            sizes="(max-width: 800px) 100vw, 800px"
+            priority
+          />
           <div className="card-body">
             <span className="badge">{categoryLabel(service.category)}</span>
             <h1 style={{ marginTop: "0.75rem" }}>{service.name}</h1>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { getDefaultTenant } from "@/lib/auth";
 import { categoryLabel, formatPrice } from "@/lib/format";
+import { ServiceMedia } from "@/components/ServiceMedia";
 
 export const dynamic = "force-dynamic";
 
@@ -29,13 +30,13 @@ export default async function ServiciosPage() {
         <div className="grid-3">
           {services.map((s) => (
             <Link key={s.id} href={`/servicios/${s.id}`} className="card card-hover">
-              <div className={`media ${s.mediaClass}`}>
-                <span className="media-icon">✦</span>
-              </div>
+              <ServiceMedia mediaClass={s.mediaClass} imageUrl={s.imageUrl} name={s.name} />
               <div className="card-body">
                 <span className="badge">{categoryLabel(s.category)}</span>
                 <h3 style={{ margin: "0.5rem 0", fontSize: "1.1rem" }}>{s.name}</h3>
-                <p className="small muted">{s.description || `${s.durationMin} min`}</p>
+                <p className="small muted line-clamp-2">
+                  {s.description || `${s.durationMin} min`}
+                </p>
                 <div className="row" style={{ justifyContent: "space-between" }}>
                   <span className="price">{formatPrice(s.priceCents)}</span>
                   <span className="tiny muted">{s.durationMin} min</span>

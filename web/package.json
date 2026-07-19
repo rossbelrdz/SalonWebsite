@@ -1,11 +1,12 @@
 {
   "name": "web",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "prisma generate && next build",
     "start": "next start",
+    "start:prod": "NODE_ENV=production next start --hostname 0.0.0.0 --port 3000",
     "lint": "eslint",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
@@ -13,6 +14,7 @@
     "db:setup": "prisma generate && prisma db push && tsx prisma/seed.ts && node scripts/assert-prisma-client.mjs",
     "db:reset": "prisma db push --force-reset && SEED_RESET_MATRICES=1 tsx prisma/seed.ts",
     "db:assert": "node scripts/assert-prisma-client.mjs",
+    "images:optimize": "node scripts/optimize-salon-images.mjs",
     "worker": "tsx worker/index.ts",
     "postinstall": "prisma generate"
   },
@@ -29,12 +31,14 @@
     "dotenv": "^17.4.2",
     "ioredis": "^5.11.1",
     "jose": "^6.2.3",
+    "maplibre-gl": "^4.7.1",
     "next": "15.5.9",
     "otplib": "^13.4.1",
     "qrcode": "^1.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "resend": "^6.17.2",
+    "sharp": "^0.34.5",
     "web-push": "^3.6.7",
     "zod": "^4.4.3"
   },

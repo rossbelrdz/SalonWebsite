@@ -75,9 +75,13 @@ Detalle de menú y config: [ROLES_AND_UI.md](../ROLES_AND_UI.md).
 
 - Ítem activo por ruta (`/admin` exacto; resto `startsWith`).  
 - Desktop: sidebar sticky a la izquierda.  
-- **Móvil (≤900px):** sidebar off-canvas; ☰ en topbar; backdrop; no empuja el grid.  
+- **Móvil (≤900px):** sidebar off-canvas; ☰ en topbar **toggle** open/close; backdrop; no empuja el grid.  
 - Al cambiar de ruta se cierra el drawer.  
 - Escape cierra el drawer.  
+- **Footer sticky** en el drawer: “Otras áreas” (empleado / sitio / cuenta) + Cerrar sesión  
+  siempre visible; el nav de operación hace scroll encima.  
+- **No** listar el sitio público (Inicio, Servicios…) como ítems del panel.  
+- **No** montar `PublicNav` en B/C.
 - Footer: **puertas** a otros shells (empleado, sitio, cuenta), no el menú completo del otro shell.
 
 ## Accesibilidad

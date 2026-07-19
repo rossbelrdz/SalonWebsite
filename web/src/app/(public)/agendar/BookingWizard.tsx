@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { formatPrice, categoryLabel } from "@/lib/format";
 
@@ -11,6 +12,7 @@ type Service = {
   durationMin: number;
   priceCents: number;
   mediaClass: string;
+  imageUrl?: string | null;
   category: string;
 };
 type Employee = {
@@ -178,15 +180,42 @@ export function BookingWizard(props: {
                 }}
                 style={{ textAlign: "left", width: "100%" }}
               >
-                <div className="card-body row" style={{ justifyContent: "space-between" }}>
-                  <div>
-                    <span className="badge">{categoryLabel(s.category)}</span>
-                    <div>
-                      <strong>{s.name}</strong>
+                <div
+                  className="card-body row"
+                  style={{ justifyContent: "space-between", alignItems: "center", gap: "0.75rem" }}
+                >
+                  <div className="row" style={{ gap: "0.75rem", alignItems: "center", minWidth: 0 }}>
+                    {s.imageUrl ? (
+                      <Image
+                        src={s.imageUrl}
+                        alt=""
+                        width={56}
+                        height={42}
+                        style={{
+                          width: 56,
+                          height: 42,
+                          objectFit: "cover",
+                          borderRadius: 8,
+                          flexShrink: 0,
+                        }}
+                      />
+                    ) : (
+                      <div
+                        className={`media ${s.mediaClass}`}
+                        style={{ width: 56, height: 42, aspectRatio: "auto", flexShrink: 0, borderRadius: 8 }}
+                      />
+                    )}
+                    <div style={{ minWidth: 0 }}>
+                      <span className="badge">{categoryLabel(s.category)}</span>
+                      <div>
+                        <strong>{s.name}</strong>
+                      </div>
+                      <div className="tiny muted">{s.durationMin} min</div>
                     </div>
-                    <div className="tiny muted">{s.durationMin} min</div>
                   </div>
-                  <span className="price">{formatPrice(s.priceCents)}</span>
+                  <span className="price" style={{ flexShrink: 0 }}>
+                    {formatPrice(s.priceCents)}
+                  </span>
                 </div>
               </button>
             ))}

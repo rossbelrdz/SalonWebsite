@@ -53,6 +53,7 @@ export default async function AgendarPage({
             durationMin: s.durationMin,
             priceCents: s.priceCents,
             mediaClass: s.mediaClass,
+            imageUrl: s.imageUrl,
             category: s.category,
           }))}
           employees={employees.map((e) => ({

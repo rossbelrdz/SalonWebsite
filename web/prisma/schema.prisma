@@ -308,6 +308,8 @@ model Service {
   priceCents   Int
   category     ServiceCategory @default(OTHER)
   mediaClass   String          @default("media-cut")
+  /** Public path under /public, e.g. /img/services/seed-svc-corte.jpg */
+  imageUrl     String?
   active       Boolean         @default(true)
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt

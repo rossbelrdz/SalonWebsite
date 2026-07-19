@@ -11,15 +11,63 @@ Política completa: [docs/VERSIONING.md](./docs/VERSIONING.md).
 
 ## [Unreleased]
 
-### Changed
-
-- Política de versionado reforzada: **changelog + VERSION obligatorios** en cada
-  entrega de código ([docs/VERSIONING.md](./docs/VERSIONING.md), `AGENTS.md`, `GROK.md`).
-
 ### Planeado
 
 - Fase 8: checador, comisiones, reportes
-- Hardening prod (F9) — ver auditoría en conversación / docs
+- Hardening prod (F9): no publicar DB/Redis al host, pin de cloudflared, migrate deploy
+
+---
+
+## [0.9.0] — 2026-07-18
+
+### Changed
+
+- **Deploy en `NODE_ENV=production` por defecto** (`docker-compose.yml`):
+  - Imagen Dockerfile target **`runner`**: `next build` + **`next start`** (sin Turbopack/HMR).
+  - Entrypoint `web/scripts/docker-prod-entrypoint.sh` (prisma + seed + start).
+  - Sin montar código fuente en el contenedor (rebuild para aplicar cambios).
+- Desarrollo local separado: **`docker-compose.dev.yml`** (`next dev`, volúmenes, `NODE_ENV=development`).
+- Docs: [DEPLOY.md](./docs/DEPLOY.md), [DEV_DOCKER.md](./docs/DEV_DOCKER.md), `AGENTS.md`.
+
+### Added (lote 0.8.1 integrado)
+
+- Fotos catálogo WebP + MapLibre en sucursales; menús por shell (público / cuenta / admin / empleado).
+
+---
+
+## [0.8.1] — 2026-07-18
+
+### Added
+
+- **Fotos reales de catálogo** en portal público: 22 servicios + hero de inicio.
+  - Assets optimizados en `web/public/img/services/*.webp` (1200×900, 4:3) y
+    `web/public/img/home/hero.webp` (pipeline **sharp**).
+  - Fuentes / guía: `media/salon-images/` (zip del equipo).
+  - Script `npm run images:optimize` → `web/scripts/optimize-salon-images.mjs`
+    (cover-crop + WebP; ~−68% vs JPG fuente).
+- Campo opcional `Service.imageUrl` (Prisma) + seed con rutas `/img/.../*.webp`.
+- Componente `ServiceMedia` con **`next/image`** (fill + sizes; sharp en runtime prod).
+- `sharp` como dependencia directa (recomendado por Next para Image Optimization).
+- Admin: campo opcional «URL de imagen» al crear servicio.
+- `KIMI.md` — panorama técnico de referencia.
+
+### Changed
+
+- Home hero usa foto de salón con overlay y floats legibles (`next/image` priority).
+- Cards de `/`, `/servicios`, detalle y wizard de agendar muestran miniatura.
+- `next.config.ts`: formatos AVIF/WebP para el optimizador de Next.
+- **Mobile (≤860px):** hero más bajo (16:10), floats → chips; cards 16:10; CTAs a ancho;
+  hamburguesa más visible; safe-area notch.
+- **Menú público vs cuenta (Shell A):** el drawer/top bar ya no mezcla todo.
+  En el **sitio** solo links del salón + Entrar/Mi cuenta; en **/cuenta** y **/mis-citas**
+  menú de cuenta (Mis citas, Cuenta, Volver al sitio, Salir). Puertas Admin/Empleado
+  solo dentro del menú de cuenta.
+- **Admin / Empleado (Shells B y C):** hamburger con toggle real; footer sticky con
+  “Otras áreas” + **Cerrar sesión** siempre visible; topbar sin duplicar Cuenta;
+  dashboard KPIs en `kpi-grid` 2×2 en móvil; tablas con scroll horizontal.
+- **/sucursales con MapLibre GL:** mapa real (OpenFreeMap liberty), pins sincronizados
+  con la lista, sin logo/watermark Mapbox; atribución OSM compacta. Dep `maplibre-gl`.
+- Política de versionado reforzada (docs `VERSIONING.md`, `AGENTS.md`, `GROK.md`).
 
 ---
 

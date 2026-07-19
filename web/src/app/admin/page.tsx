@@ -54,7 +54,7 @@ export default async function AdminDashboard() {
           </Link>
         }
       />
-      <div className="grid-4" style={{ marginBottom: "1.5rem" }}>
+      <div className="kpi-grid">
         {[
           { label: "Citas hoy", value: String(todayCount) },
           { label: "Servicios", value: String(services) },
@@ -64,13 +64,9 @@ export default async function AdminDashboard() {
             value: formatPrice(revenue._sum.priceCents ?? 0),
           },
         ].map((k) => (
-          <div key={k.label} className="card">
-            <div className="card-body">
-              <div className="tiny muted">{k.label}</div>
-              <div style={{ fontSize: "1.5rem", fontWeight: 700, fontFamily: "var(--font-display)" }}>
-                {k.value}
-              </div>
-            </div>
+          <div key={k.label} className="kpi">
+            <div className="kpi-label">{k.label}</div>
+            <div className="kpi-value">{k.value}</div>
           </div>
         ))}
       </div>

@@ -3,7 +3,7 @@
 /**
  * Shell C — área empleado (sidebar reducido + topbar).
  * Contrato: docs/patterns/app-shells.md + mockup/empleado/*
- * Mismo esqueleto CSS que admin; NO PublicNav. F8: checador/comisiones van aquí.
+ * NO PublicNav. Solo “Mi día” + puertas a otras áreas.
  */
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -11,8 +11,8 @@ import { useEffect, useState } from "react";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MobileMenuToggle } from "@/components/MobileMenuToggle";
 
-const links = [
-  { href: "/empleado", label: "Agenda hoy", section: "Mi día" },
+const DAY_LINKS = [
+  { href: "/empleado", label: "Agenda hoy" },
   { href: "/empleado#permiso", label: "Solicitar permiso" },
 ];
 
@@ -50,7 +50,7 @@ export function EmpleadoShell({
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  let lastSection = "";
+  const close = () => setOpen(false);
 
   return (
     <div className={`admin-shell ${open ? "sidebar-open" : ""}`}>
@@ -59,10 +59,10 @@ export function EmpleadoShell({
         className="sidebar-backdrop"
         aria-label="Cerrar menú"
         tabIndex={open ? 0 : -1}
-        onClick={() => setOpen(false)}
+        onClick={close}
       />
 
-      <aside className="sidebar" id="empleado-sidebar">
+      <aside className="sidebar" id="empleado-sidebar" aria-label="Navegación empleado">
         <div className="sidebar-brand">
           <span className="logo-mark">S</span>
           <span>Empleado</span>
@@ -70,50 +70,48 @@ export function EmpleadoShell({
             type="button"
             className="sidebar-close-btn"
             aria-label="Cerrar menú"
-            onClick={() => setOpen(false)}
+            onClick={close}
           >
             ×
           </button>
         </div>
 
-        <nav className="sidebar-nav" aria-label="Empleado">
-          {links.map((l) => {
-            const showSection = Boolean(l.section && l.section !== lastSection);
-            if (l.section) lastSection = l.section;
+        <nav className="sidebar-nav">
+          <div className="sidebar-section">Mi día</div>
+          {DAY_LINKS.map((l) => {
             const base = l.href.split("#")[0];
             const active =
               base === "/empleado"
                 ? pathname === "/empleado" && !l.href.includes("#")
                 : pathname.startsWith(base);
             return (
-              <div key={l.href}>
-                {showSection && <div className="sidebar-section">{l.section}</div>}
-                <Link
-                  href={l.href}
-                  className={active ? "is-active" : undefined}
-                  onClick={() => setOpen(false)}
-                >
-                  {l.label}
-                </Link>
-              </div>
+              <Link
+                key={l.href}
+                href={l.href}
+                className={active ? "is-active" : undefined}
+                onClick={close}
+              >
+                {l.label}
+              </Link>
             );
           })}
         </nav>
 
         <div className="sidebar-footer">
+          <div className="sidebar-section">Otras áreas</div>
           {showAdmin && (
-            <Link href="/admin" onClick={() => setOpen(false)}>
-              Vista admin
+            <Link href="/admin" onClick={close}>
+              Panel admin
             </Link>
           )}
-          <Link href="/cuenta" onClick={() => setOpen(false)}>
-            Mi cuenta
-          </Link>
-          <Link href="/" onClick={() => setOpen(false)}>
+          <Link href="/" onClick={close}>
             Sitio público
           </Link>
-          <form action="/api/auth/logout" method="post">
-            <button type="submit" className="btn btn-ghost btn-sm" style={{ width: "100%" }}>
+          <Link href="/cuenta" onClick={close}>
+            Mi cuenta
+          </Link>
+          <form action="/api/auth/logout" method="post" className="sidebar-logout">
+            <button type="submit" className="btn btn-secondary btn-sm" style={{ width: "100%" }}>
               Cerrar sesión
             </button>
           </form>
@@ -126,17 +124,17 @@ export function EmpleadoShell({
             <MobileMenuToggle
               className="admin-menu-btn"
               open={open}
-              onClick={() => setOpen(true)}
+              onClick={() => setOpen((v) => !v)}
               controlsId="empleado-sidebar"
             />
-            <div>
+            <div className="admin-topbar-title">
               <strong>Mi agenda</strong>
               <div className="tiny muted">{userName}</div>
             </div>
           </div>
           <div className="admin-topbar-right">
             <NotificationBell href="/cuenta" />
-            <span className="badge badge-info">Empleado</span>
+            <span className="badge badge-info admin-topbar-badge">Empleado</span>
           </div>
         </header>
         <div className="admin-content">{children}</div>

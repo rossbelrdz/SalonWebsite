@@ -23,6 +23,7 @@ export function ServiceForm() {
         price: Number(fd.get("price")),
         category: fd.get("category"),
         mediaClass: fd.get("mediaClass"),
+        imageUrl: fd.get("imageUrl"),
       }),
     });
     const data = await res.json();
@@ -67,7 +68,7 @@ export function ServiceForm() {
         </select>
       </div>
       <div className="form-group">
-        <label className="form-label">Estilo visual</label>
+        <label className="form-label">Estilo visual (fallback)</label>
         <select name="mediaClass" className="form-control" defaultValue="media-cut">
           <option value="media-cut">Corte</option>
           <option value="media-color">Color</option>
@@ -76,6 +77,18 @@ export function ServiceForm() {
           <option value="media-spa">Spa</option>
           <option value="media-makeup">Maquillaje</option>
         </select>
+      </div>
+      <div className="form-group">
+        <label className="form-label">URL de imagen (opcional)</label>
+        <input
+          name="imageUrl"
+          className="form-control"
+          placeholder="/img/services/mi-servicio.webp"
+        />
+        <p className="tiny muted" style={{ marginTop: "0.35rem" }}>
+          Ruta pública (WebP preferido). Generar con{" "}
+          <code>npm run images:optimize</code>
+        </p>
       </div>
       <button type="submit" className="btn btn-primary" disabled={loading}>
         {loading ? "…" : "Crear"}

@@ -3,7 +3,7 @@
 /**
  * Shell B — panel admin (sidebar + topbar).
  * Contrato: docs/patterns/app-shells.md + docs/patterns/admin-sidebar.md
- * NO montar PublicNav aquí. Móvil = este sidebar en drawer, no el menú del sitio.
+ * NO PublicNav. Móvil = este sidebar en drawer (solo operación admin).
  */
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -11,18 +11,61 @@ import { useEffect, useState } from "react";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MobileMenuToggle } from "@/components/MobileMenuToggle";
 
-const baseLinks = [
+type NavLink = { href: string; label: string; section?: string };
+
+/** Solo operación del negocio — no sitio público ni menú de cuenta. */
+const OP_LINKS: NavLink[] = [
   { href: "/admin", label: "Dashboard", section: "Operación" },
   { href: "/admin/citas", label: "Citas" },
   { href: "/admin/servicios", label: "Servicios" },
   { href: "/admin/sucursales", label: "Sucursales" },
   { href: "/admin/personal", label: "Personal", section: "Personas" },
   { href: "/admin/clientes", label: "Clientes" },
-  { href: "/admin/notificaciones", label: "Log notificaciones", section: "Sistema" },
+];
+
+const SYSTEM_LINKS: NavLink[] = [
+  { href: "/admin/config", label: "Configuración", section: "Sistema" },
+  { href: "/admin/notificaciones", label: "Log notificaciones" },
   { href: "/admin/permisos", label: "Matriz permisos" },
   { href: "/admin/matriz-notificaciones", label: "Matriz notificaciones" },
-  { href: "/admin/config", label: "Configuración" },
 ];
+
+function isActive(pathname: string, href: string) {
+  if (href === "/admin") return pathname === "/admin";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function NavBlock({
+  links,
+  pathname,
+  onNavigate,
+}: {
+  links: NavLink[];
+  pathname: string;
+  onNavigate: () => void;
+}) {
+  let lastSection = "";
+  return (
+    <>
+      {links.map((l) => {
+        const showSection = Boolean(l.section && l.section !== lastSection);
+        if (l.section) lastSection = l.section;
+        return (
+          <div key={l.href}>
+            {showSection && <div className="sidebar-section">{l.section}</div>}
+            <Link
+              href={l.href}
+              className={isActive(pathname, l.href) ? "is-active" : undefined}
+              onClick={onNavigate}
+            >
+              {l.label}
+            </Link>
+          </div>
+        );
+      })}
+    </>
+  );
+}
 
 export function AdminShell({
   isSuperAdmin = false,
@@ -36,12 +79,14 @@ export function AdminShell({
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  // Cerrar menú al navegar (móvil)
+  const systemLinks: NavLink[] = isSuperAdmin
+    ? [...SYSTEM_LINKS, { href: "/admin/plataforma", label: "Plataforma" }]
+    : SYSTEM_LINKS;
+
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
-  // Evitar scroll del fondo con drawer abierto
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -51,7 +96,6 @@ export function AdminShell({
     };
   }, [open]);
 
-  // Escape cierra el menú
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -61,14 +105,7 @@ export function AdminShell({
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const links = isSuperAdmin
-    ? [
-        ...baseLinks,
-        { href: "/admin/plataforma", label: "Plataforma", section: "Sistema" },
-      ]
-    : baseLinks;
-
-  let lastSection = "";
+  const close = () => setOpen(false);
 
   return (
     <div className={`admin-shell ${open ? "sidebar-open" : ""}`}>
@@ -77,10 +114,10 @@ export function AdminShell({
         className="sidebar-backdrop"
         aria-label="Cerrar menú"
         tabIndex={open ? 0 : -1}
-        onClick={() => setOpen(false)}
+        onClick={close}
       />
 
-      <aside className="sidebar" id="admin-sidebar">
+      <aside className="sidebar" id="admin-sidebar" aria-label="Navegación admin">
         <div className="sidebar-brand">
           <span className="logo-mark">S</span>
           <span>Salon Admin</span>
@@ -88,47 +125,30 @@ export function AdminShell({
             type="button"
             className="sidebar-close-btn"
             aria-label="Cerrar menú"
-            onClick={() => setOpen(false)}
+            onClick={close}
           >
             ×
           </button>
         </div>
 
         <nav className="sidebar-nav">
-          {links.map((l) => {
-            const showSection = Boolean(l.section && l.section !== lastSection);
-            if (l.section) lastSection = l.section;
-            const active =
-              l.href === "/admin"
-                ? pathname === "/admin"
-                : pathname.startsWith(l.href);
-            return (
-              <div key={l.href}>
-                {showSection && <div className="sidebar-section">{l.section}</div>}
-                <Link
-                  href={l.href}
-                  className={active ? "is-active" : undefined}
-                  onClick={() => setOpen(false)}
-                >
-                  {l.label}
-                </Link>
-              </div>
-            );
-          })}
+          <NavBlock links={OP_LINKS} pathname={pathname} onNavigate={close} />
+          <NavBlock links={systemLinks} pathname={pathname} onNavigate={close} />
         </nav>
 
         <div className="sidebar-footer">
-          <Link href="/empleado" onClick={() => setOpen(false)}>
+          <div className="sidebar-section">Otras áreas</div>
+          <Link href="/empleado" onClick={close}>
             Vista empleado
           </Link>
-          <Link href="/cuenta" onClick={() => setOpen(false)}>
-            Mi cuenta
-          </Link>
-          <Link href="/" onClick={() => setOpen(false)}>
+          <Link href="/" onClick={close}>
             Sitio público
           </Link>
-          <form action="/api/auth/logout" method="post">
-            <button type="submit" className="btn btn-ghost btn-sm" style={{ width: "100%" }}>
+          <Link href="/cuenta" onClick={close}>
+            Mi cuenta
+          </Link>
+          <form action="/api/auth/logout" method="post" className="sidebar-logout">
+            <button type="submit" className="btn btn-secondary btn-sm" style={{ width: "100%" }}>
               Cerrar sesión
             </button>
           </form>
@@ -141,20 +161,17 @@ export function AdminShell({
             <MobileMenuToggle
               className="admin-menu-btn"
               open={open}
-              onClick={() => setOpen(true)}
+              onClick={() => setOpen((v) => !v)}
               controlsId="admin-sidebar"
             />
-            <div>
+            <div className="admin-topbar-title">
               <strong>Panel admin</strong>
               <div className="tiny muted">{userName}</div>
             </div>
           </div>
           <div className="admin-topbar-right">
             <NotificationBell href="/cuenta" />
-            <Link href="/cuenta" className="btn btn-ghost btn-sm admin-topbar-cuenta">
-              Cuenta
-            </Link>
-            <span className="badge badge-accent">
+            <span className="badge badge-accent admin-topbar-badge">
               {isSuperAdmin ? "Super" : "Admin"}
             </span>
           </div>

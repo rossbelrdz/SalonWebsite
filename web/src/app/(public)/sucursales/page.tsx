@@ -1,15 +1,31 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { getDefaultTenant } from "@/lib/auth";
+import { BranchesMap, type BranchMapItem } from "@/components/BranchesMap";
 
 export const dynamic = "force-dynamic";
 
 export default async function SucursalesPage() {
   const tenant = await getDefaultTenant();
-  const branches = await prisma.branch.findMany({
+  const rows = await prisma.branch.findMany({
     where: { tenantId: tenant.id, active: true },
     orderBy: { name: "asc" },
   });
+
+  const branches: BranchMapItem[] = rows
+    .filter((b) => b.lat != null && b.lng != null)
+    .map((b) => ({
+      id: b.id,
+      name: b.name,
+      address: b.address,
+      city: b.city,
+      lat: b.lat as number,
+      lng: b.lng as number,
+      openTime: b.openTime,
+      closeTime: b.closeTime,
+      phone: b.phone,
+    }));
+
+  const missingCoords = rows.length - branches.length;
 
   return (
     <section className="section">
@@ -18,62 +34,25 @@ export default async function SucursalesPage() {
           <div>
             <h2>Sucursales</h2>
             <p className="muted" style={{ margin: 0 }}>
-              Encuentra la más cercana y agenda ahí
+              Elige en la lista o toca el pin en el mapa
             </p>
           </div>
         </div>
-        <div className="map-layout">
-          <div className="map-list">
-            {branches.map((b) => (
-              <div key={b.id} className="card">
-                <div className="card-body">
-                  <h3 style={{ margin: "0 0 0.35rem", fontSize: "1.05rem" }}>{b.name}</h3>
-                  <p className="small muted" style={{ margin: "0 0 0.5rem" }}>
-                    {b.address}, {b.city}
-                  </p>
-                  <p className="tiny muted">
-                    {b.openTime} – {b.closeTime}
-                    {b.phone ? ` · ${b.phone}` : ""}
-                  </p>
-                  <Link
-                    href={`/agendar?branchId=${b.id}`}
-                    className="btn btn-primary btn-sm"
-                    style={{ marginTop: "0.75rem" }}
-                  >
-                    Agendar aquí
-                  </Link>
-                </div>
-              </div>
-            ))}
+
+        {branches.length === 0 ? (
+          <div className="card">
+            <div className="card-body">
+              <p className="muted" style={{ margin: 0 }}>
+                No hay sucursales con ubicación en el mapa.
+                {missingCoords > 0
+                  ? " Configura latitud/longitud en el admin."
+                  : " Aún no hay sucursales activas."}
+              </p>
+            </div>
           </div>
-          <div className="map-canvas" aria-label="Mapa de sucursales">
-            {branches.map((b, i) => (
-              <div
-                key={b.id}
-                className="map-pin"
-                style={{
-                  left: `${30 + i * 25}%`,
-                  top: `${35 + i * 12}%`,
-                }}
-                title={b.name}
-              >
-                <div
-                  style={{
-                    width: 16,
-                    height: 16,
-                    borderRadius: "50%",
-                    background: "var(--accent)",
-                    margin: "0 auto 0.25rem",
-                    boxShadow: "0 0 0 4px var(--accent-soft)",
-                  }}
-                />
-                <span className="tiny" style={{ fontWeight: 700 }}>
-                  {b.name.replace("Sucursal ", "")}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+        ) : (
+          <BranchesMap branches={branches} />
+        )}
       </div>
     </section>
   );

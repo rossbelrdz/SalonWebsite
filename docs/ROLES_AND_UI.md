@@ -31,21 +31,26 @@ Detalle + checklist PR: [patterns/app-shells.md](./patterns/app-shells.md).
 Patrones: [public-nav](./patterns/public-nav.md) · [admin-sidebar](./patterns/admin-sidebar.md).
 
 ```text
-          ┌──────────── Shell A ────────────┐
+          ┌──────── Shell A — sitio ────────┐
  Visitante│  Top: Inicio · Servicios · …    │
- Cliente  │  Mis citas · Cuenta · Salir     │
+          │  Entrar / Mi cuenta · Agendar   │
           └───────────────┬─────────────────┘
-                          │ puerta “Admin” / “Mi agenda”
+                          │ “Mi cuenta”
+          ┌──────── Shell A — cuenta ───────┐
+ Cliente  │  Mis citas · Mi cuenta          │
+          │  Volver al sitio · Salir        │
+          │  (puerta Admin / agenda si staff)│
+          └───────────────┬─────────────────┘
+                          │ puerta panel
           ┌───────────────▼─────────────────┐
  Admin    │  Shell B — sidebar operación    │
- Super    │  /admin/*                       │
           └───────────────┬─────────────────┘
-                          │ puerta “Vista empleado”
+                          │ puerta empleado
           ┌───────────────▼─────────────────┐
  Empleado │  Shell C — sidebar “Mi día”     │
-          │  /empleado/*                    │
           └─────────────────────────────────┘
 ```
+
 
 ---
 

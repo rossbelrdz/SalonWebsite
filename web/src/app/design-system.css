@@ -701,6 +701,29 @@ textarea.form-control {
   overflow: hidden;
 }
 
+.hero-visual-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Soft dark gradient so float cards stay readable over photo */
+.hero-visual-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    145deg,
+    rgba(26, 47, 40, 0.45) 0%,
+    rgba(36, 52, 71, 0.25) 45%,
+    rgba(58, 42, 36, 0.4) 100%
+  );
+  pointer-events: none;
+}
+
 .hero-visual::after {
   content: "";
   position: absolute;
@@ -712,6 +735,8 @@ textarea.form-control {
       transparent 100%
     );
   animation: sheen 6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
 }
 
 @keyframes sheen {
@@ -728,6 +753,7 @@ textarea.form-control {
 
 .hero-float {
   position: absolute;
+  z-index: 2;
   background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.18);
@@ -757,6 +783,31 @@ textarea.form-control {
   right: 18%;
 }
 
+/* Chips under hero photo (mobile-first alternative to floating cards) */
+.hero-chips {
+  display: none;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.85rem;
+}
+.hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+.hero-chip strong {
+  color: var(--primary);
+  font-weight: 700;
+}
+
 /* Sections */
 .section {
   padding: 3.5rem 0;
@@ -781,7 +832,7 @@ textarea.form-control {
   border-block: 1px solid var(--border);
 }
 
-/* Service media placeholders */
+/* Service media (photo or gradient placeholder) — cards use 4/3 */
 .media {
   aspect-ratio: 4/3;
   background: linear-gradient(135deg, #dfe8e3, #f0e6df);
@@ -789,8 +840,39 @@ textarea.form-control {
   overflow: hidden;
 }
 
+.media-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Detail / banner: when height is set inline, still fill the box */
+.media[style*="height"] {
+  aspect-ratio: auto;
+}
+
+.media-detail {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  max-height: none;
+  height: auto !important;
+}
+
 .media-tall {
   aspect-ratio: 3/4;
+}
+
+/* 2-line clamp for long service blurbs in cards */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .media-icon {
@@ -828,17 +910,30 @@ textarea.form-control {
   color: var(--ink);
 }
 
-/* Map mock */
+/* Sucursales: lista + MapLibre */
 .map-layout {
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: minmax(260px, 340px) 1fr;
   gap: 1.25rem;
   min-height: 480px;
+  align-items: stretch;
 }
 
 @media (max-width: 860px) {
   .map-layout {
     grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .map-list {
+    max-height: none;
+    order: 2;
+  }
+
+  .map-canvas.maplibre-host {
+    order: 1;
+    min-height: 280px;
+    height: min(48vh, 360px);
   }
 }
 
@@ -854,48 +949,112 @@ textarea.form-control {
   position: relative;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
-  background:
-    linear-gradient(rgba(31, 77, 58, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(31, 77, 58, 0.05) 1px, transparent 1px),
-    linear-gradient(160deg, #dfe8e4, #e8e0d6 50%, #d5dde8);
-  background-size: 28px 28px, 28px 28px, auto;
+  background: #e8ebe9;
   min-height: 420px;
   overflow: hidden;
 }
 
-.map-pin {
-  position: absolute;
-  transform: translate(-50%, -100%);
-  cursor: pointer;
-  text-align: center;
+.map-canvas.maplibre-host {
+  padding: 0;
 }
 
-.map-pin-dot {
-  width: 18px;
-  height: 18px;
+.maplibre-root {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.maplibre-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 1;
+  background: rgba(246, 243, 238, 0.55);
+}
+
+.maplibre-loading {
+  background: transparent;
+}
+
+/* Pins personalizados (sin default MapLibre azul) */
+.maplibre-pin {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  filter: drop-shadow(0 4px 8px rgba(20, 24, 31, 0.28));
+}
+
+.maplibre-pin-dot {
+  display: block;
+  width: 22px;
+  height: 22px;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
   background: var(--accent);
   border: 2px solid #fff;
-  box-shadow: var(--shadow);
-  margin: 0 auto 0.25rem;
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
-.map-pin span {
-  display: inline-block;
-  background: var(--surface);
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.72rem;
-  font-weight: 600;
-  box-shadow: var(--shadow-sm);
-  white-space: nowrap;
-}
-
-.map-pin.is-active .map-pin-dot {
+.maplibre-pin.is-active .maplibre-pin-dot {
   background: var(--primary);
-  width: 22px;
-  height: 22px;
+  transform: rotate(-45deg) scale(1.15);
+}
+
+/* Controles MapLibre: limpios, sin watermark grande */
+.map-canvas .maplibregl-ctrl-group {
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-sm) !important;
+  overflow: hidden;
+}
+
+.map-canvas .maplibregl-ctrl-group button {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+/* Ocultar controles de atribución/logo del vendor (usamos .map-attrib) */
+.map-canvas .maplibregl-ctrl-attrib,
+.map-canvas .maplibregl-ctrl-logo {
+  display: none !important;
+}
+
+/* Crédito legal mínimo OSM — esquina, sin panel */
+.map-attrib {
+  position: absolute;
+  z-index: 2;
+  right: 8px;
+  bottom: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: rgba(255, 252, 248, 0.88);
+  color: #5c6570;
+  border: 1px solid rgba(230, 224, 214, 0.9);
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+.map-attrib:hover {
+  color: var(--ink);
+}
+
+/* Lista seleccionable en mapa */
+.map-list .card-selectable {
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.map-list .card-selectable.is-selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-soft);
 }
 
 /* Booking wizard */
@@ -1253,8 +1412,27 @@ textarea.form-control {
 
 .sidebar-footer {
   margin-top: auto;
-  padding-top: 1rem;
+  flex-shrink: 0;
+  padding-top: 0.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: #12171e;
+  /* Always visible at bottom of drawer (nav scrolls above) */
+  position: sticky;
+  bottom: 0;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+.sidebar-footer .sidebar-section {
+  padding-top: 0.65rem;
+}
+
+.sidebar-logout {
+  margin-top: 0.65rem;
+  padding: 0 0.25rem 0.25rem;
+}
+
+.sidebar-logout .btn {
+  white-space: normal;
 }
 
 .admin-main {
@@ -1305,9 +1483,12 @@ textarea.form-control {
     grid-template-columns: 1fr;
   }
 
-  /* Menú hamburguesa visible en la esquina del topbar */
   .admin-menu-btn.mobile-menu-btn {
     display: inline-flex;
+    width: 44px;
+    height: 44px;
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-sm);
   }
 
   .sidebar-close-btn {
@@ -1330,6 +1511,7 @@ textarea.form-control {
     transition: transform 0.28s var(--ease);
     box-shadow: none;
     pointer-events: none;
+    padding-top: max(1.25rem, env(safe-area-inset-top, 0px));
   }
 
   .admin-shell.sidebar-open .sidebar {
@@ -1363,6 +1545,11 @@ textarea.form-control {
   .admin-topbar {
     padding: 0 0.85rem;
     height: 56px;
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  .admin-topbar-title strong {
+    font-size: 0.95rem;
   }
 
   .admin-content {
@@ -1370,13 +1557,43 @@ textarea.form-control {
   }
 
   .admin-topbar-cuenta {
-    display: none; /* ahorra espacio; campanita + badge bastan */
+    display: none;
   }
 
   /* Tablas: scroll horizontal sin romper el viewport */
   .table-wrap {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    margin-inline: -0.15rem;
+  }
+
+  .table-wrap table.data {
+    min-width: 520px;
+  }
+
+  /* KPIs: 2×2 en móvil, no 4 torres apiladas */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .kpi {
+    padding: 0.9rem;
+  }
+
+  .kpi-value {
+    font-size: 1.35rem;
+  }
+
+  /* Page header: stack title + actions */
+  .page-header .row {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.75rem;
+  }
+
+  .page-header .btn {
+    width: 100%;
   }
 }
 
@@ -1673,4 +1890,124 @@ table.data tr:hover td {
 .mock-banner a {
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+/*
+ * Public mobile / tablet compact layout — MUST stay at end of file so it
+ * overrides base .media / .hero-* rules (same specificity → source order).
+ * Breakpoint aligned with hamburger (860px).
+ */
+@media (max-width: 860px) {
+  .container {
+    width: min(100% - 1.5rem, var(--container));
+  }
+
+  .hero {
+    padding: 1.5rem 0 1.75rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.7rem, 6vw, 2.25rem);
+    line-height: 1.12;
+  }
+
+  .hero-lead {
+    font-size: 0.98rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .hero-grid {
+    gap: 1.15rem;
+  }
+
+  /* Photo: short landscape, not a 380px tower */
+  .hero-visual {
+    min-height: 0 !important;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    border-radius: 18px;
+  }
+
+  /* Floating pills clip/overlap on narrow screens → chips below instead */
+  .hero-float {
+    display: none !important;
+  }
+
+  .hero-chips {
+    display: flex !important;
+  }
+
+  .section {
+    padding: 2rem 0;
+  }
+
+  .section-header {
+    margin-bottom: 1.1rem;
+    align-items: center;
+  }
+
+  .section-header h2 {
+    font-size: 1.35rem;
+  }
+
+  /* Service cards: less tall image so text is above the fold sooner */
+  .media {
+    aspect-ratio: 16 / 10;
+  }
+
+  .media-detail {
+    aspect-ratio: 16 / 10;
+  }
+
+  .card-body {
+    padding: 0.9rem 1rem 1.1rem;
+  }
+
+  .card-body h3 {
+    font-size: 1.02rem !important;
+  }
+
+  .price {
+    font-size: 1.05rem;
+  }
+
+  .hero .row {
+    width: 100%;
+  }
+
+  .hero .row .btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: center;
+  }
+
+  .mobile-menu-btn {
+    width: 44px;
+    height: 44px;
+    border-color: var(--border-strong);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .public-nav {
+    height: 64px;
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  .mobile-nav-drawer {
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .card-selectable .card-body {
+    padding: 0.75rem 0.85rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    gap: 0.85rem;
+  }
 }

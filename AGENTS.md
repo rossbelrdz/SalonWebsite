@@ -45,7 +45,8 @@ pero **sin uso en código**. Turnstile se guarda en settings pero **no se verifi
 Salon/
 ├── AGENTS.md                 # este archivo
 ├── GROK.md / README.md       # contexto de entrada
-├── VERSION / CHANGELOG.md    # SemVer + Keep a Changelog (actual: 0.8.0)
+├── KIMI.md                   # panorama técnico verificado contra código (referencia de trabajo)
+├── VERSION / CHANGELOG.md    # SemVer + Keep a Changelog (actual: 0.9.0)
 ├── docker-compose.yml        # postgres, redis, minio, app, worker, tunnel (perfil)
 ├── docs/                     # ~22 docs por tema (ver §8) + patterns/ (12 patrones UI)
 ├── mockup/                   # HTML estático CONGELADO — solo referencia visual
@@ -107,38 +108,30 @@ Salon/
 
 ## 6. Deploy y operación
 
-**Solo hay compose de desarrollo + tunnel. No hay CI/CD** (sin `.github/`, `vercel.json`, etc.).
+**No hay CI/CD** (sin `.github/`, `vercel.json`). Compose es la vía de deploy.
 
-- Dev local: `docker compose up` → `http://localhost:3000` (ver `APP_PORT`).
-- Demo/"prod": `docker compose --profile tunnel up -d` → `https://salon.freonx.org`
-  (cloudflared → `app:3000`). Setup del tunnel documentado en `docs/DEPLOY.md`.
-- El arranque de `app` corre `web/scripts/docker-dev-entrypoint.sh`:
-  `npm ci` → `prisma generate` → **`prisma db push`** → seed → assert → `next dev --turbopack`.
-  **No hay migraciones versionadas** (no existe `web/prisma/migrations/`); es deuda conocida.
-- **Worker:** servicio compose aparte, mismo Dockerfile target dev, `npx tsx worker/index.ts`,
-  `SKIP_SEED=1`/`SKIP_DB_PUSH=1`, depende de `app` healthy (`/api/health`).
-- Scripts npm útiles (`web/package.json`): `db:generate`, `db:push`, `db:seed`, `db:setup`,
-  `db:reset` (destructivo), `db:assert`.
-- **Versionado (OBLIGATORIO en cada cambio de producto/fix/seguridad):**  
-  1. Anotar en `CHANGELOG.md` (`[Unreleased]` o sección de versión).  
-  2. Al cerrar el lote entregable: subir `VERSION` + `web/package.json` y mover
-     `[Unreleased]` → `## [X.Y.Z] — fecha`.  
-  3. Política completa: `docs/VERSIONING.md`.  
-  **No** dar por cerrada una tarea de código sin rastro en changelog/versión.
-- Variables de entorno requeridas: ver `.env.example` raíz (infra Postgres/Redis/MinIO,
-  `APP_ENCRYPTION_KEY`, `SESSION_SECRET`, `TENANT_SLUG`, `PUBLIC_APP_URL`,
-  `CLOUDFLARE_TUNNEL_TOKEN`, `VAPID_*`, integraciones opcionales).
-- **URLs absolutas / redirects:** usar `web/src/lib/url.ts` (`appBaseUrl`,
-  `requestPublicOrigin`, `absoluteUrl`). **Nunca** `new URL(path, req.url)` para
-  redirects: en Docker Next escucha en `0.0.0.0:3000` y el browser acaba en
-  `http://0.0.0.0:3000/...`. Con tunnel, los headers `x-forwarded-*` mandan.
-  `PUBLIC_APP_URL` debe ser la URL que ve el usuario (`http://localhost:3010` o
-  `https://salon.freonx.org`).
+| Compose | Modo | Comando |
+|---------|------|---------|
+| **`docker-compose.yml`** | **production** (`next start`) | `docker compose --profile tunnel up -d --build` |
+| `docker-compose.dev.yml` | development (Turbopack) | `docker compose -f docker-compose.dev.yml up` |
 
-⚠️ Discrepancias conocidas docs↔realidad: el "deploy" corre `next dev` con
-`NODE_ENV=development`; el target `runner` del Dockerfile existe pero ningún compose lo usa;
-compose publica puertos 5432/6379/9000/9001/3000 al host pese a lo que dice DEPLOY.md;
-`cloudflared:latest` sin pinnear. Hardening de prod = Fase 9 (pendiente).
+- **Prod/demo:** `NODE_ENV=production`, imagen target **`runner`** (build en imagen, sin montar
+  `./web`). Entrypoint `web/scripts/docker-prod-entrypoint.sh` → prisma generate + db push +
+  seed → **`next start`**. Tunnel: `https://salon.freonx.org` (cloudflared → `app:3000`).
+- **Dev:** monta código, `next dev --turbopack`, entrypoint `docker-dev-entrypoint.sh`.
+- **Worker:** misma imagen; `npx tsx worker/index.ts`, `SKIP_SEED=1` / `SKIP_DB_PUSH=1`.
+- **No hay migraciones versionadas** (solo `db push`); deuda conocida.
+- Scripts npm: `build`, `start`, `db:generate`, `db:push`, `db:seed`, `db:setup`, `db:reset`,
+  `db:assert`.
+- **Versionado (OBLIGATORIO):** `CHANGELOG.md` + `VERSION` + `web/package.json` —
+  ver `docs/VERSIONING.md`.
+- Env: `.env.example` (`APP_ENCRYPTION_KEY`, `SESSION_SECRET`, `PUBLIC_APP_URL`,
+  `CLOUDFLARE_TUNNEL_TOKEN`, `VAPID_*`, …).
+- **URLs:** `web/src/lib/url.ts`. Nunca `new URL(path, req.url)` para redirects en Docker.
+  Prod: `PUBLIC_APP_URL=https://salon.freonx.org`.
+
+⚠️ Compose aún publica Postgres/Redis/MinIO al host (hardening = F9). `cloudflared:latest`
+sin pinnear.
 
 ## 7. UI shells y navegación (OBLIGATORIO — no re-mezclar)
 
