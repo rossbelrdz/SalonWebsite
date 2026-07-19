@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { prisma } from "@/lib/db";
-import { verifyPassword } from "@/lib/auth";
+import { verifyPassword, getDefaultTenant } from "@/lib/auth";
 import { setSessionCookie } from "@/lib/session";
 import { decryptMfaSecret, verifyMfaToken } from "@/lib/mfa";
+import { decryptSecret } from "@/lib/crypto";
+import { requireTurnstileIfConfigured } from "@/lib/turnstile";
 
 export async function POST(req: Request) {
   try {
@@ -13,7 +15,7 @@ export async function POST(req: Request) {
     const mfaToken = body.mfaToken ? String(body.mfaToken).trim() : "";
     const mfaPending = body.mfaPending ? String(body.mfaPending) : "";
 
-    // Segundo paso: solo MFA
+    // Segundo paso: solo MFA (Turnstile ya pasó en el primer paso)
     if (mfaPending && mfaToken) {
       const user = await prisma.user.findFirst({
         where: { mfaPendingToken: mfaPending, active: true },
@@ -31,6 +33,18 @@ export async function POST(req: Request) {
         data: { mfaPendingToken: null },
       });
       return finishLogin(user);
+    }
+
+    // Turnstile en el primer paso de login
+    const tenant = await getDefaultTenant();
+    const s = tenant.settings;
+    const ts = await requireTurnstileIfConfigured({
+      token: body.turnstileToken,
+      siteKey: s?.turnstileSiteKey,
+      secret: decryptSecret(s?.turnstileSecretEnc),
+    });
+    if (!ts.ok) {
+      return NextResponse.json({ error: ts.error }, { status: ts.status });
     }
 
     if (!identifier || !password) {

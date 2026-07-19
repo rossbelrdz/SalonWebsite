@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { getDefaultTenant, hashPassword } from "@/lib/auth";
 import { setSessionCookie } from "@/lib/session";
 import { notifyAccountCreated } from "@/lib/notifications";
+import { decryptSecret } from "@/lib/crypto";
+import { requireTurnstileIfConfigured } from "@/lib/turnstile";
 
 export async function POST(req: Request) {
   try {
@@ -12,6 +14,17 @@ export async function POST(req: Request) {
     const email = body.email ? String(body.email).trim().toLowerCase() : null;
     const phone = body.phone ? String(body.phone).trim() : null;
     const password = String(body.password || "");
+
+    const tenant = await getDefaultTenant();
+    const s = tenant.settings;
+    const ts = await requireTurnstileIfConfigured({
+      token: body.turnstileToken,
+      siteKey: s?.turnstileSiteKey,
+      secret: decryptSecret(s?.turnstileSecretEnc),
+    });
+    if (!ts.ok) {
+      return NextResponse.json({ error: ts.error }, { status: ts.status });
+    }
 
     if (!name || name.length < 2) {
       return NextResponse.json({ error: "Nombre requerido" }, { status: 400 });
@@ -36,7 +49,6 @@ export async function POST(req: Request) {
       }
     }
 
-    const tenant = await getDefaultTenant();
     const passwordHash = await hashPassword(password);
 
     const user = await prisma.user.create({

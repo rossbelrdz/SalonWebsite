@@ -172,73 +172,98 @@ export const NOTIF_EVENT_CATALOG: NotifEventDef[] = [
   { eventType: "absence.resolved", label: "Ausencia aprobada/rechazada" },
 ];
 
+/** Alineado a Prisma enum TelegramRouteMode. */
+export type TelegramRouteMode = "USER_LINKED" | "TARGETS" | "BOTH";
+
 export type ChannelFlags = {
   email: boolean;
   telegram: boolean;
   inApp: boolean;
   push: boolean;
+  telegramMode: TelegramRouteMode;
+  telegramTargetIds: string[];
 };
 
-/** Defaults alineados a docs/NOTIFICATIONS_MATRIX.md */
+const UL = "USER_LINKED" as const;
+const TG = "TARGETS" as const;
+
+function ch(
+  email: boolean,
+  telegram: boolean,
+  inApp: boolean,
+  push: boolean,
+  mode: TelegramRouteMode = UL,
+): ChannelFlags {
+  return {
+    email,
+    telegram,
+    inApp,
+    push,
+    telegramMode: mode,
+    telegramTargetIds: [],
+  };
+}
+
+/** Defaults alineados a docs/NOTIFICATIONS_MATRIX.md + destinos ops. */
 export const DEFAULT_NOTIFICATION_MATRIX: Record<
   string,
   Partial<Record<NotifAudience, ChannelFlags>>
 > = {
   "account.created": {
-    CLIENT: { email: true, telegram: false, inApp: true, push: false },
-    EMPLOYEE: { email: true, telegram: false, inApp: true, push: false },
-    ADMIN: { email: false, telegram: false, inApp: true, push: false },
+    CLIENT: ch(true, false, true, false),
+    EMPLOYEE: ch(true, false, true, false),
+    ADMIN: ch(false, false, true, false),
   },
   "appointment.created": {
-    CLIENT: { email: true, telegram: true, inApp: true, push: true },
-    EMPLOYEE: { email: true, telegram: true, inApp: true, push: true },
-    ADMIN: { email: false, telegram: false, inApp: true, push: false },
+    CLIENT: ch(true, true, true, true),
+    EMPLOYEE: ch(true, true, true, true),
+    ADMIN: ch(false, false, true, false),
   },
   "appointment.prepaid": {
-    CLIENT: { email: true, telegram: false, inApp: true, push: true },
-    ADMIN: { email: false, telegram: false, inApp: true, push: false },
+    CLIENT: ch(true, false, true, true),
+    ADMIN: ch(false, false, true, false),
   },
   "appointment.cancelled": {
-    CLIENT: { email: true, telegram: true, inApp: true, push: true },
-    EMPLOYEE: { email: true, telegram: false, inApp: true, push: true },
-    ADMIN: { email: false, telegram: false, inApp: true, push: false },
+    CLIENT: ch(true, true, true, true),
+    EMPLOYEE: ch(true, false, true, true),
+    ADMIN: ch(false, true, true, false, TG),
   },
   "appointment.reassignment": {
-    CLIENT: { email: true, telegram: true, inApp: true, push: true },
-    EMPLOYEE: { email: false, telegram: false, inApp: true, push: true },
-    ADMIN: { email: false, telegram: false, inApp: true, push: false },
+    CLIENT: ch(true, true, true, true),
+    EMPLOYEE: ch(false, false, true, true),
+    ADMIN: ch(false, false, true, false),
   },
   "appointment.reassignment_accepted": {
-    CLIENT: { email: true, telegram: false, inApp: true, push: false },
-    EMPLOYEE: { email: true, telegram: false, inApp: true, push: true },
-    ADMIN: { email: false, telegram: false, inApp: true, push: false },
+    CLIENT: ch(true, false, true, false),
+    EMPLOYEE: ch(true, false, true, true),
+    ADMIN: ch(false, false, true, false),
   },
   "appointment.rescheduled": {
-    CLIENT: { email: true, telegram: false, inApp: true, push: false },
-    EMPLOYEE: { email: true, telegram: false, inApp: true, push: true },
-    ADMIN: { email: false, telegram: false, inApp: true, push: false },
+    CLIENT: ch(true, false, true, false),
+    EMPLOYEE: ch(true, false, true, true),
+    ADMIN: ch(false, false, true, false),
   },
   "appointment.reminder_24h": {
-    CLIENT: { email: true, telegram: true, inApp: false, push: true },
-    EMPLOYEE: { email: false, telegram: false, inApp: true, push: false },
+    CLIENT: ch(true, true, false, true),
+    EMPLOYEE: ch(false, false, true, false),
   },
   "appointment.reminder_2h": {
-    CLIENT: { email: true, telegram: true, inApp: false, push: true },
-    EMPLOYEE: { email: false, telegram: false, inApp: true, push: false },
+    CLIENT: ch(true, true, false, true),
+    EMPLOYEE: ch(false, false, true, false),
   },
   "payment.refunded": {
-    CLIENT: { email: true, telegram: false, inApp: true, push: true },
-    ADMIN: { email: true, telegram: false, inApp: true, push: false },
+    CLIENT: ch(true, false, true, true),
+    ADMIN: ch(true, false, true, false),
   },
   "absence.requested": {
-    EMPLOYEE: { email: false, telegram: false, inApp: true, push: false },
-    ADMIN: { email: true, telegram: true, inApp: true, push: true },
+    EMPLOYEE: ch(false, false, true, false),
+    ADMIN: ch(true, true, true, true, TG),
   },
   "absence.resolved": {
-    EMPLOYEE: { email: true, telegram: false, inApp: true, push: true },
+    EMPLOYEE: ch(true, false, true, true),
   },
 };
 
 export function emptyChannels(): ChannelFlags {
-  return { email: false, telegram: false, inApp: false, push: false };
+  return ch(false, false, false, false);
 }

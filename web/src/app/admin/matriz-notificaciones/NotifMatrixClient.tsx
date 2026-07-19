@@ -2,30 +2,57 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+type TelegramRouteMode = "USER_LINKED" | "TARGETS" | "BOTH";
+
 type Channels = {
   email: boolean;
   telegram: boolean;
   inApp: boolean;
   push: boolean;
+  telegramMode: TelegramRouteMode;
+  telegramTargetIds: string[];
 };
 
 type EventDef = { eventType: string; label: string };
 type Audience = { code: string; label: string };
+type TgTarget = {
+  id: string;
+  label: string;
+  kind: string;
+  chatId: string;
+  isDefaultOps: boolean;
+};
 
-const CHANNEL_LABELS: Record<keyof Channels, string> = {
+const CHANNEL_LABELS: Record<"email" | "telegram" | "inApp" | "push", string> = {
   email: "Email",
   telegram: "Telegram",
   inApp: "In-app",
   push: "Push",
 };
 
+const MODE_LABELS: Record<TelegramRouteMode, string> = {
+  USER_LINKED: "Usuario vinculado",
+  TARGETS: "Destinos ops",
+  BOTH: "Ambos",
+};
+
+function emptyCh(): Channels {
+  return {
+    email: false,
+    telegram: false,
+    inApp: false,
+    push: false,
+    telegramMode: "USER_LINKED",
+    telegramTargetIds: [],
+  };
+}
+
 export function NotifMatrixClient() {
   const [events, setEvents] = useState<EventDef[]>([]);
   const [audiences, setAudiences] = useState<Audience[]>([]);
   const [matrix, setMatrix] = useState<Record<string, Record<string, Channels>>>({});
-  const [dirty, setDirty] = useState<
-    (Channels & { eventType: string; audience: string })[]
-  >([]);
+  const [targets, setTargets] = useState<TgTarget[]>([]);
+  const [dirty, setDirty] = useState<(Channels & { eventType: string; audience: string })[]>([]);
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(true);
@@ -41,6 +68,7 @@ export function NotifMatrixClient() {
       setEvents(data.events);
       setAudiences(data.audiences);
       setMatrix(data.matrix);
+      setTargets(data.targets || []);
       setDirty([]);
       if (data.audiences?.[0]) setAudienceFocus(data.audiences[0].code);
     } catch (e) {
@@ -54,14 +82,7 @@ export function NotifMatrixClient() {
     load();
   }, [load]);
 
-  function toggle(eventType: string, audience: string, channel: keyof Channels) {
-    const cur = matrix[eventType]?.[audience] || {
-      email: false,
-      telegram: false,
-      inApp: false,
-      push: false,
-    };
-    const next = { ...cur, [channel]: !cur[channel] };
+  function markDirty(eventType: string, audience: string, next: Channels) {
     setMatrix((m) => ({
       ...m,
       [eventType]: { ...m[eventType], [audience]: next },
@@ -71,6 +92,41 @@ export function NotifMatrixClient() {
         (x) => !(x.eventType === eventType && x.audience === audience),
       );
       return [...rest, { eventType, audience, ...next }];
+    });
+  }
+
+  function toggle(
+    eventType: string,
+    audience: string,
+    channel: "email" | "telegram" | "inApp" | "push",
+  ) {
+    const cur = matrix[eventType]?.[audience] || emptyCh();
+    const next = { ...cur, [channel]: !cur[channel] };
+    // Si se activa telegram en ADMIN y mode es USER_LINKED, sugerir TARGETS
+    if (
+      channel === "telegram" &&
+      next.telegram &&
+      audience === "ADMIN" &&
+      next.telegramMode === "USER_LINKED"
+    ) {
+      next.telegramMode = "TARGETS";
+    }
+    markDirty(eventType, audience, next);
+  }
+
+  function setMode(eventType: string, audience: string, mode: TelegramRouteMode) {
+    const cur = matrix[eventType]?.[audience] || emptyCh();
+    markDirty(eventType, audience, { ...cur, telegramMode: mode });
+  }
+
+  function toggleTarget(eventType: string, audience: string, targetId: string) {
+    const cur = matrix[eventType]?.[audience] || emptyCh();
+    const ids = new Set(cur.telegramTargetIds || []);
+    if (ids.has(targetId)) ids.delete(targetId);
+    else ids.add(targetId);
+    markDirty(eventType, audience, {
+      ...cur,
+      telegramTargetIds: Array.from(ids),
     });
   }
 
@@ -112,7 +168,8 @@ export function NotifMatrixClient() {
     return <div className="flash flash-error">{err}</div>;
   }
 
-  const channels = Object.keys(CHANNEL_LABELS) as (keyof Channels)[];
+  const channels = Object.keys(CHANNEL_LABELS) as (keyof typeof CHANNEL_LABELS)[];
+  const showTargetUi = audienceFocus === "ADMIN";
 
   return (
     <div>
@@ -149,8 +206,9 @@ export function NotifMatrixClient() {
       </div>
 
       <p className="small muted">
-        Vista por audiencia (más legible). Cada celda = canal activo para ese evento.
-        Preferencias del usuario se aplican encima (si desactiva email, no se manda).
+        Vista por audiencia. Preferencias del usuario se aplican encima en canales
+        personales. En ADMIN con Telegram, elige modo (usuario / destinos ops) y
+        opcionalmente destinos concretos.
       </p>
 
       <div className="card">
@@ -164,16 +222,12 @@ export function NotifMatrixClient() {
                     {CHANNEL_LABELS[c]}
                   </th>
                 ))}
+                {showTargetUi && <th>Telegram route</th>}
               </tr>
             </thead>
             <tbody>
               {events.map((ev) => {
-                const ch = matrix[ev.eventType]?.[audienceFocus] || {
-                  email: false,
-                  telegram: false,
-                  inApp: false,
-                  push: false,
-                };
+                const ch = matrix[ev.eventType]?.[audienceFocus] || emptyCh();
                 return (
                   <tr key={ev.eventType}>
                     <td>
@@ -189,6 +243,73 @@ export function NotifMatrixClient() {
                         />
                       </td>
                     ))}
+                    {showTargetUi && (
+                      <td style={{ minWidth: 220 }}>
+                        {ch.telegram ? (
+                          <div>
+                            <select
+                              className="form-control"
+                              style={{ fontSize: "0.8rem", marginBottom: 4 }}
+                              value={ch.telegramMode || "USER_LINKED"}
+                              onChange={(e) =>
+                                setMode(
+                                  ev.eventType,
+                                  audienceFocus,
+                                  e.target.value as TelegramRouteMode,
+                                )
+                              }
+                            >
+                              {(Object.keys(MODE_LABELS) as TelegramRouteMode[]).map(
+                                (m) => (
+                                  <option key={m} value={m}>
+                                    {MODE_LABELS[m]}
+                                  </option>
+                                ),
+                              )}
+                            </select>
+                            {(ch.telegramMode === "TARGETS" ||
+                              ch.telegramMode === "BOTH") && (
+                              <div className="tiny" style={{ maxHeight: 90, overflow: "auto" }}>
+                                {targets.length === 0 ? (
+                                  <span className="muted">
+                                    Sin destinos (Config → Telegram)
+                                  </span>
+                                ) : (
+                                  targets.map((t) => (
+                                    <label
+                                      key={t.id}
+                                      className="row"
+                                      style={{ gap: 4, marginBottom: 2 }}
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={(ch.telegramTargetIds || []).includes(
+                                          t.id,
+                                        )}
+                                        onChange={() =>
+                                          toggleTarget(
+                                            ev.eventType,
+                                            audienceFocus,
+                                            t.id,
+                                          )
+                                        }
+                                      />
+                                      {t.label}
+                                      {t.isDefaultOps ? " ★" : ""}
+                                    </label>
+                                  ))
+                                )}
+                                <div className="muted" style={{ marginTop: 2 }}>
+                                  Vacío = default ops / legacy
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="tiny muted">—</span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 );
               })}
@@ -229,12 +350,7 @@ export function NotifMatrixClient() {
                   <tr key={ev.eventType}>
                     <td className="tiny">{ev.label}</td>
                     {audiences.map((a) => {
-                      const ch = matrix[ev.eventType]?.[a.code] || {
-                        email: false,
-                        telegram: false,
-                        inApp: false,
-                        push: false,
-                      };
+                      const ch = matrix[ev.eventType]?.[a.code] || emptyCh();
                       return channels.map((c) => (
                         <td key={`${a.code}-${c}`} style={{ textAlign: "center" }}>
                           <input
@@ -251,7 +367,8 @@ export function NotifMatrixClient() {
             </table>
           </div>
           <p className="tiny muted" style={{ padding: 8 }}>
-            E = email · T = telegram · I = in-app · P = push
+            E = email · T = telegram · I = in-app · P = push. Rutas Telegram se editan
+            en la vista por audiencia ADMIN.
           </p>
         </div>
       </details>

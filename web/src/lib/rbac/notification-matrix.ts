@@ -1,3 +1,4 @@
+import type { TelegramRouteMode } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { ensureTenantMatrices } from "./seed-matrices";
 import {
@@ -12,6 +13,11 @@ const TTL = 30_000;
 
 function ruleKey(eventType: string, audience: string) {
   return `${eventType}::${audience}`;
+}
+
+function asRouteMode(v: string | TelegramRouteMode | null | undefined): ChannelFlags["telegramMode"] {
+  if (v === "TARGETS" || v === "BOTH" || v === "USER_LINKED") return v;
+  return "USER_LINKED";
 }
 
 export function clearNotificationMatrixCache(tenantId?: string) {
@@ -39,6 +45,8 @@ async function loadMatrix(tenantId: string) {
       telegram: r.telegram,
       inApp: r.inApp,
       push: r.push,
+      telegramMode: asRouteMode(r.telegramMode),
+      telegramTargetIds: Array.isArray(r.telegramTargetIds) ? r.telegramTargetIds : [],
     });
   }
   cache.set(tenantId, { at: Date.now(), rules });
@@ -59,7 +67,7 @@ export async function getMatrixChannels(
   return def;
 }
 
-/** Intersección: matriz tenant ∩ preferencias usuario (si hay). */
+/** Intersección: matriz tenant ∩ preferencias usuario (si hay). Conserva mode/targets. */
 export function applyUserPrefs(
   matrix: ChannelFlags,
   user?: {
@@ -75,5 +83,7 @@ export function applyUserPrefs(
     telegram: matrix.telegram && user.notifyTelegram !== false,
     inApp: matrix.inApp && user.notifyInApp !== false,
     push: matrix.push && user.notifyPush !== false,
+    telegramMode: matrix.telegramMode,
+    telegramTargetIds: matrix.telegramTargetIds,
   };
 }

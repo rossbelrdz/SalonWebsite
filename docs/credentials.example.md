@@ -18,16 +18,23 @@ Detalle: [DEPLOY.md](./DEPLOY.md)
 
 ---
 
-## Otras (cuando existan)
+## Infra (env / Compose)
 
 ```text
-RESEND_API_KEY=
-TURNSTILE_SITE_KEY=
-TURNSTILE_SECRET_KEY=
-TELEGRAM_BOT_TOKEN=
 APP_ENCRYPTION_KEY=
+SESSION_SECRET=
 POSTGRES_PASSWORD=
 MINIO_ROOT_PASSWORD=
 ```
 
-También puedes ponerlas solo en `.env` (preferido para Compose).
+## Producto (Admin → Configuración, cifrado en TenantSettings)
+
+No van en `.env` de la app. Se configuran por tenant en la UI:
+
+| Integración | Campos |
+|-------------|--------|
+| Resend | API key, from email / name |
+| Telegram | Bot token, destinos (grupos/canales), legacy chat admin |
+| Turnstile | Site key + secret |
+
+También puedes documentar valores locales en este archivo gitignored; el runtime lee de DB.

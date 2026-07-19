@@ -46,6 +46,8 @@ export async function enqueueNotification(opts: {
   userId?: string | null;
   priority?: NotifyPriority;
   delayMs?: number;
+  /** Telegram topic (supergrupo). */
+  messageThreadId?: number | null;
 }) {
   const existing = await prisma.notificationLog.findUnique({
     where: { eventKey: opts.eventKey },
@@ -99,6 +101,7 @@ export async function enqueueNotification(opts: {
     text: opts.text,
     html: opts.html,
     userId: opts.userId,
+    messageThreadId: opts.messageThreadId ?? null,
   };
 
   try {

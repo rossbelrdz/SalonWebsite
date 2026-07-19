@@ -92,10 +92,11 @@ Copiar desde [`.env.example`](../.env.example). Mínimo para tunnel + URL públi
 | `NEXT_PUBLIC_APP_URL` | No | `https://salon.freonx.org` | URL conocida en el cliente (si la app la usa) |
 | `APP_PORT` | No | `3000` | Puerto interno del contenedor app |
 | `POSTGRES_*` / `REDIS_URL` / `MINIO_*` | Sí (passwords) | Ver `.env.example` | Stack interno |
-| `APP_ENCRYPTION_KEY` | **Sí** | String largo aleatorio | Cifrado de tokens en DB |
-| `RESEND_API_KEY` | Sí | Cuando haya correo | Emails con links a la URL pública |
-| `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | Site = pública | Cuando haya formularios | Anti-bot |
-| `TELEGRAM_BOT_TOKEN` | Sí | Opcional | Bot |
+| `APP_ENCRYPTION_KEY` | **Sí** | String largo aleatorio | Cifrado de tokens en DB (`*Enc`) |
+| `SESSION_SECRET` | **Sí** | String largo aleatorio | JWT de sesión |
+
+**No** van en env de app: Resend, Telegram bot token, Turnstile. Se configuran en
+**Admin → Configuración** y viven en `TenantSettings` (AES-GCM). Ver [CONFIGURATION.md](./CONFIGURATION.md).
 
 ### 3.2 Qué me debes pasar (owner → agente / deploy)
 

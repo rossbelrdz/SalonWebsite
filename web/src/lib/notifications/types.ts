@@ -13,6 +13,8 @@ export type NotificationJobData = {
   text: string;
   html?: string;
   userId?: string | null;
+  /** Telegram topic (supergrupo). */
+  messageThreadId?: number | null;
 };
 
 export type EventType =

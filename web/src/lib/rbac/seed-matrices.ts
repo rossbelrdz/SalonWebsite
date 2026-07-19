@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient, TelegramRouteMode } from "@prisma/client";
 import {
   DEFAULT_NOTIFICATION_MATRIX,
   DEFAULT_PERMISSIONS,
@@ -9,6 +9,11 @@ import {
   emptyChannels,
   type RoleCode,
 } from "./catalog";
+
+function asRouteMode(v: string | undefined): TelegramRouteMode {
+  if (v === "TARGETS" || v === "BOTH" || v === "USER_LINKED") return v;
+  return "USER_LINKED";
+}
 
 /** Siembra o rellena huecos de permisos y notifs para un tenant (no pisa overrides existentes). */
 export async function ensureTenantMatrices(
@@ -57,6 +62,10 @@ export async function ensureTenantMatrices(
     const byAud = DEFAULT_NOTIFICATION_MATRIX[ev.eventType] || {};
     for (const audience of NOTIF_AUDIENCES) {
       const ch = byAud[audience] || emptyChannels();
+      const telegramMode = asRouteMode(ch.telegramMode);
+      const telegramTargetIds = Array.isArray(ch.telegramTargetIds)
+        ? ch.telegramTargetIds
+        : [];
       await prisma.notificationMatrixRule.upsert({
         where: {
           tenantId_eventType_audience: {
@@ -71,6 +80,8 @@ export async function ensureTenantMatrices(
               telegram: ch.telegram,
               inApp: ch.inApp,
               push: ch.push,
+              telegramMode,
+              telegramTargetIds,
             }
           : {},
         create: {
@@ -81,6 +92,8 @@ export async function ensureTenantMatrices(
           telegram: ch.telegram,
           inApp: ch.inApp,
           push: ch.push,
+          telegramMode,
+          telegramTargetIds,
         },
       });
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserForm } from "./UserForm";
 
@@ -43,6 +43,16 @@ type Member = {
   active: boolean;
 };
 
+type TgTarget = {
+  id: string;
+  label: string;
+  kind: string;
+  chatId: string;
+  messageThreadId: number | null;
+  active: boolean;
+  isDefaultOps: boolean;
+};
+
 const TABS = [
   { id: "general", label: "General" },
   { id: "appearance", label: "Apariencia" },
@@ -67,6 +77,25 @@ export function ConfigClient({
   const [err, setErr] = useState("");
   const [primary, setPrimary] = useState(initial.themePrimary);
   const [accent, setAccent] = useState(initial.themeAccent);
+  const [tgTargets, setTgTargets] = useState<TgTarget[]>([]);
+  const [tgLoading, setTgLoading] = useState(false);
+
+  const loadTgTargets = useCallback(async () => {
+    setTgLoading(true);
+    try {
+      const res = await fetch("/api/admin/telegram-targets");
+      const data = await res.json();
+      if (res.ok) setTgTargets(data.targets || []);
+    } catch {
+      /* ignore */
+    } finally {
+      setTgLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (tab === "telegram") void loadTgTargets();
+  }, [tab, loadTgTargets]);
 
   async function save(section: string, payload: Record<string, unknown>) {
     setMsg("");
@@ -83,6 +112,47 @@ export function ConfigClient({
     }
     setMsg("Guardado");
     router.refresh();
+  }
+
+  async function addTgTarget(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setMsg("");
+    setErr("");
+    const fd = new FormData(e.currentTarget);
+    const res = await fetch("/api/admin/telegram-targets", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        label: fd.get("label"),
+        kind: fd.get("kind"),
+        chatId: fd.get("chatId"),
+        messageThreadId: fd.get("messageThreadId") || null,
+        isDefaultOps: fd.get("isDefaultOps") === "on",
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setErr(data.error || "Error al crear destino");
+      return;
+    }
+    e.currentTarget.reset();
+    setMsg("Destino Telegram creado");
+    void loadTgTargets();
+  }
+
+  async function deleteTgTarget(id: string) {
+    if (!confirm("¿Eliminar este destino?")) return;
+    setErr("");
+    const res = await fetch(`/api/admin/telegram-targets?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setErr(data.error || "Error al eliminar");
+      return;
+    }
+    setMsg("Destino eliminado");
+    void loadTgTargets();
   }
 
   return (
@@ -279,58 +349,151 @@ export function ConfigClient({
       )}
 
       {tab === "telegram" && (
-        <div className="card" style={{ maxWidth: 520 }}>
-          <div className="card-body">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const fd = new FormData(e.currentTarget);
-                save("telegram", {
-                  telegramEnabled: fd.get("telegramEnabled") === "on",
-                  telegramBotToken: fd.get("telegramBotToken") || undefined,
-                  telegramAdminChatId: fd.get("telegramAdminChatId"),
-                });
-              }}
-            >
-              <label className="row" style={{ marginBottom: "1rem" }}>
-                <input
-                  type="checkbox"
-                  name="telegramEnabled"
-                  defaultChecked={initial.telegramEnabled}
-                />
-                Bot activo
-              </label>
-              <div className="form-group">
-                <label className="form-label">Bot token</label>
-                <input
-                  name="telegramBotToken"
-                  type="password"
-                  className="form-control form-control-secret"
-                  placeholder={
-                    initial.hasTelegramToken
-                      ? "•••• (dejar vacío para no cambiar)"
-                      : "token de @BotFather"
-                  }
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Chat ID admin (avisos operativos)</label>
-                <input
-                  name="telegramAdminChatId"
-                  className="form-control"
-                  defaultValue={initial.telegramAdminChatId}
-                  placeholder="ej. 123456789"
-                />
-                <p className="form-hint">
-                  Webhook:{" "}
-                  <code>/api/telegram/webhook</code>. Usuarios vinculan con{" "}
-                  <code>/start &lt;userId&gt;</code>.
-                </p>
-              </div>
-              <button type="submit" className="btn btn-primary">
-                Guardar
-              </button>
-            </form>
+        <div className="grid-2" style={{ alignItems: "start" }}>
+          <div className="card" style={{ maxWidth: 520 }}>
+            <div className="card-body">
+              <h3 style={{ marginTop: 0 }}>Bot</h3>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const fd = new FormData(e.currentTarget);
+                  save("telegram", {
+                    telegramEnabled: fd.get("telegramEnabled") === "on",
+                    telegramBotToken: fd.get("telegramBotToken") || undefined,
+                    telegramAdminChatId: fd.get("telegramAdminChatId"),
+                  });
+                }}
+              >
+                <label className="row" style={{ marginBottom: "1rem" }}>
+                  <input
+                    type="checkbox"
+                    name="telegramEnabled"
+                    defaultChecked={initial.telegramEnabled}
+                  />
+                  Bot activo
+                </label>
+                <div className="form-group">
+                  <label className="form-label">Bot token</label>
+                  <input
+                    name="telegramBotToken"
+                    type="password"
+                    className="form-control form-control-secret"
+                    placeholder={
+                      initial.hasTelegramToken
+                        ? "•••• (dejar vacío para no cambiar)"
+                        : "token de @BotFather"
+                    }
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">
+                    Chat ID admin (legacy / fallback)
+                  </label>
+                  <input
+                    name="telegramAdminChatId"
+                    className="form-control"
+                    defaultValue={initial.telegramAdminChatId}
+                    placeholder="ej. -100123… o 123456789"
+                  />
+                  <p className="form-hint">
+                    Fallback si no hay destinos activos o default ops. Preferí el
+                    catálogo de destinos abajo. Webhook:{" "}
+                    <code>/api/telegram/webhook</code>. Usuarios:{" "}
+                    <code>/start &lt;userId&gt;</code>.
+                  </p>
+                </div>
+                <button type="submit" className="btn btn-primary">
+                  Guardar bot
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card-body">
+              <h3 style={{ marginTop: 0 }}>Destinos (grupos / canales)</h3>
+              <p className="small muted">
+                Usados por la matriz en modo TARGETS/BOTH (avisos operativos).
+              </p>
+              {tgLoading ? (
+                <p className="muted small">Cargando…</p>
+              ) : tgTargets.length === 0 ? (
+                <p className="small muted">Sin destinos aún.</p>
+              ) : (
+                <div className="table-wrap" style={{ marginBottom: "1rem" }}>
+                  <table className="data">
+                    <thead>
+                      <tr>
+                        <th>Label</th>
+                        <th>Tipo</th>
+                        <th>Chat</th>
+                        <th>Ops</th>
+                        <th />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tgTargets.map((t) => (
+                        <tr key={t.id}>
+                          <td>
+                            {t.label}
+                            {t.messageThreadId != null && (
+                              <div className="tiny muted">
+                                thread {t.messageThreadId}
+                              </div>
+                            )}
+                          </td>
+                          <td className="small">{t.kind}</td>
+                          <td className="tiny">
+                            <code>{t.chatId}</code>
+                          </td>
+                          <td className="small">
+                            {t.isDefaultOps ? "default" : "—"}
+                            {!t.active && " (off)"}
+                          </td>
+                          <td>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-secondary"
+                              onClick={() => deleteTgTarget(t.id)}
+                            >
+                              Eliminar
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              <form onSubmit={addTgTarget}>
+                <div className="form-group">
+                  <label className="form-label">Etiqueta</label>
+                  <input name="label" className="form-control" required placeholder="Ops principal" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Tipo</label>
+                  <select name="kind" className="form-control" defaultValue="GROUP">
+                    <option value="GROUP">Grupo</option>
+                    <option value="CHANNEL">Canal</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Chat ID</label>
+                  <input name="chatId" className="form-control" required placeholder="-100…" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Thread ID (topic, opcional)</label>
+                  <input name="messageThreadId" className="form-control" inputMode="numeric" />
+                </div>
+                <label className="row" style={{ marginBottom: "1rem" }}>
+                  <input type="checkbox" name="isDefaultOps" />
+                  Default operativo (matriz sin IDs)
+                </label>
+                <button type="submit" className="btn btn-primary btn-sm">
+                  Agregar destino
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       )}

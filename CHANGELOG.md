@@ -18,6 +18,35 @@ Política completa: [docs/VERSIONING.md](./docs/VERSIONING.md).
 
 ---
 
+## [0.10.0] — 2026-07-19
+
+### Added
+
+- **TelegramTarget** (catálogo de destinos operativos: grupo/canal + `messageThreadId`, `isDefaultOps`).
+- API admin `GET/POST/PATCH/DELETE /api/admin/telegram-targets`.
+- Matriz de notificaciones: `telegramMode` (`USER_LINKED` | `TARGETS` | `BOTH`) y `telegramTargetIds[]`.
+- UI Config → Telegram: listar/crear/eliminar destinos; chat admin como fallback legacy.
+- UI Matriz notificaciones: en audiencia ADMIN, modo de ruta Telegram + multi-select de destinos.
+- **Turnstile** real en login/registro: `web/src/lib/turnstile.ts` + siteverify si hay secret en tenant.
+- Plantillas de email: nombre del tenant, política de cancelación en confirmación, ID de cita en reembolso.
+
+### Changed
+
+- Credenciales de producto (Resend / Telegram / Turnstile) solo en **TenantSettings** (AES-GCM);
+  eliminadas de `.env.example` y docs de deploy/config.
+- Worker Telegram soporta `messageThreadId` (topics de supergrupo).
+- Defaults de matriz: ADMIN en ausencia/cancelación → Telegram `TARGETS`; CLIENT/EMPLOYEE → `USER_LINKED`.
+- `dispatchChannels` resuelve destinos por modo y encola un job por destino (idempotente).
+- Docs: `CONFIGURATION.md` (tabla env vs DB), `NOTIFICATIONS.md` (plantillas + enrutado), `AGENTS.md`
+  (changelog + commit + push obligatorio).
+- Ausencias admin usan la matriz (canales/targets) en lugar de hardcode al chat admin.
+
+### Security
+
+- Login y registro exigen token Turnstile cuando el tenant tiene `turnstileSecretEnc` configurado.
+
+---
+
 ## [0.9.0] — 2026-07-18
 
 ### Changed

@@ -516,10 +516,38 @@ async function main() {
     reset: process.env.SEED_RESET_MATRICES === "1",
   });
 
+  // Si hay chat admin legacy, asegura un destino default ops (idempotente)
+  const settings = await prisma.tenantSettings.findUnique({
+    where: { tenantId: tenant.id },
+  });
+  if (settings?.telegramAdminChatId && prisma.telegramTarget?.findFirst) {
+    const existing = await prisma.telegramTarget.findFirst({
+      where: {
+        tenantId: tenant.id,
+        chatId: settings.telegramAdminChatId,
+      },
+    });
+    if (!existing) {
+      await prisma.telegramTarget.create({
+        data: {
+          tenantId: tenant.id,
+          label: "Ops (desde chat admin legacy)",
+          kind: "GROUP",
+          chatId: settings.telegramAdminChatId,
+          isDefaultOps: true,
+          active: true,
+        },
+      });
+    }
+  }
+
   const permCount = await prisma.rolePermission.count({ where: { tenantId: tenant.id } });
   const notifCount = await prisma.notificationMatrixRule.count({
     where: { tenantId: tenant.id },
   });
+  const tgCount = prisma.telegramTarget
+    ? await prisma.telegramTarget.count({ where: { tenantId: tenant.id } })
+    : 0;
 
   console.log("Seed OK (idempotente)");
   console.log("  Tenant: demo");
@@ -529,6 +557,7 @@ async function main() {
   console.log("  super@salon.local / demo1234");
   console.log(`  RolePermission rows: ${permCount}`);
   console.log(`  NotificationMatrixRule rows: ${notifCount}`);
+  console.log(`  TelegramTarget rows: ${tgCount}`);
   console.log("  Pasarela: NONE (demo) — superadmin → Plataforma");
   console.log("  superAdmin id:", superAdmin.id);
 }

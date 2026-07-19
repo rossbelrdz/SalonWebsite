@@ -46,7 +46,7 @@ Salon/
 ├── AGENTS.md                 # este archivo
 ├── GROK.md / README.md       # contexto de entrada
 ├── KIMI.md                   # panorama técnico verificado contra código (referencia de trabajo)
-├── VERSION / CHANGELOG.md    # SemVer + Keep a Changelog (actual: 0.9.0)
+├── VERSION / CHANGELOG.md    # SemVer + Keep a Changelog (actual: 0.10.0)
 ├── docker-compose.yml        # postgres, redis, minio, app, worker, tunnel (perfil)
 ├── docs/                     # ~22 docs por tema (ver §8) + patterns/ (12 patrones UI)
 ├── mockup/                   # HTML estático CONGELADO — solo referencia visual
@@ -161,8 +161,11 @@ Roles/menús: `docs/ROLES_AND_UI.md`. Tokens: `docs/DESIGN_SYSTEM.md` §5.
 
 ## 8. Convenciones de código
 
-- **Changelog + versión en cada entrega de código** — ver §6 y `docs/VERSIONING.md`.
-  Sin esto se pierde el historial de lo implementado (regla del equipo, 2026-07-18).
+- **Changelog + versión + commit + push en cada entrega de código** (OBLIGATORIO):
+  1. Actualizar `CHANGELOG.md` (sección de la versión), `VERSION` y `web/package.json`.
+  2. `git add` (nunca `.env` ni secretos) → `git commit` con mensaje claro.
+  3. `git push` a la rama de trabajo (`develop` / la del PR).
+  Ver §6 y `docs/VERSIONING.md`. Sin esto se pierde el historial (regla del equipo, 2026-07-18).
 - UI/rutas/mensajes/docs en español; código en inglés.
 - Server Components por defecto con Prisma directo en página (`export const dynamic =
   "force-dynamic"`); interactividad en componentes cliente (`*Client.tsx` o nombre de acción).

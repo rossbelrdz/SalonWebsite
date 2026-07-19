@@ -13,13 +13,36 @@ Seguridad de secretos: [SECURITY.md](./SECURITY.md).
 |-------|--------|----------|
 | **Plataforma** | Super Admin | **Pasarela de pago activa**, feature flags, límites SaaS, tunnel |
 | **Tenant (negocio)** | Admin | Apariencia, **credenciales de pago**, Resend, Telegram, Turnstile, prepago %, reembolsos |
-| **Usuario** | Cada quien | Preferencias de notificación (futuro) |
+| **Usuario** | Cada quien | Preferencias de notificación (email / push / telegram / in-app) |
 
 ---
 
-## 2. Integraciones (UI + base de datos)
+## 2. Env vs base de datos (OBLIGATORIO)
 
-### 2.0 Apariencia (colores de marca)
+| Configuración | Dónde | Notas |
+|---------------|--------|--------|
+| `POSTGRES_*`, `REDIS_URL`, `MINIO_*` | **Env** (Compose) | Infraestructura |
+| `APP_ENCRYPTION_KEY` | **Env** | Cifrado AES-256-GCM de secretos en DB |
+| `SESSION_SECRET` | **Env** | JWT cookie `salon_session` |
+| `PUBLIC_APP_URL` / `NEXT_PUBLIC_APP_URL` | **Env** | Links absolutos, redirects, plantillas |
+| `CLOUDFLARE_TUNNEL_TOKEN` | **Env** (perfil tunnel) | cloudflared |
+| `VAPID_*` / `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | **Env** | Web Push (empaquetado en build) |
+| Resend API key / from | **DB** `TenantSettings` (`resendApiKeyEnc`, …) | Admin → Correo |
+| Telegram bot token / enabled | **DB** (`telegramBotTokenEnc`, `telegramEnabled`) | Admin → Telegram |
+| Telegram destinos (grupos/canales) | **DB** `TelegramTarget` | Admin → Telegram (catálogo) |
+| Chat admin legacy | **DB** `telegramAdminChatId` | Fallback si no hay targets |
+| Turnstile site + secret | **DB** (`turnstileSiteKey`, `turnstileSecretEnc`) | Admin → Turnstile |
+| MP / PayPal / Clip credentials | **DB** (`*Enc`) | Admin → Pagos |
+| Tema, timezone, prepago, reembolsos | **DB** | Admin → Apariencia / Citas |
+
+**Regla:** secretos de producto del tenant **no** van en `.env` de la app. Se guardan
+cifrados (`*Enc`) con `APP_ENCRYPTION_KEY`. Ver [NOTIFICATIONS.md](./NOTIFICATIONS.md).
+
+---
+
+## 3. Integraciones (UI + base de datos)
+
+### 3.0 Apariencia (colores de marca)
 
 | Campo | Visibilidad | Notas |
 |-------|-------------|--------|
@@ -34,40 +57,40 @@ Seguridad de secretos: [SECURITY.md](./SECURITY.md).
 - Patrón: [patterns/brand-theme.md](./patterns/brand-theme.md).  
 - Tokens base: [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) §8.
 
-### 2.1 Resend (correo)
+### 3.1 Resend (correo)
 
 | Campo | Visibilidad | Notas |
 |-------|-------------|--------|
-| API Key | Secreto | Enmascarado en UI; cifrado en reposo recomendado |
+| API Key | Secreto | Enmascarado en UI; cifrado AES-GCM en reposo |
 | From email / From name | Visible | Dominio verificado en Resend |
-| Reply-to | Visible | Opcional |
 
 Uso: confirmaciones, cancelaciones, reasignaciones, reembolsos, altas de cuenta.  
 Envío **siempre** vía worker BullMQ.
 
-### 2.2 Telegram Bot
+### 3.2 Telegram Bot
 
 | Campo | Visibilidad | Notas |
 |-------|-------------|--------|
-| Bot token | Secreto | Emitido por @BotFather |
-| Bot username | Visible | Informativo |
+| Bot token | Secreto | Emitido por @BotFather; cifrado en DB |
 | Activo (sí/no) | Visible | Feature flag del tenant |
-| Webhook secret | Secreto | Si se usa webhook |
+| Destinos (`TelegramTarget`) | Visible | Grupos / canales / topics (`messageThreadId`) |
+| Default ops | Visible | Flag `isDefaultOps` si la matriz no lista targets |
+| Chat ID admin (legacy) | Visible | Fallback si no hay targets activos |
 
-Uso opcional: agendar citas y/o enviar notificaciones.  
-Si está inactivo, la matriz de notificaciones omite `telegram`.
+Uso: notificaciones a usuarios vinculados y/o a destinos operativos (matriz).  
+Matriz de enrutado: [NOTIFICATIONS.md](./NOTIFICATIONS.md).
 
-### 2.3 Cloudflare Turnstile
+### 3.3 Cloudflare Turnstile
 
 | Campo | Visibilidad | Notas |
 |-------|-------------|--------|
-| Site key | Pública | Puede exponerse al frontend |
-| Secret key | Secreto | Solo servidor |
-| Modo | Visible | managed / non-interactive / invisible (según cuenta CF) |
+| Site key | Pública | Frontend (login/registro) |
+| Secret key | Secreto | Solo servidor; cifrado en DB |
 
-Uso: registro, login, contacto, crear/cancelar cita (público).
+Uso: registro y login. Si hay secret configurado, el token es obligatorio y se
+verifica con siteverify. Sin secret, el captcha no se exige (modo dev).
 
-### 2.4 Cloudflare Tunnel
+### 3.4 Cloudflare Tunnel
 
 | Campo | Dónde |
 |-------|--------|
@@ -77,11 +100,11 @@ Uso: registro, login, contacto, crear/cancelar cita (público).
 | URL de la app | `PUBLIC_APP_URL` / `NEXT_PUBLIC_APP_URL` = `https://salon.freonx.org` en deploy |
 
 Lo configura el owner en el deploy. Desarrollo local **no** lo requiere.  
-Guía completa (dashboard Cloudflare, checklist, Compose perfil `tunnel`): **[DEPLOY.md](./DEPLOY.md)**.
+Guía completa: **[DEPLOY.md](./DEPLOY.md)**.
 
 ---
 
-## 3. Usuarios (desde Configuración o sección Usuarios)
+## 4. Usuarios (desde Configuración o sección Usuarios)
 
 ### Empresa (staff)
 
@@ -105,7 +128,7 @@ Datos adicionales en el **checkout / prepago**.
 
 ---
 
-## 4. Pagos (F6)
+## 5. Pagos (F6)
 
 Ver guía completa: **[PAYMENTS.md](./PAYMENTS.md)**.
 
@@ -115,7 +138,7 @@ Ver guía completa: **[PAYMENTS.md](./PAYMENTS.md)**.
 | Admin tenant | Configuración → **Pagos** | Tokens/keys del proveedor elegido |
 | Admin tenant | Configuración → **Citas / prepago** | % descuento + política reembolso (horas / %) |
 
-## 5. Parámetros de negocio
+## 6. Parámetros de negocio
 
 | Parámetro | Descripción |
 |-----------|-------------|
@@ -127,23 +150,27 @@ Ver guía completa: **[PAYMENTS.md](./PAYMENTS.md)**.
 
 ---
 
-## 6. Modelo de persistencia (orientativo)
+## 7. Modelo de persistencia (orientativo)
 
 ```text
 tenant_settings
   tenant_id
-  theme_primary          # hex, opcional (null = default plataforma)
-  theme_accent           # hex, opcional
-  resend_api_key_encrypted
-  resend_from_email
-  telegram_bot_token_encrypted
-  telegram_enabled
-  turnstile_site_key
-  turnstile_secret_encrypted
-  prepaid_discount_pct
-  ...
-  updated_at
-  updated_by
+  theme_primary / theme_accent
+  resend_api_key_encrypted, resend_from_email, resend_from_name
+  telegram_bot_token_encrypted, telegram_enabled
+  telegram_admin_chat_id          # legacy fallback
+  turnstile_site_key, turnstile_secret_encrypted
+  prepaid_discount_pct, refund_* , remind_*
+  …
+
+telegram_target
+  tenant_id, label, kind (GROUP|CHANNEL), chat_id
+  message_thread_id?, active, is_default_ops
+
+notification_matrix_rule
+  event_type, audience, email, telegram, in_app, push
+  telegram_mode (USER_LINKED|TARGETS|BOTH)
+  telegram_target_ids[]
 ```
 
 - Nunca loguear valores de secretos.  
@@ -151,9 +178,9 @@ tenant_settings
 
 ---
 
-## 6. Variables de entorno (infra)
+## 8. Variables de entorno (infra)
 
-Además de la UI, el compose usará `.env` para:
+Además de la UI, Compose usa `.env` para:
 
 ```text
 POSTGRES_USER=
@@ -163,6 +190,7 @@ REDIS_URL=
 MINIO_ROOT_USER=
 MINIO_ROOT_PASSWORD=
 APP_ENCRYPTION_KEY=
+SESSION_SECRET=
 APP_PORT=3000
 
 # URLs
@@ -171,16 +199,14 @@ APP_PORT=3000
 PUBLIC_APP_URL=
 NEXT_PUBLIC_APP_URL=
 
-# Opcional plataforma:
-TURNSTILE_SITE_KEY=
-TURNSTILE_SECRET_KEY=
-RESEND_API_KEY=
-TELEGRAM_BOT_TOKEN=
-
 # Solo deploy con perfil Compose "tunnel" — ver DEPLOY.md
 CLOUDFLARE_TUNNEL_TOKEN=
-```
 
-Prioridad (a definir en F3/F4): env de plataforma como fallback si el tenant no tiene keys propias.
+# Web Push (build-time NEXT_PUBLIC_*)
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=
+```
 
 **Pasar el token del tunnel al agente/deploy:** pegar el valor en `.env` (preferido) o en chat de forma puntual; no commitear. Checklist en [DEPLOY.md](./DEPLOY.md) §3.

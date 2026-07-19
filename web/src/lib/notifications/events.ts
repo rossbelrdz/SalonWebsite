@@ -1,4 +1,4 @@
-import { NotificationChannel, Role } from "@prisma/client";
+import { NotificationChannel, Role, type TelegramRouteMode } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { enqueueNotification } from "./queue";
 import type { EventType } from "./types";
@@ -8,6 +8,7 @@ import {
 } from "@/lib/rbac/notification-matrix";
 import type { NotifAudience } from "@/lib/rbac/catalog";
 import {
+  formatCancelPolicy,
   tplAbsenceAdmin,
   tplAccountCreated,
   tplAppointmentCancelled,
@@ -31,6 +32,109 @@ async function settings(tenantId: string) {
   return prisma.tenantSettings.findUnique({ where: { tenantId } });
 }
 
+async function tenantName(tenantId: string): Promise<string | null> {
+  const t = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { name: true },
+  });
+  return t?.name ?? null;
+}
+
+type TgDest = {
+  chatId: string;
+  messageThreadId?: number | null;
+  keySuffix: string;
+};
+
+/**
+ * Resuelve destinos Telegram según telegramMode de la matriz.
+ * TARGETS: IDs de regla → isDefaultOps → telegramAdminChatId legacy.
+ */
+async function resolveTelegramDestinations(opts: {
+  tenantId: string;
+  mode: TelegramRouteMode | string;
+  targetIds: string[];
+  userChatId?: string | null;
+  /** Solo para USER_LINKED cuando audience es ADMIN y no hay chat de user. */
+  allowUserLinkedAdminFallback?: boolean;
+  adminTelegramChatId?: string | null;
+  /** Preferencias: si false, no envía USER_LINKED. TARGETS ignora prefs. */
+  allowUserLinked: boolean;
+}): Promise<TgDest[]> {
+  const mode = (opts.mode || "USER_LINKED") as TelegramRouteMode;
+  const dests: TgDest[] = [];
+  const seen = new Set<string>();
+
+  const push = (d: TgDest) => {
+    const k = `${d.chatId}:${d.messageThreadId ?? ""}`;
+    if (seen.has(k)) return;
+    seen.add(k);
+    dests.push(d);
+  };
+
+  if ((mode === "USER_LINKED" || mode === "BOTH") && opts.allowUserLinked) {
+    if (opts.userChatId) {
+      push({
+        chatId: opts.userChatId,
+        keySuffix: `user:${opts.userChatId}`,
+      });
+    } else if (
+      opts.allowUserLinkedAdminFallback &&
+      opts.adminTelegramChatId
+    ) {
+      push({
+        chatId: opts.adminTelegramChatId,
+        keySuffix: "admin:legacy-user",
+      });
+    }
+  }
+
+  if (mode === "TARGETS" || mode === "BOTH") {
+    let targets: {
+      id: string;
+      chatId: string;
+      messageThreadId: number | null;
+    }[] = [];
+
+    if (opts.targetIds.length > 0) {
+      targets = await prisma.telegramTarget.findMany({
+        where: {
+          tenantId: opts.tenantId,
+          id: { in: opts.targetIds },
+          active: true,
+        },
+        select: { id: true, chatId: true, messageThreadId: true },
+      });
+    }
+    if (targets.length === 0) {
+      targets = await prisma.telegramTarget.findMany({
+        where: {
+          tenantId: opts.tenantId,
+          isDefaultOps: true,
+          active: true,
+        },
+        select: { id: true, chatId: true, messageThreadId: true },
+      });
+    }
+    if (targets.length > 0) {
+      for (const t of targets) {
+        push({
+          chatId: t.chatId,
+          messageThreadId: t.messageThreadId,
+          keySuffix: `target:${t.id}`,
+        });
+      }
+    } else if (opts.adminTelegramChatId) {
+      push({
+        chatId: opts.adminTelegramChatId,
+        keySuffix: "admin:legacy",
+      });
+    }
+  }
+
+  return dests;
+}
+
 async function dispatchChannels(opts: {
   tenantId: string;
   audience: NotifAudience;
@@ -42,7 +146,7 @@ async function dispatchChannels(opts: {
   userId?: string | null;
   email?: string | null;
   telegramChatId?: string | null;
-  /** Chat admin del tenant (no es user chat). */
+  /** Chat admin del tenant (fallback legacy). */
   adminTelegramChatId?: string | null;
   telegramEnabled?: boolean;
 }) {
@@ -72,23 +176,38 @@ async function dispatchChannels(opts: {
     });
   }
 
-  const tgChat =
-    opts.telegramChatId ||
-    (opts.audience === "ADMIN" ? opts.adminTelegramChatId : null);
-  if (ch.telegram && opts.telegramEnabled && tgChat) {
-    await enqueueNotification({
+  if (matrix.telegram && opts.telegramEnabled) {
+    const dests = await resolveTelegramDestinations({
       tenantId: opts.tenantId,
-      eventKey: `${opts.eventType}:${opts.entityId}:telegram:${opts.tag}`,
-      eventType: opts.eventType,
-      channel: NotificationChannel.TELEGRAM,
-      recipient: tgChat,
-      text:
-        opts.audience === "ADMIN"
-          ? `${opts.content.subject}\n\n${opts.content.text}`
-          : opts.content.text,
-      userId: opts.userId,
-      priority: prio,
+      mode: matrix.telegramMode,
+      targetIds: matrix.telegramTargetIds || [],
+      userChatId: opts.telegramChatId,
+      allowUserLinkedAdminFallback:
+        opts.audience === "ADMIN" && matrix.telegramMode === "USER_LINKED",
+      adminTelegramChatId: opts.adminTelegramChatId,
+      // Preferencias solo afectan destino usuario; TARGETS siempre si matriz lo pide
+      allowUserLinked: ch.telegram,
     });
+
+    const text =
+      opts.audience === "ADMIN"
+        ? `${opts.content.subject}\n\n${opts.content.text}`
+        : opts.content.text;
+
+    for (const d of dests) {
+      // eventKey sin tag de admin: evita N copias al mismo target al iterar admins
+      await enqueueNotification({
+        tenantId: opts.tenantId,
+        eventKey: `${opts.eventType}:${opts.entityId}:telegram:${d.keySuffix}`,
+        eventType: opts.eventType,
+        channel: NotificationChannel.TELEGRAM,
+        recipient: d.chatId,
+        text,
+        userId: opts.userId,
+        priority: prio,
+        messageThreadId: d.messageThreadId,
+      });
+    }
   }
 
   if (ch.inApp && opts.userId) {
@@ -145,6 +264,7 @@ async function toClientChannels(
     email: email || user?.email,
     telegramChatId: user?.telegramChatId,
     telegramEnabled: s?.telegramEnabled,
+    adminTelegramChatId: s?.telegramAdminChatId,
   });
 }
 
@@ -173,6 +293,7 @@ async function toStaff(
     email: emp.user.email,
     telegramChatId: emp.user.telegramChatId,
     telegramEnabled: s?.telegramEnabled,
+    adminTelegramChatId: s?.telegramAdminChatId,
   });
 }
 
@@ -200,35 +321,42 @@ async function toAdminsInApp(
       telegramEnabled: s?.telegramEnabled,
     });
   }
-  // Si no hay admins pero sí chat operativo, respeta matriz ADMIN telegram
-  if (admins.length === 0 && s?.telegramAdminChatId) {
+  // Sin admins: aún puede haber TARGETS / legacy chat ops
+  if (admins.length === 0) {
     await dispatchChannels({
       tenantId,
       audience: "ADMIN",
       eventType,
       entityId,
-      tag: "admin:chat",
+      tag: "admin:ops",
       content,
-      adminTelegramChatId: s.telegramAdminChatId,
-      telegramEnabled: s.telegramEnabled,
+      adminTelegramChatId: s?.telegramAdminChatId,
+      telegramEnabled: s?.telegramEnabled,
     });
   }
 }
 
-function apptCtx(a: {
-  id: string;
-  clientName: string;
-  clientEmail?: string | null;
-  clientUserId?: string | null;
-  startsAt: Date;
-  priceCents: number;
-  prepaid?: boolean;
-  service: { name: string };
-  branch: { name: string };
-  employee: { id: string; user: { name: string } };
-  proposedEmployee?: { user: { name: string } } | null;
-  reassignmentNote?: string | null;
-}): AppointmentContext {
+function apptCtx(
+  a: {
+    id: string;
+    clientName: string;
+    clientEmail?: string | null;
+    clientUserId?: string | null;
+    startsAt: Date;
+    priceCents: number;
+    prepaid?: boolean;
+    service: { name: string };
+    branch: { name: string };
+    employee: { id: string; user: { name: string } };
+    proposedEmployee?: { user: { name: string } } | null;
+    reassignmentNote?: string | null;
+  },
+  extra?: {
+    tenantName?: string | null;
+    cancelPolicy?: string | null;
+    refundCents?: number;
+  },
+): AppointmentContext {
   return {
     appointmentId: a.id,
     clientName: a.clientName,
@@ -240,7 +368,20 @@ function apptCtx(a: {
     prepaid: a.prepaid,
     proposedEmployeeName: a.proposedEmployee?.user.name,
     note: a.reassignmentNote,
+    tenantName: extra?.tenantName,
+    cancelPolicy: extra?.cancelPolicy,
+    refundCents: extra?.refundCents,
   };
+}
+
+async function cancelPolicyFor(tenantId: string): Promise<string | null> {
+  const s = await settings(tenantId);
+  if (!s) return null;
+  return formatCancelPolicy({
+    refundFullHours: s.refundFullHours,
+    refundPartialPct: s.refundPartialPct,
+    refundNoneHours: s.refundNoneHours,
+  });
 }
 
 export async function notifyAccountCreated(opts: {
@@ -249,7 +390,8 @@ export async function notifyAccountCreated(opts: {
   name: string;
   email?: string | null;
 }) {
-  const content = tplAccountCreated(opts.name, opts.email);
+  const name = await tenantName(opts.tenantId);
+  const content = tplAccountCreated(opts.name, opts.email, name);
   // Correo de bienvenida si hay email (Resend debe estar configurado o queda SKIPPED)
   if (opts.email) {
     await enqueueNotification({
@@ -286,7 +428,9 @@ export async function notifyAppointmentCreated(appointmentId: string) {
     },
   });
   if (!a) return;
-  const ctx = apptCtx(a);
+  const name = await tenantName(a.tenantId);
+  const policy = await cancelPolicyFor(a.tenantId);
+  const ctx = apptCtx(a, { tenantName: name, cancelPolicy: policy });
   const content = tplAppointmentCreated(ctx);
   await toClientChannels(
     a.tenantId,
@@ -315,7 +459,12 @@ export async function notifyAppointmentPrepaid(appointmentId: string) {
     },
   });
   if (!a) return;
-  const ctx = apptCtx({ ...a, prepaid: true });
+  const name = await tenantName(a.tenantId);
+  const policy = await cancelPolicyFor(a.tenantId);
+  const ctx = apptCtx({ ...a, prepaid: true }, {
+    tenantName: name,
+    cancelPolicy: policy,
+  });
   const content = tplAppointmentPrepaid(ctx);
   await toClientChannels(
     a.tenantId,
@@ -343,7 +492,8 @@ export async function notifyAppointmentCancelled(
     },
   });
   if (!a) return;
-  const ctx = { ...apptCtx(a), refundCents };
+  const name = await tenantName(a.tenantId);
+  const ctx = apptCtx(a, { tenantName: name, refundCents });
   const content = tplAppointmentCancelled(ctx, by);
   await toClientChannels(
     a.tenantId,
@@ -387,7 +537,8 @@ export async function notifyReassignment(appointmentId: string) {
     },
   });
   if (!a) return;
-  const ctx = apptCtx(a);
+  const name = await tenantName(a.tenantId);
+  const ctx = apptCtx(a, { tenantName: name });
   const content = tplReassignment(ctx);
   await toClientChannels(
     a.tenantId,
@@ -429,7 +580,8 @@ export async function notifyReassignmentResolved(
     },
   });
   if (!a) return;
-  const ctx = apptCtx(a);
+  const name = await tenantName(a.tenantId);
+  const ctx = apptCtx(a, { tenantName: name });
   const map = {
     accepted: {
       type: "appointment.reassignment_accepted" as EventType,
@@ -473,7 +625,11 @@ export async function notifyReminder(appointmentId: string, kind: "24h" | "2h") 
   if (!a) return;
   const eventType: EventType =
     kind === "24h" ? "appointment.reminder_24h" : "appointment.reminder_2h";
-  const content = tplReminder(apptCtx(a), kind === "24h" ? "en ~24 h" : "en ~2 h");
+  const name = await tenantName(a.tenantId);
+  const content = tplReminder(
+    apptCtx(a, { tenantName: name }),
+    kind === "24h" ? "en ~24 h" : "en ~2 h",
+  );
   await toClientChannels(
     a.tenantId,
     a.clientUserId,
@@ -498,42 +654,38 @@ export async function notifyAbsenceRequested(absenceId: string) {
     ab.blockedByPrepaid,
   );
   const admins = await tenantAdmins(ab.tenantId);
-  for (const a of admins) {
-    if (a.user.email) {
-      await enqueueNotification({
-        tenantId: ab.tenantId,
-        eventKey: `absence.requested:${absenceId}:email:admin:${a.userId}`,
-        eventType: "absence.requested",
-        channel: NotificationChannel.EMAIL,
-        recipient: a.user.email,
-        subject: content.subject,
-        text: content.text,
-        html: content.html,
-        userId: a.userId,
-        priority: ab.blockedByPrepaid ? "high" : "normal",
-      });
-    }
-    await enqueueNotification({
-      tenantId: ab.tenantId,
-      eventKey: `absence.requested:${absenceId}:in_app:admin:${a.userId}`,
-      eventType: "absence.requested",
-      channel: NotificationChannel.IN_APP,
-      recipient: a.userId,
-      subject: content.subject,
-      text: content.text,
-      userId: a.userId,
-    });
-  }
   const s = await settings(ab.tenantId);
-  if (s?.telegramEnabled && s.telegramAdminChatId) {
-    await enqueueNotification({
+  const prio = ab.blockedByPrepaid ? "high" : "normal";
+
+  if (admins.length === 0) {
+    await dispatchChannels({
       tenantId: ab.tenantId,
-      eventKey: `absence.requested:${absenceId}:telegram:admin`,
+      audience: "ADMIN",
       eventType: "absence.requested",
-      channel: NotificationChannel.TELEGRAM,
-      recipient: s.telegramAdminChatId,
-      text: content.text,
-      priority: "high",
+      entityId: absenceId,
+      tag: "admin:ops",
+      content,
+      priority: prio,
+      adminTelegramChatId: s?.telegramAdminChatId,
+      telegramEnabled: s?.telegramEnabled,
+    });
+    return;
+  }
+
+  for (const a of admins) {
+    await dispatchChannels({
+      tenantId: ab.tenantId,
+      audience: "ADMIN",
+      eventType: "absence.requested",
+      entityId: absenceId,
+      tag: `admin:${a.userId}`,
+      content,
+      priority: prio,
+      userId: a.userId,
+      email: a.user.email,
+      telegramChatId: a.user.telegramChatId,
+      adminTelegramChatId: s?.telegramAdminChatId,
+      telegramEnabled: s?.telegramEnabled,
     });
   }
 }

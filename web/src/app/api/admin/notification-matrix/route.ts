@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { TelegramRouteMode } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getDefaultTenant } from "@/lib/auth";
 import { requirePermission } from "@/lib/rbac/permissions";
@@ -10,6 +11,11 @@ import {
 } from "@/lib/rbac/catalog";
 import { ensureTenantMatrices } from "@/lib/rbac/seed-matrices";
 import { clearNotificationMatrixCache } from "@/lib/rbac/notification-matrix";
+
+function asRouteMode(v: unknown): TelegramRouteMode {
+  if (v === "TARGETS" || v === "BOTH" || v === "USER_LINKED") return v;
+  return "USER_LINKED";
+}
 
 export async function GET() {
   try {
@@ -23,7 +29,17 @@ export async function GET() {
 
     const matrix: Record<
       string,
-      Record<string, { email: boolean; telegram: boolean; inApp: boolean; push: boolean }>
+      Record<
+        string,
+        {
+          email: boolean;
+          telegram: boolean;
+          inApp: boolean;
+          push: boolean;
+          telegramMode: TelegramRouteMode;
+          telegramTargetIds: string[];
+        }
+      >
     > = {};
     for (const ev of NOTIF_EVENT_CATALOG) {
       matrix[ev.eventType] = {};
@@ -38,8 +54,24 @@ export async function GET() {
         telegram: r.telegram,
         inApp: r.inApp,
         push: r.push,
+        telegramMode: asRouteMode(r.telegramMode),
+        telegramTargetIds: Array.isArray(r.telegramTargetIds)
+          ? r.telegramTargetIds
+          : [],
       };
     }
+
+    const targets = await prisma.telegramTarget.findMany({
+      where: { tenantId: tenant.id, active: true },
+      orderBy: [{ isDefaultOps: "desc" }, { label: "asc" }],
+      select: {
+        id: true,
+        label: true,
+        kind: true,
+        chatId: true,
+        isDefaultOps: true,
+      },
+    });
 
     return NextResponse.json({
       events: NOTIF_EVENT_CATALOG,
@@ -48,7 +80,9 @@ export async function GET() {
         label: NOTIF_AUDIENCE_LABELS[a],
       })),
       channels: ["email", "telegram", "inApp", "push"],
+      telegramModes: ["USER_LINKED", "TARGETS", "BOTH"],
       matrix,
+      targets,
       tenantId: tenant.id,
     });
   } catch (e) {
@@ -70,7 +104,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ ok: true, reset: true });
     }
 
-    // updates: [{ eventType, audience, email, telegram, inApp, push }]
+    // updates: [{ eventType, audience, email, telegram, inApp, push, telegramMode?, telegramTargetIds? }]
     const updates = Array.isArray(body.updates) ? body.updates : [];
     for (const u of updates) {
       const eventType = String(u.eventType);
@@ -79,6 +113,11 @@ export async function PUT(req: Request) {
       if (!NOTIF_AUDIENCES.includes(audience as (typeof NOTIF_AUDIENCES)[number])) {
         continue;
       }
+
+      const telegramMode = asRouteMode(u.telegramMode);
+      const telegramTargetIds = Array.isArray(u.telegramTargetIds)
+        ? u.telegramTargetIds.map(String).filter(Boolean)
+        : [];
 
       await prisma.notificationMatrixRule.upsert({
         where: {
@@ -93,6 +132,8 @@ export async function PUT(req: Request) {
           telegram: Boolean(u.telegram),
           inApp: Boolean(u.inApp),
           push: Boolean(u.push),
+          telegramMode,
+          telegramTargetIds,
         },
         create: {
           tenantId: tenant.id,
@@ -102,6 +143,8 @@ export async function PUT(req: Request) {
           telegram: Boolean(u.telegram),
           inApp: Boolean(u.inApp),
           push: Boolean(u.push),
+          telegramMode,
+          telegramTargetIds,
         },
       });
     }

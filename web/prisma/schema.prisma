@@ -93,6 +93,43 @@ model Tenant {
   notifications       NotificationLog[]
   rolePermissions     RolePermission[]
   notificationMatrix  NotificationMatrixRule[]
+  telegramTargets     TelegramTarget[]
+}
+
+enum TelegramTargetKind {
+  GROUP
+  CHANNEL
+}
+
+/// Cómo enrutar el canal Telegram de una regla de matriz.
+enum TelegramRouteMode {
+  /// Solo chat del usuario (User.telegramChatId).
+  USER_LINKED
+  /// Destinos del catálogo TelegramTarget (o default ops / legacy admin chat).
+  TARGETS
+  /// Usuario vinculado y destinos operativos.
+  BOTH
+}
+
+/// Destino operativo de Telegram (grupo, canal o topic).
+model TelegramTarget {
+  id              String             @id @default(cuid())
+  tenantId        String
+  label           String
+  kind            TelegramTargetKind @default(GROUP)
+  chatId          String
+  /// Topic de supergrupo (message_thread_id), opcional.
+  messageThreadId Int?
+  active          Boolean            @default(true)
+  /// Si true, se usa cuando la matriz no lista target IDs concretos.
+  isDefaultOps    Boolean            @default(false)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, active])
+  @@index([tenantId, isDefaultOps])
 }
 
 /// Matriz de permisos por rol (por tenant; editable en admin).
@@ -114,15 +151,19 @@ model RolePermission {
 /// Matriz de notificaciones: evento × audiencia × canales.
 /// audience: CLIENT | EMPLOYEE | ADMIN | SUPER_ADMIN
 model NotificationMatrixRule {
-  id        String   @id @default(cuid())
-  tenantId  String
-  eventType String
-  audience  String
-  email     Boolean  @default(false)
-  telegram  Boolean  @default(false)
-  inApp     Boolean  @default(false)
-  push      Boolean  @default(false)
-  updatedAt DateTime @updatedAt
+  id                String            @id @default(cuid())
+  tenantId          String
+  eventType         String
+  audience          String
+  email             Boolean           @default(false)
+  telegram          Boolean           @default(false)
+  inApp             Boolean           @default(false)
+  push              Boolean           @default(false)
+  /// Enrutado del canal Telegram (usuario vs destinos operativos).
+  telegramMode      TelegramRouteMode @default(USER_LINKED)
+  /// IDs de TelegramTarget; vacío = usar isDefaultOps / legacy admin chat.
+  telegramTargetIds String[]          @default([])
+  updatedAt         DateTime          @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 

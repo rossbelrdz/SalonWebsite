@@ -51,17 +51,26 @@ async function sendEmail(
   if (error) throw new Error(error.message || "Resend error");
 }
 
-async function sendTelegram(botToken: string, chatId: string, text: string) {
+async function sendTelegram(
+  botToken: string,
+  chatId: string,
+  text: string,
+  messageThreadId?: number | null,
+) {
+  const body: Record<string, unknown> = {
+    chat_id: chatId,
+    text: text.slice(0, 4000),
+    disable_web_page_preview: true,
+  };
+  if (messageThreadId != null && Number.isFinite(messageThreadId)) {
+    body.message_thread_id = messageThreadId;
+  }
   const res = await fetch(
     `https://api.telegram.org/bot${botToken}/sendMessage`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: text.slice(0, 4000),
-        disable_web_page_preview: true,
-      }),
+      body: JSON.stringify(body),
     },
   );
   const data = await res.json().catch(() => ({}));
@@ -123,7 +132,12 @@ export async function processNotificationJob(data: NotificationJobData) {
         console.log(`[worker] skip telegram ${data.eventKey}`);
         return;
       }
-      await sendTelegram(token, data.recipient, data.text);
+      await sendTelegram(
+        token,
+        data.recipient,
+        data.text,
+        data.messageThreadId,
+      );
     } else if (data.channel === "PUSH") {
       const { sendWebPush } = await import("../src/lib/push");
       const result = await sendWebPush({
