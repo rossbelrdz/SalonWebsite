@@ -1900,6 +1900,17 @@ table.data tr:hover td {
   border: 1px solid var(--border);
 }
 
+/* Categorías del wizard: wrap en varias filas, sin scroll horizontal */
+.booking-categories {
+  flex-wrap: wrap;
+  overflow: visible;
+  margin-bottom: 0;
+}
+
+.booking-categories .chip {
+  flex: 0 0 auto;
+}
+
 /* Catálogo público de servicios: búsqueda + tabs por categoría */
 .servicios-toolbar {
   display: flex;

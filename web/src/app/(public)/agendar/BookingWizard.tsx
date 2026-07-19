@@ -263,7 +263,8 @@ export function BookingWizard(props: {
             <p className="small muted" style={{ marginTop: 0 }}>
               Selecciona una o más categorías (p. ej. Color y Uñas)
             </p>
-            <div className="filters servicios-tabs" style={{ marginBottom: "0.75rem" }}>
+            {/* chips con wrap (sin scroll horizontal) */}
+            <div className="filters booking-categories" style={{ marginBottom: "0.75rem" }}>
               {availableCategories.map((c) => {
                 const count = props.services.filter((s) => s.category === c).length;
                 const active = categories.includes(c);

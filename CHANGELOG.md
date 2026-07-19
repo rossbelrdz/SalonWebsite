@@ -18,6 +18,14 @@ Política completa: [docs/VERSIONING.md](./docs/VERSIONING.md).
 
 ---
 
+## [0.12.1] — 2026-07-19
+
+### Fixed
+
+- Wizard agendar: categorías en chips con **wrap** (varias filas), sin scroll horizontal.
+
+---
+
 ## [0.12.0] — 2026-07-19
 
 ### Added
